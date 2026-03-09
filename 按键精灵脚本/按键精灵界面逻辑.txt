@@ -1,0 +1,301 @@
+Dim 文件路径, 完成进度, 初始进度
+Dim 通用项目, 建筑项目, 统帅项目, 操作阶段
+Dim 分项, 总项, 百分百进度, 完成进度数量, 初始进度数量,进度条
+Dim TemA, TemB, TemC, TemD, TemE, TemF, TemG, TemH
+Function 初始设置数据
+    文件路径 = "/sdcard/Pictures/Config.ini"
+    初始进度 = "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓"//30个初始进度:灰色
+    完成进度 = "█████████████████████████████"//30个完成进度:黑色
+    通用项目 = 21 : 建筑项目 = 46 : 统帅项目 = 60
+End Function
+Function 默认设置
+    初始设置数据  
+    UIP.SetAttribute "分项提示1", {"显示内容":"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓准备通用默认：0.00%"}
+    UIP.SetAttribute "分项提示2", {"显示内容":"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓准备建筑默认：0.00%"}
+    UIP.SetAttribute "分项提示3", {"显示内容":"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓准备统帅默认：0.00%"}
+    操作阶段 = "通用默认" : 总项 = 通用项目
+    For 分项 = 1 To 通用项目
+        Select Case 分项
+        Case 12, 19 : UIP.SetAttribute "控制" & 分项, {"选中":True}
+        Case 20 : UIP.SetAttribute "控制" & 分项, {"选中":False}
+        Case 1, 2, 4, 5, 6, 8, 9, 13, 14, 15, 17, 18 : UIP.SetAttribute "控制" & 分项, {"初始选项":0}
+        Case 3, 10, 11 : UIP.SetAttribute "控制" & 分项, {"初始选项":1}
+        Case 7, 16 : UIP.SetAttribute "控制" & 分项, {"初始选项":2}
+        Case 21 : UIP.SetAttribute "控制" & 分项, {"初始文本":"默认主帅"}
+        End Select : 分项提示 (1)
+    Next
+    操作阶段 = "建筑默认" : 总项 = 建筑项目
+    For 分项 = 1 To 建筑项目
+        Select Case 分项
+            //==主帅主城:17============================================================
+        Case 1, 2 : UIP.SetAttribute "建筑" & 分项, {"初始选项":17}//城市+兵工厂
+        Case 3 : UIP.SetAttribute "建筑" & 分项, {"初始选项":14}//陆基  
+        Case 4 : UIP.SetAttribute "建筑" & 分项, {"初始选项":3}//空基
+        Case 5 : UIP.SetAttribute "建筑" & 分项, {"初始选项":4}//商业区
+        Case 6 : UIP.SetAttribute "建筑" & 分项, {"初始选项":3}//补给
+        Case 7 : UIP.SetAttribute "建筑" & 分项, {"初始选项":3}//内塔
+        Case 8, 9, 10, 11, 12 : UIP.SetAttribute "建筑" & 分项, {"初始选项":3}//外建
+            //==付帅主城:15============================================================
+        Case 13, 14 : UIP.SetAttribute "建筑" & 分项, {"初始选项":15}//城市+兵工厂
+        Case 15 : UIP.SetAttribute "建筑" & 分项, {"初始选项":13}//陆基  
+        Case 16 : UIP.SetAttribute "建筑" & 分项, {"初始选项":3}//空基
+        Case 17 : UIP.SetAttribute "建筑" & 分项, {"初始选项":4}//商业区
+        Case 18 : UIP.SetAttribute "建筑" & 分项, {"初始选项":3}//补给
+        Case 19 : UIP.SetAttribute "建筑" & 分项, {"初始选项":3}//内塔
+        Case 20, 21, 22, 23, 24 : UIP.SetAttribute "建筑" & 分项, {"初始选项":3}//外建
+            //==所有附城============================================================
+        Case 25 : UIP.SetAttribute "建筑" & 分项, {"初始选项":15}//城市
+        Case 26, 27 : UIP.SetAttribute "建筑" & 分项, {"初始选项":10}//兵工厂+陆基  
+        Case 28 : UIP.SetAttribute "建筑" & 分项, {"初始选项":1}//空基
+        Case 29 : UIP.SetAttribute "建筑" & 分项, {"初始选项":4}//商业区
+        Case 30 : UIP.SetAttribute "建筑" & 分项, {"初始选项":1}//补给
+        Case 31 : UIP.SetAttribute "建筑" & 分项, {"初始选项":3}//内塔
+        Case 32, 33, 34, 35, 36 : UIP.SetAttribute "建筑" & 分项, {"初始选项":3}//外建
+            //==军团城市==============================================================
+        Case 37 : UIP.SetAttribute "建筑" & 分项, {"初始选项":1}//编号
+        Case 38, 39, 40 : UIP.SetAttribute "建筑" & 分项, {"初始选项":5}//军城+军工+军需
+        Case 41, 42, 43 : UIP.SetAttribute "建筑" & 分项, {"初始选项":0}//陆基+空基+炮塔     
+            //==建单排序==============================================================        
+        Case 44, 45 : UIP.SetAttribute "建筑" & 分项, {"初始选项":0}
+            //炮塔改建:
+        Case 46 : UIP.SetAttribute "建筑" & 分项, {"选中":True}
+        End Select : 分项提示(2)
+    Next
+    操作阶段 = "统帅默认" : 总项 = 统帅项目
+    For 分项 = 1 To 统帅项目
+        Select Case 分项   
+        Case 1
+            UIP.SetAttribute "统帅" & 分项, {"初始选项":0}
+        Case 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57
+            UIP.SetAttribute "统帅" & 分项, {"初始选项":1}
+        Case 2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58
+            //UIP.SetAttribute "统帅" & 分项, {"初始文本":""}
+        Case 3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 43, 47, 51, 55, 59
+            UIP.SetAttribute "统帅" & 分项, {"初始选项":0}
+        Case Else
+            UIP.SetAttribute "统帅" & 分项, {"选中":True}
+        End Select : 分项提示(3)
+    Next
+End Function
+Function 保存设置//=======================================================================
+    初始设置数据  : File.Write 文件路径, "{\n"
+    UIP.SetAttribute "分项提示1", {"显示内容":"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓准备通用保存：0.00%"}
+    UIP.SetAttribute "分项提示2", {"显示内容":"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓准备建筑保存：0.00%"}
+    UIP.SetAttribute "分项提示3", {"显示内容":"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓准备统帅保存：0.00%"}
+    操作阶段 = "通用保存" : 总项 = 通用项目
+    For 分项 = 1 To 通用项目
+        TemA = UIP.GetAttribute("控制" & 分项)
+        Select Case 分项
+        Case 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 16, 17, 18        //下拉框
+            TemA = TemA["初始选项"] : File.Append 文件路径, """控制" & 分项 & """:""" & TemA & """ ,"
+        Case 12, 14, 19, 20         //多选框
+            If TemA["选中"] Then  : File.Append 文件路径 , """控制" & 分项 & """:""" & "True" & """ ," : TemB ="开启" : Else  : File.Append 文件路径 , """控制" & 分项 & """:""" & "False" & """ ," : TemB = "关闭" : End If
+        Case  21
+            File.Append 文件路径 , """控制" & 分项 & """:""" & TemA["初始文本"] & """ ,"
+        End Select
+        Select Case 分项
+        Case 1
+            Select Case TemA : Case 0 : TemB = "正常使用" : Case 1 : TemB = "需要激活" : End Select
+            File.Append 文件路径 , """授权状态""" & ":""" & TemB & """ ,\n"  
+        Case 2
+            Select Case TemA : Case 0 : TemB = "自动挂机" : Case 1 : TemB = "手动控制" : Case 2 : TemB = "手动组团" : Case 3 : TemB = "快速进场" : End Select
+            File.Append 文件路径 , """挂机模式""" & ":""" & TemB & """ ,\n"
+        Case 3
+            File.Append 文件路径, """挂机速度""" & ":""" & (TemA + 2) * 50 & """ ,\n"
+        Case 4 : 
+            File.Append 文件路径, """尝试次数""" & ":""" & (TemA + 2) * 5 & """ ,\n"
+        Case 5 : 
+            File.Append 文件路径 , """缓存限制""" & ":""" & (TemA + 2) * 500 & """ ,\n"
+        Case 6 : 
+            File.Append 文件路径, """速建限级""" & ":""" & TemA + 5 & """ ,\n"
+        Case 7
+            Select Case TemA : Case 0 : TemB = "城市" : Case 1 : TemB = "资源" : Case 2 : TemB = "城资" : End Select
+            File.Append 文件路径 , """速建类别""" & ":""" & TemB & """ ,\n"  
+        Case 8
+            File.Append 文件路径 , """速产限级""" & ":""" & TemA + 5 & """ ,\n"
+        Case 9
+            Select Case TemA : Case 0 : TemB = "自动平衡" : Case 1 : TemB = "战时经济" : Case 2 : TemB = "钢铁熔炉" :  Case 3 : TemB = "橡胶采集" : Case 4 : TemB = "油井开采" : End Select
+            File.Append 文件路径 , """速产策略""" & ":""" & TemB & """ ,\n"  
+        Case 10            
+            File.Append 文件路径 , """保留策点""" & ":""" & (TemA + 1) * 30 & """ ,\n"
+        Case 11
+            File.Append 文件路径 , """支线限级""" & ":""" & TemA + 5 & """ ,\n"
+        Case 12
+            File.Append 文件路径, """支线状态""" & ":""" & TemB & """ ,\n"
+        Case 13
+            Select Case TemA : Case 0 : TemB = "城区战场" : Case 1 : TemB = "城政战场" : End Select
+            File.Append 文件路径, """打扫战场类型""" & ":""" & TemB & """ ,\n"
+        Case 14
+            Select Case TemA : Case 0 : TemB = "停止攻占" : Case 1 : TemB = "自动攻占" : End Select
+            File.Append 文件路径, """自动打野模式""" & ":""" & TemB & """ ,\n"
+        Case 15
+            File.Append 文件路径, """打野战场限级""" & ":""" & TemA + 10 & """ ,\n"
+        Case 16
+            File.Append 文件路径, """打野叛军限级""" & ":""" & TemA + 1 & """ ,\n"
+        Case 17
+            File.Append 文件路径 , """集资限级""" & ":""" & (TemA + 2) * 5 & """ ,\n"               
+        Case 18
+            File.Append 文件路径, """集资限量""" & ":""" & (TemA + 2) * 10^4 & """ ,\n"
+        Case 19
+            File.Append 文件路径, """主帅集资""" & ":""" & TemB & """ ,\n"
+        Case 20
+            File.Append 文件路径, """附城集资""" & ":""" & TemB & """ ,\n"
+        Case 21
+            File.Append 文件路径, """集资统帅""" & ":""" & TemA["初始文本"] & """ ,\n"
+        End Select : 分项提示 (1) 
+    Next
+    操作阶段 = "建筑保存" : 总项 = 建筑项目
+    For 分项 = 1 To 建筑项目
+        TemA = UIP.GetAttribute("建筑" & 分项) //: TemA = TemA["初始选项"]
+        If InStr(1, "|12|24|36|43|", "|" & 分项 & "|") > 0 Then 
+            TemA = TemA["初始选项"] : File.Append 文件路径, """建筑" & 分项 & """:""" & TemA & """ ,\n"
+        ElseIf 分项 = 46 Then        //多选框
+            If TemA["选中"] Then  : File.Append 文件路径, """建筑" & 分项 & """:""" & "True" & """ ," : TemB = "开启" : Else  : File.Append 文件路径, """建筑" & 分项 & """:""" & "False" & """ ," : TemB = "关闭" : End If
+        Else 
+            TemA = TemA["初始选项"] : File.Append 文件路径, """建筑" & 分项 & """:""" & TemA & """ ,"
+        End If
+        Select Case 分项
+        Case 1, 13, 25 : TemC = "" : TemC = TemC & "|城市/" & TemA
+        Case 2, 14, 26 : TemC = TemC & "|兵工厂/" & TemA
+        Case 3, 15, 27 : TemC = TemC & "|陆军基地/" & TemA
+        Case 4, 16, 28 : TemC = TemC & "|空军基地/" & TemA
+        Case 5, 17, 29 : TemC = TemC & "|商业区/" & TemA
+        Case 6, 18, 30 : TemC = TemC & "|补给品厂/" & TemA
+        Case 7, 19, 31 : TemC = TemC & "|高产农场/6|高产铁矿/6|高产橡胶厂/6|高产油井/6|岸防炮/" & TemA & "|炮塔/" & TemA
+        Case 8, 20, 32 : TemD = "|农场/6|村庄/" & TemA
+        Case 9, 21, 33 : TemE = "|铁矿/6|橡胶厂/6|油井/6|资源区/" & TemA
+        Case 10, 22, 34 : TemF = "|军事区/" & TemA
+        Case 11, 23, 35 : TemG = "|海军基地/15|海港/" & TemA
+        Case 12 
+            File.Append 文件路径, """主帅主城城市建筑设置"": """ & TemC & """,\n"
+            File.Append 文件路径, """主帅主城村庄建筑设置"": """ & TemD & "|狙击塔/" & TemA & """,\n"
+            File.Append 文件路径, """主帅主城资源区建筑设置"": """ & TemE & "|狙击塔/" & TemA & """,\n"
+            File.Append 文件路径, """主帅主城军事区建筑设置"": """ & TemF & "|岸防炮/" & TemA & "|炮塔/" & TemA & """,\n"
+            File.Append 文件路径, """主帅主城海港建筑设置"": """ & TemG & "|岸防炮/" & TemA & "|炮塔/" & TemA & """,\n"
+        Case 24 
+            File.Append 文件路径, """付帅主城城市建筑设置"": """ & TemC & """,\n"
+            File.Append 文件路径, """付帅主城村庄建筑设置"": """ & TemD & "|狙击塔/" & TemA & """,\n"
+            File.Append 文件路径, """付帅主城资源区建筑设置"": """ & TemE & "|狙击塔/" & TemA & """,\n"
+            File.Append 文件路径, """付帅主城军事区建筑设置"": """ & TemF & "|岸防炮/" & TemA & "|炮塔/" & TemA & """,\n"
+            File.Append 文件路径, """付帅主城海港建筑设置"": """ & TemG & "|岸防炮/" & TemA & "|炮塔/" & TemA & """,\n"
+        Case 36
+            File.Append 文件路径, """附城城市建筑设置"": """ & TemC & """,\n"
+            File.Append 文件路径, """附城村庄建筑设置"": """ & TemD & "|狙击塔/" & TemA & """,\n"
+            File.Append 文件路径, """附城资源区建筑设置"": """ & TemE & "|狙击塔/" & TemA & """,\n"
+            File.Append 文件路径, """附城军事区建筑设置"": """ & TemF & "|岸防炮/" & TemA & "|炮塔/" & TemA & """,\n"
+            File.Append 文件路径, """附城海港建筑设置"": """ & TemG & "|岸防炮/" & TemA & "|炮塔/" & TemA & """,\n"
+        Case 37 
+            File.Append 文件路径, """需建军号"": """ & TemA & """,\n"
+        Case 38 : TemC = "" : TemC = TemC & "|军团城市/" & TemA
+        Case 39 : TemC = "|军团兵工厂/" & TemA & TemC
+        Case 40 : TemC = TemC & "|军需处/" & TemA 
+        Case 41 : TemC = TemC & "|军团陆军基地/" & TemA
+        Case 42 : TemC = TemC & "|军团空军基地/" & TemA
+        Case 43 : TemC = TemC & "|军团炮塔/" & TemA
+            File.Append 文件路径, """军团城市建筑设置"": """ & TemC & """,\n"       
+        Case 44 
+            Select Case TemA
+            Case 0 : TemC = "自动平衡" : Case 1 : TemC = "农场/铁矿/油井/橡胶厂" : Case 2 : TemC = "农场/橡胶厂/铁矿/油井"
+            //Case 0 : TemC = "农场/铁矿/橡胶厂/油井" : Case 1 : TemC = "农场/铁矿/油井/橡胶厂" : Case 2 : TemC = "农场/橡胶厂/铁矿/油井"
+            Case 3 : TemC = "农场/橡胶厂/油井/铁矿" : Case 4 : TemC = "农场/油井/铁矿/橡胶厂" : Case 5 : TemC = "农场/油井/橡胶厂/铁矿"
+            Case 6 : TemC = "铁矿/农场/橡胶厂/油井" : Case 7 : TemC = "铁矿/农场/油井/橡胶厂" : Case 8 : TemC = "铁矿/橡胶厂/农场/油井"
+            Case 9 : TemC = "铁矿/橡胶厂/油井/农场" : Case 10 : TemC = "铁矿/油井/农场/橡胶厂" : Case 11 : TemC = "铁矿/油井/橡胶厂/农场"
+            Case 12 : TemC = "橡胶厂/农场/铁矿/油井" : Case 13 : TemC = "橡胶厂/农场/油井/铁矿" : Case 14 : TemC = "橡胶厂/铁矿/农场/油井"
+            Case 15 : TemC = "橡胶厂/铁矿/油井/农场" : Case 16 : TemC = "橡胶厂/油井/农场/铁矿" : Case 17 : TemC = "橡胶厂/油井/铁矿/农场"
+            Case 18 : TemC = "油井/农场/铁矿/橡胶厂" : Case 19 : TemC = "油井/农场/橡胶厂/铁矿" : Case 20 : TemC = "油井/铁矿/农场/橡胶厂"
+            Case 21 : TemC = "油井/铁矿/橡胶厂/农场" : Case 22 : TemC = "油井/橡胶厂/农场/铁矿" : Case 23 : TemC = "油井/橡胶厂/铁矿/农场"
+            End Select           
+            File.Append 文件路径, """资建排序""" & ":""" & TemC & """ ,\n"
+        Case 45
+            Select Case TemA : Case 0 : TemC = "炮塔/岸防炮" : Case 1 : TemC = "岸防炮/炮塔" : End Select
+            File.Append 文件路径, """塔建排序""" & ":""" & TemC & """ ,\n"
+        Case 46
+            File.Append 文件路径, """海港改建岸防""" & ":""" & TemB & """ ,\n"           
+        End Select  
+        分项提示 (2)
+    Next    
+    操作阶段 = "统帅保存" : 总项 = 统帅项目 : TemE = ""
+    For 分项 = 1 To 统帅项目
+        TemA = UIP.GetAttribute("统帅" & 分项) 
+        Select Case 分项
+        Case 1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57     //下拉框
+            File.Append 文件路径, """统帅" & 分项 & """:""" & TemA["初始选项"] & ""","
+            Select Case TemA["初始选项"] : Case 0 : TemB = "主帅" : Case 1 : TemB = "付帅" : End Select
+        Case 2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58     //输入框
+            TemC = TemA["初始文本"]
+            File.Append 文件路径, """统帅" & 分项 & """:""" & TemC & ""","
+        Case 3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 43, 47, 51, 55, 59//下拉框
+            File.Append 文件路径, """统帅" & 分项 & """:""" & TemA["初始选项"] & ""","
+            Select Case TemA["初始选项"]
+            Case 0 : TemD = "TAP" : Case 1 : TemD = "九游" : Case 2 : TemD = "FAN" : Case 3 : TemD = "小七" : Case 4 : TemD = "VIVO" : Case 5 : TemD = "OPOP"
+            End Select
+        Case Else //多选框
+            If TemA["选中"] Then 
+                File.Append 文件路径, """统帅" & 分项 & """:""" & "True" & """,\n"
+                If TemC <> "" Then TemE = TemE & "/" & TemB & "/" & TemC & "/" & TemD
+            Else 
+                File.Append 文件路径, """统帅" & 分项 & """:""" & "False" & """,\n"
+            End If       
+        End Select : 分项提示 (3)
+    Next
+    TemE = UTF8.Right(TemE, UTF8.Len(TemE) - 1)
+    File.Append 文件路径, """挂机统帅信息" & """:""" & TemE & """\n}"//开始-结束加"{"和"}"号
+End Function       
+Function 加载配置//=======================================================================
+    初始设置数据  : TemA = File.Read(文件路径) : TemB = Encode.JsonToTable(TemA)
+    UIP.SetAttribute "分项提示1", {"显示内容":"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓准备通用加载：0.00%"}
+    UIP.SetAttribute "分项提示2", {"显示内容":"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓准备建筑加载：0.00%"}
+    UIP.SetAttribute "分项提示3", {"显示内容":"▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓准备统帅加载：0.00%"}
+    For 分项 = 1 To 通用项目
+        Select Case 分项
+        Case 12, 19, 20 //多选框
+            If TemB["控制" & 分项] = "True" Then 
+                UIP.SetAttribute "控制" & 分项, {"选中":True}
+            Else 
+                UIP.SetAttribute "控制" & 分项, {"选中":False}
+            End If
+        Case 21 //输入框
+            UIP.SetAttribute "控制" & 分项, {"初始文本":TemB["控制" & 分项]}
+        Case Else //下拉框
+            UIP.SetAttribute "控制" & 分项, {"初始选项":CInt(TemB["控制" & 分项])}
+        End Select
+        分项提示(1) 
+    Next
+    操作阶段 = "建筑加载" : 总项 = 建筑项目
+    For 分项 = 1 To 建筑项目
+        If 分项 = 46 Then //多选框
+            If TemB["建筑" & 分项] = "True" Then 
+                UIP.SetAttribute "建筑" & 分项, {"选中":True}
+            Else 
+                UIP.SetAttribute "建筑" & 分项, {"选中":False}
+            End If
+        Else //下拉框
+            UIP.SetAttribute "建筑" & 分项, {"初始选项":CInt(TemB["建筑" & 分项])}
+        End If
+        分项提示 (2)
+    Next
+    操作阶段 = "统帅加载" : 总项 = 统帅项目
+    For 分项 = 1 To 统帅项目
+        Select Case 分项
+        Case 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60   //多选框
+            If TemB["统帅" & 分项] = "True" Then  
+                UIP.SetAttribute "统帅" & 分项, {"选中":True} 
+            Else  
+                UIP.SetAttribute "统帅" & 分项, {"选中":False} 
+            End If
+        Case 2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58 //输入框
+            UIP.SetAttribute "统帅" & 分项, {"初始文本":TemB["统帅" & 分项]}
+        Case Else //下拉框
+            UIP.SetAttribute "统帅" & 分项, {"初始选项":CInt(TemB["统帅" & 分项])}
+        End Select 
+        分项提示 (3)
+    Next
+End Function
+Function 分项提示(分项号)
+    百分百进度 = Round(分项 / 总项 * 100) & "%"
+    完成进度数量 = Round(分项 / 总项 * 30)
+    If 完成进度数量 > 30 Then 完成进度数量 = 30
+    初始进度数量 = 30 - 完成进度数量
+    进度条 = UTF8.Left(完成进度, 完成进度数量) & UTF8.Left(初始进度, 初始进度数量)
+    UIP.SetAttribute("分项提示" & 分项号,{"显示内容":进度条 & "完成" & 操作阶段 &"："& 百分百进度 })
+End Function

@@ -1,0 +1,40 @@
+# 虚拟环境
+venv/
+
+# IDE配置
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+Thumbs.db
+.DS_Store
+
+# 配置文件
+前端/配置/用户配置/
+*.ini
+*.cfg
+*.conf
+
+# 日志文件
+logs/
+*.log
+
+# 编译产物
+__pycache__/
+*.pyc
+*.pyo
+
+# 临时文件
+*.tmp
+*.temp
+
+# 测试文件
+.pytest_cache/
+.tox/
+
+# 其他
+.env
+*.env

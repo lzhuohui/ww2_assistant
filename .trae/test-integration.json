@@ -1,0 +1,123 @@
+{
+  "name": "测试联动配置",
+  "version": "1.0.0",
+  "description": "Trae IDE与pytest测试框架的联动配置",
+  "configurations": {
+    "testDiscovery": {
+      "enabled": true,
+      "pattern": "test_*.py",
+      "directories": [
+        "测试/单元测试",
+        "测试/集成测试"
+      ]
+    },
+    "testRunner": {
+      "command": "${workspaceFolder}/venv/Scripts/python.exe",
+      "args": [
+        "-m",
+        "pytest"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    "autoRun": {
+      "enabled": true,
+      "onSave": true,
+      "delay": 1000
+    },
+    "coverage": {
+      "enabled": true,
+      "threshold": 60,
+      "reportPath": "测试/报告/htmlcov"
+    }
+  },
+  "commands": {
+    "runCurrentFileTests": {
+      "title": "运行当前文件测试",
+      "command": "${workspaceFolder}/venv/Scripts/python.exe",
+      "args": [
+        "-m",
+        "pytest",
+        "${file}",
+        "-v",
+        "--tb=short",
+        "--color=yes"
+      ]
+    },
+    "runRelatedTests": {
+      "title": "运行相关测试",
+      "command": "${workspaceFolder}/venv/Scripts/python.exe",
+      "args": [
+        "AI产物/工具/脚本/测试联动工具.py",
+        "--file",
+        "${file}",
+        "--coverage"
+      ]
+    },
+    "runAllTests": {
+      "title": "运行全部测试",
+      "command": "${workspaceFolder}/venv/Scripts/python.exe",
+      "args": [
+        "-m",
+        "pytest",
+        "测试",
+        "-v",
+        "--tb=short",
+        "--cov=前端",
+        "--cov-report=html:测试/报告/htmlcov",
+        "--html=测试/报告/report.html"
+      ]
+    },
+    "runUnitTests": {
+      "title": "运行单元测试",
+      "command": "${workspaceFolder}/venv/Scripts/python.exe",
+      "args": [
+        "-m",
+        "pytest",
+        "测试/单元测试",
+        "-v",
+        "-m",
+        "unit"
+      ]
+    },
+    "runIntegrationTests": {
+      "title": "运行集成测试",
+      "command": "${workspaceFolder}/venv/Scripts/python.exe",
+      "args": [
+        "-m",
+        "pytest",
+        "测试/集成测试",
+        "-v",
+        "-m",
+        "integration"
+      ]
+    },
+    "watchTests": {
+      "title": "监听测试",
+      "command": "${workspaceFolder}/venv/Scripts/python.exe",
+      "args": [
+        "AI产物/工具/脚本/智能测试运行器.py",
+        "--watch"
+      ]
+    }
+  },
+  "keybindings": {
+    "runCurrentFileTests": "ctrl+shift+t",
+    "runRelatedTests": "ctrl+shift+r",
+    "runAllTests": "ctrl+shift+a",
+    "runUnitTests": "ctrl+shift+u",
+    "runIntegrationTests": "ctrl+shift+i"
+  },
+  "ui": {
+    "testExplorer": {
+      "enabled": true,
+      "showCoverage": true,
+      "autoRefresh": true
+    },
+    "statusBar": {
+      "showTestStatus": true,
+      "showCoverage": true
+    }
+  }
+}
