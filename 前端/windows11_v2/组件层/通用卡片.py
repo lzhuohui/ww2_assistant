@@ -51,6 +51,14 @@ CONTENT_LEFT = 130                # 内容区域左边距
 DEFAULT_ICON_SIZE = 24            # 图标大小
 DEFAULT_TITLE_SIZE = 14           # 标题字体大小
 DEFAULT_DESC_SIZE = 12            # 描述字体大小
+
+# Win11 Fluent Design 阴影配置
+SHADOW_BLUR_DEFAULT = 4           # 默认阴影模糊半径（Win11风格：轻微深度）
+SHADOW_BLUR_HOVER = 8             # 悬停阴影模糊半径（Win11风格：增强深度）
+SHADOW_SPREAD = 0                 # 阴影扩散半径
+SHADOW_OFFSET_Y = 2               # 阴影Y轴偏移（模拟光源从上方照射）
+CARD_BORDER_RADIUS = 8            # 卡片圆角（Win11风格：8px）
+CARD_BORDER_WIDTH = 1             # 卡片边框宽度
 # ========================================================
 
 
@@ -253,12 +261,13 @@ class UniversalCard:  # 通用卡片组件
         container = ft.Container(
             content=main_stack,
             bgcolor=theme_colors.get("bg_card"),
-            border_radius=radius_config.get("radius_lg", 12),
-            border=ft.Border.all(1, theme_colors.get("border_light")),
+            border_radius=CARD_BORDER_RADIUS,
+            border=ft.Border.all(CARD_BORDER_WIDTH, theme_colors.get("border_light")),
             shadow=ft.BoxShadow(
-                spread_radius=0,
-                blur_radius=4,
+                spread_radius=SHADOW_SPREAD,
+                blur_radius=SHADOW_BLUR_DEFAULT,
                 color=theme_colors.get("shadow"),
+                offset=ft.Offset(0, SHADOW_OFFSET_Y),
             ),
             animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
             clip_behavior=ft.ClipBehavior.NONE,
@@ -291,19 +300,21 @@ class UniversalCard:  # 通用卡片组件
         def on_hover(e):  # 悬停效果
             if e.data == "true":
                 container.bgcolor = theme_colors.get("bg_hover")
-                container.border = ft.Border.all(1, theme_colors.get("border"))
+                container.border = ft.Border.all(CARD_BORDER_WIDTH, theme_colors.get("border"))
                 container.shadow = ft.BoxShadow(
-                    spread_radius=0,
-                    blur_radius=8,
+                    spread_radius=SHADOW_SPREAD,
+                    blur_radius=SHADOW_BLUR_HOVER,
                     color=theme_colors.get("shadow"),
+                    offset=ft.Offset(0, SHADOW_OFFSET_Y + 1),
                 )
             else:
                 container.bgcolor = theme_colors.get("bg_card")
-                container.border = ft.Border.all(1, theme_colors.get("border_light"))
+                container.border = ft.Border.all(CARD_BORDER_WIDTH, theme_colors.get("border_light"))
                 container.shadow = ft.BoxShadow(
-                    spread_radius=0,
-                    blur_radius=4,
+                    spread_radius=SHADOW_SPREAD,
+                    blur_radius=SHADOW_BLUR_DEFAULT,
                     color=theme_colors.get("shadow"),
+                    offset=ft.Offset(0, SHADOW_OFFSET_Y),
                 )
             container.update()
         
