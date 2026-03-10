@@ -55,10 +55,11 @@ class NavBar:
         
         # 默认导航项
         default_nav_items = [
-            {"name": "系统设置", "icon": "SETTINGS"},
-            {"name": "个性化", "icon": "PALETTE"},
-            {"name": "应用", "icon": "APPS"},
-            {"name": "账户", "icon": "ACCOUNT_CIRCLE"},
+            {"name": "系统", "icon": "SETTINGS"},
+            {"name": "任务", "icon": "ASSIGNMENT"},
+            {"name": "建设", "icon": "DOMAIN"},
+            {"name": "账号", "icon": "ACCOUNT_CIRCLE"},
+            {"name": "关于", "icon": "INFO"},
         ]
         
         current_nav_items = nav_items if nav_items else default_nav_items
