@@ -210,47 +210,15 @@ class UniversalCard:
 
 # ==================== 调试逻辑 ====================
 if __name__ == "__main__":
-    config = 界面配置()
+    # 1. 界面配置初始化
+    配置 = 界面配置()
     
+    # 2. 自动加载用户数据覆盖默认值（在界面配置.__init__中自动完成）
+    
+    # 3. 正常启动被测模块
     def main(page: ft.Page):
-        page.padding = 20
-        page.bgcolor = config.获取颜色("bg_primary")
-        
-        page.add(ft.Text("通用卡片测试（装配模式）:", color=config.获取颜色("text_secondary")))
-        page.add(ft.Divider(height=20, color="transparent"))
-        
-        def on_state_change(enabled):
-            print(f"卡片状态变化: {'启用' if enabled else '禁用'}")
-        
-        card = UniversalCard.create(
-            config=config,
-            title="测试卡片",
-            icon="HOME",
-            enabled=True,
-            on_state_change=on_state_change,
-            help_text="点击切换启用/禁用状态",
-        )
-        
-        page.add(card)
-        
-        page.add(ft.Divider(height=20, color="transparent"))
-        
-        card2 = UniversalCard.create(
-            config=config,
-            title="设置卡片",
-            icon="SETTINGS",
-            enabled=True,
-            help_text="这是设置卡片的帮助提示",
-        )
-        
-        page.add(card2)
-        
-        page.add(ft.Divider(height=20, color="transparent"))
-        
-        # 测试外部控制
-        def external_toggle(e):
-            card.toggle_state()
-        
-        page.add(ft.ElevatedButton("外部切换卡片状态", on_click=external_toggle))
+        page.padding = 0
+        page.bgcolor = 配置.当前主题颜色["bg_primary"]
+        page.add(UniversalCard.create(配置, title="主界面", icon="HOME", enabled=True, help_text="点击切换状态"))  # 只能更改此处**被测调用模块名称**
     
     ft.run(main)

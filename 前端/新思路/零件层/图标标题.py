@@ -150,39 +150,15 @@ class IconTitle:
 
 # ==================== 调试逻辑 ====================
 if __name__ == "__main__":
-    config = 界面配置()
+    # 1. 界面配置初始化
+    配置 = 界面配置()
     
+    # 2. 自动加载用户数据覆盖默认值（在界面配置.__init__中自动完成）
+    
+    # 3. 正常启动被测模块
     def main(page: ft.Page):
-        page.padding = 20
-        page.bgcolor = config.获取颜色("bg_primary")
-        
-        page.add(ft.Text("图标标题测试（独立功能模块）:", color=config.获取颜色("text_secondary")))
-        page.add(ft.Divider(height=20, color="transparent"))
-        
-        def on_state_change(enabled):
-            print(f"状态变化: {'启用' if enabled else '禁用'}")
-        
-        icon_title = IconTitle.create(
-            config=config,
-            title="测试标题",
-            icon="HOME",
-            enabled=True,
-            on_state_change=on_state_change,
-        )
-        
-        page.add(ft.Container(
-            content=icon_title,
-            padding=20,
-            bgcolor=config.获取颜色("bg_card"),
-            border_radius=8,
-        ))
-        
-        page.add(ft.Divider(height=20, color="transparent"))
-        
-        # 测试外部控制
-        def external_toggle(e):
-            icon_title.toggle_state()
-        
-        page.add(ft.ElevatedButton("外部切换状态", on_click=external_toggle))
+        page.padding = 0
+        page.bgcolor = 配置.当前主题颜色["bg_primary"]
+        page.add(IconTitle.create(配置, title="测试标题", icon="HOME", enabled=True))  # 只能更改此处**被测调用模块名称**
     
     ft.run(main)

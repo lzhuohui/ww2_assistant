@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-卡片容器 - 原子层（新思路）
+卡片容器 - 零件层（新思路）
 
 设计思路:
     最小模块化的卡片容器，只负责外轮廓、阴影、边框。
@@ -108,25 +108,15 @@ class CardContainer:
 
 # ==================== 调试逻辑 ====================
 if __name__ == "__main__":
-    config = 界面配置()
+    # 1. 界面配置初始化
+    配置 = 界面配置()
     
+    # 2. 自动加载用户数据覆盖默认值（在界面配置.__init__中自动完成）
+    
+    # 3. 正常启动被测模块
     def main(page: ft.Page):
-        page.padding = 20
-        page.bgcolor = config.获取颜色("bg_primary")
-        
-        page.add(ft.Text("卡片容器测试:", color=config.获取颜色("text_secondary")))
-        page.add(ft.Divider(height=20, color="transparent"))
-        
-        content = ft.Container(
-            content=ft.Text("卡片内容", size=16),
-            padding=20,
-        )
-        
-        page.add(CardContainer.create(
-            config=config,
-            content=content,
-            height=100,
-            width=400,
-        ))
+        page.padding = 0
+        page.bgcolor = 配置.当前主题颜色["bg_primary"]
+        page.add(CardContainer.create(配置, content=ft.Text("卡片内容"), height=100, width=400))  # 只能更改此处**被测调用模块名称**
     
     ft.run(main)
