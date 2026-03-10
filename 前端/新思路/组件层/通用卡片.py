@@ -113,7 +113,12 @@ class UniversalCard:
             height=multirow_config.get("divider_height", 60),
             enabled=current_enabled,
         )
-        divider.left = divider_left
+        # 计算分割线位置，使其左上角与帮助标签的右上角重合
+        if help_icon:
+            # 帮助标签的位置是 left=50, top=0，宽度约为18
+            divider.left = card_padding + 50 + 18  # card_padding + 帮助标签的left + 帮助标签的宽度
+        else:
+            divider.left = divider_left
         divider.top = 0
         divider.bottom = 0
         
