@@ -3,15 +3,14 @@
 通用卡片 - 组件层（新思路）
 
 设计思路:
-    调用零件模块组合成卡片组件。
-    - 容器：卡片容器.py
-    - 左侧：图标标题.py + 帮助标签.py
-    - 分割线：分割线.py
-    - 右侧：空着，由扩展卡片模块填充
+    装配模式：组合零件模块，协调交互。
+    - 不直接操作零件内部控件
+    - 通过零件暴露的接口进行控制
+    - 负责布局和协调
 
 功能:
     1. 组合零件模块
-    2. 状态切换逻辑
+    2. 协调状态切换
     3. 布局排列
 
 数据来源:
@@ -28,7 +27,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, List
 from 配置.界面配置 import 界面配置
 from 新思路.零件层.卡片容器 import CardContainer
 from 新思路.零件层.图标标题 import IconTitle
@@ -37,7 +36,7 @@ from 新思路.零件层.分割线 import Divider
 
 
 class UniversalCard:
-    """通用卡片 - 调用原子模块组合"""
+    """通用卡片 - 装配模式，组合零件模块"""
     
     @staticmethod
     def create(
@@ -51,71 +50,108 @@ class UniversalCard:
         width: int = None,
         **kwargs
     ) -> ft.Container:
+        """
+        创建通用卡片
+        
+        参数:
+            config: 界面配置对象
+            title: 标题文字
+            icon: 图标名称
+            enabled: 初始启用状态
+            on_state_change: 状态变化回调
+            help_text: 帮助提示文字
+            height: 卡片高度
+            width: 卡片宽度
+        
+        返回:
+            ft.Container: 完整的卡片容器
+        """
         theme_colors = config.当前主题颜色
         
-        spacing_config = config.定义尺寸.get("间距", {})
         ui_config = config.定义尺寸.get("界面", {})
         card_config = config.定义尺寸.get("卡片", {})
         multirow_config = config.定义尺寸.get("多行卡片", {})
         
         card_padding = ui_config.get("card_padding", 16)
-        left_width = multirow_config.get("left_width", 80)  # 增加宽度确保图标标题能够居中显示
-        divider_left = multirow_config.get("divider_left", 110)  # 相应调整分割线位置
         
         card_height = height or card_config.get("default_height", 70)
         card_width = width or 800
         
+        # 内部状态
         current_enabled = enabled
         
-        # 创建图标标题内容
-        icon_title_content, icon_control, title_control = IconTitle.create(
+        # 零件列表，用于协调状态
+        parts: List = []
+        
+        # 创建图标标题零件
+        def on_icon_title_state_change(new_enabled: bool):
+            """图标标题状态变化时，同步其他零件"""
+            nonlocal current_enabled
+            current_enabled = new_enabled
+            sync_parts_state(new_enabled)
+            if on_state_change:
+                on_state_change(new_enabled)
+        
+        icon_title = IconTitle.create(
             config=config,
             title=title,
             icon=icon,
             enabled=current_enabled,
+            on_state_change=on_icon_title_state_change,
         )
+        parts.append(icon_title)
         
-        # 创建帮助标签
-        help_icon = HelpTag.create(
-            config=config,
-            help_text=help_text,
-            enabled=current_enabled,
-        )
+        # 创建帮助标签零件
+        help_tag = None
+        if help_text:
+            help_tag = HelpTag.create(
+                config=config,
+                help_text=help_text,
+                enabled=current_enabled,
+            )
+            if help_tag:
+                parts.append(help_tag)
         
-        # 创建分割线
+        # 创建分割线零件
         divider = Divider.create(
             config=config,
             height=multirow_config.get("divider_height", 60),
             enabled=current_enabled,
         )
         
-        # 创建图标标题容器（左侧，垂直居中）
+        def sync_parts_state(new_enabled: bool):
+            """同步所有零件状态"""
+            for part in parts:
+                if hasattr(part, 'set_state'):
+                    part.set_state(new_enabled, notify=False)
+            
+            # 更新分割线
+            if divider:
+                divider.opacity = multirow_config.get("divider_opacity", 0.7) if new_enabled else 0.2
+                divider.update()
+        
+        # 创建布局
         icon_title_container = ft.Container(
-            content=icon_title_content,
+            content=icon_title,
             left=card_padding,
             top=0,
             bottom=0,
-            alignment=ft.Alignment(-1, 0),  # 左对齐，垂直居中
-            on_click=lambda e: toggle_state(e),
+            alignment=ft.Alignment(-1, 0),
         )
         
-        # 创建Stack布局元素列表
         stack_children = [icon_title_container]
         
-        # 计算帮助标签位置（紧跟图标标题右侧，顶部对齐）
-        if help_icon:
-            # 图标标题的宽度约为60px，加上左侧内边距
-            help_left = card_padding + 60 + 4  # 图标标题宽度 + 间距
-            help_icon.left = help_left
-            help_icon.top = 0  # 顶部对齐
-            stack_children.append(help_icon)
+        # 计算帮助标签位置
+        if help_tag:
+            help_left = card_padding + 60 + 4
+            help_tag.left = help_left
+            help_tag.top = 0
+            stack_children.append(help_tag)
         
-        # 计算分割线位置（紧跟帮助标签右侧，垂直居中）
-        if help_icon:
-            # 帮助标签的宽度约为18px
-            divider_left = help_left + 18 + 4  # 帮助标签位置 + 宽度 + 间距
+        # 计算分割线位置
+        if help_tag:
+            divider_left = help_left + 18 + 4
         else:
-            # 没有帮助标签时，分割线紧跟图标标题
             divider_left = card_padding + 60 + 4
         
         divider_container = ft.Container(
@@ -123,11 +159,11 @@ class UniversalCard:
             left=divider_left,
             top=0,
             bottom=0,
-            alignment=ft.Alignment(-1, 0),  # 左对齐，垂直居中
+            alignment=ft.Alignment(-1, 0),
         )
         stack_children.append(divider_container)
         
-        # 创建主Stack布局
+        # 创建主布局
         main_stack = ft.Stack(
             stack_children,
             height=card_height,
@@ -135,6 +171,7 @@ class UniversalCard:
             clip_behavior=ft.ClipBehavior.NONE,
         )
         
+        # 创建卡片容器
         container = CardContainer.create(
             config=config,
             content=main_stack,
@@ -142,27 +179,27 @@ class UniversalCard:
             width=card_width,
         )
         
-        def toggle_state(e):
+        # 暴露控制接口
+        def set_state(new_enabled: bool):
+            """设置卡片状态"""
             nonlocal current_enabled
-            current_enabled = not current_enabled
-            
-            if icon_control:
-                icon_control.opacity = 1.0 if current_enabled else 0.4
-                icon_control.update()
-            if title_control:
-                title_control.opacity = 1.0 if current_enabled else 0.4
-                title_control.update()
-            
-            if help_icon:
-                help_icon.opacity = 0.7 if current_enabled else 0.3
-                help_icon.update()
-            
-            if divider:
-                divider.opacity = multirow_config.get("divider_opacity", 0.7) if current_enabled else 0.2
-                divider.update()
-            
+            current_enabled = new_enabled
+            icon_title.set_state(new_enabled, notify=False)
+            sync_parts_state(new_enabled)
             if on_state_change:
-                on_state_change(current_enabled)
+                on_state_change(new_enabled)
+        
+        def toggle_state():
+            """切换卡片状态"""
+            set_state(not current_enabled)
+        
+        def get_state() -> bool:
+            """获取当前状态"""
+            return current_enabled
+        
+        container.set_state = set_state
+        container.toggle_state = toggle_state
+        container.get_state = get_state
         
         return container
 
@@ -179,29 +216,41 @@ if __name__ == "__main__":
         page.padding = 20
         page.bgcolor = config.获取颜色("bg_primary")
         
-        page.add(ft.Text("通用卡片测试（原子模块组合）:", color=config.获取颜色("text_secondary")))
+        page.add(ft.Text("通用卡片测试（装配模式）:", color=config.获取颜色("text_secondary")))
         page.add(ft.Divider(height=20, color="transparent"))
         
         def on_state_change(enabled):
-            print(f"状态变化: {'启用' if enabled else '禁用'}")
+            print(f"卡片状态变化: {'启用' if enabled else '禁用'}")
         
-        page.add(UniversalCard.create(
+        card = UniversalCard.create(
             config=config,
             title="测试卡片",
             icon="HOME",
             enabled=True,
             on_state_change=on_state_change,
             help_text="点击切换启用/禁用状态",
-        ))
+        )
+        
+        page.add(card)
         
         page.add(ft.Divider(height=20, color="transparent"))
         
-        page.add(UniversalCard.create(
+        card2 = UniversalCard.create(
             config=config,
             title="设置卡片",
             icon="SETTINGS",
             enabled=True,
             help_text="这是设置卡片的帮助提示",
-        ))
+        )
+        
+        page.add(card2)
+        
+        page.add(ft.Divider(height=20, color="transparent"))
+        
+        # 测试外部控制
+        def external_toggle(e):
+            card.toggle_state()
+        
+        page.add(ft.ElevatedButton("外部切换卡片状态", on_click=external_toggle))
     
     ft.run(main)

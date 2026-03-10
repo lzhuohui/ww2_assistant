@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
 """
-图标标题 - 原子层（新思路）
+图标标题 - 零件层（新思路）
 
 设计思路:
-    最小模块化的图标+标题组件，垂直排列居中。
+    独立功能模块，自带状态切换能力。
+    符合"装配"模式，即插即用。
 
 功能:
     1. 图标：上方居中
     2. 标题：下方居中
-    3. 状态切换：启用/禁用透明度变化
+    3. 状态切换：内置切换逻辑，通过回调通知外部
+    4. 外部控制：支持外部设置状态
 
 数据来源:
     所有配置数据从配置目录获取。
 
 使用场景:
-    被组件层模块调用。
+    被组件层模块调用，也可独立使用。
 
 可独立运行调试: python 图标标题.py
 """
@@ -24,12 +26,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
-from typing import Optional, Tuple
+from typing import Callable, Optional
 from 配置.界面配置 import 界面配置
 
 
 class IconTitle:
-    """图标标题 - 图标+标题垂直排列居中"""
+    """图标标题 - 独立功能模块，自带状态切换"""
     
     @staticmethod
     def create(
@@ -37,8 +39,24 @@ class IconTitle:
         title: str,
         icon: str = None,
         enabled: bool = True,
+        on_state_change: Callable[[bool], None] = None,
+        on_click: Callable = None,
         **kwargs
-    ) -> Tuple[ft.Column, Optional[ft.Icon], ft.Text]:
+    ) -> ft.Container:
+        """
+        创建图标标题组件
+        
+        参数:
+            config: 界面配置对象
+            title: 标题文字
+            icon: 图标名称（字符串）
+            enabled: 初始启用状态
+            on_state_change: 状态变化回调函数，参数为新状态
+            on_click: 点击回调函数（可选，用于扩展）
+        
+        返回:
+            ft.Container: 包含图标标题的容器，具备状态切换能力
+        """
         theme_colors = config.当前主题颜色
         
         weight_config = config.定义尺寸.get("字重", {})
@@ -56,6 +74,7 @@ class IconTitle:
             else:
                 icon_value = icon
         
+        # 创建图标控件
         icon_control = None
         if icon_value:
             icon_control = ft.Icon(
@@ -65,6 +84,7 @@ class IconTitle:
                 opacity=1.0 if enabled else 0.4,
             )
         
+        # 创建标题控件
         title_control = ft.Text(
             title,
             size=default_title_size,
@@ -82,7 +102,46 @@ class IconTitle:
             alignment=ft.MainAxisAlignment.CENTER,
         )
         
-        return content, icon_control, title_control
+        # 内部状态
+        current_enabled = enabled
+        
+        def set_state(new_enabled: bool, notify: bool = True):
+            """设置状态"""
+            nonlocal current_enabled
+            current_enabled = new_enabled
+            
+            if icon_control:
+                icon_control.opacity = 1.0 if current_enabled else 0.4
+                icon_control.update()
+            
+            if title_control:
+                title_control.opacity = 1.0 if current_enabled else 0.4
+                title_control.update()
+            
+            if notify and on_state_change:
+                on_state_change(current_enabled)
+        
+        def toggle_state(e=None):
+            """切换状态"""
+            set_state(not current_enabled)
+        
+        def handle_click(e):
+            """处理点击事件"""
+            toggle_state()
+            if on_click:
+                on_click(e)
+        
+        container = ft.Container(
+            content=content,
+            on_click=handle_click,
+        )
+        
+        # 暴露控制接口
+        container.set_state = set_state
+        container.toggle_state = toggle_state
+        container.get_state = lambda: current_enabled
+        
+        return container
 
 
 # 兼容别名
@@ -97,21 +156,33 @@ if __name__ == "__main__":
         page.padding = 20
         page.bgcolor = config.获取颜色("bg_primary")
         
-        page.add(ft.Text("图标标题测试:", color=config.获取颜色("text_secondary")))
+        page.add(ft.Text("图标标题测试（独立功能模块）:", color=config.获取颜色("text_secondary")))
         page.add(ft.Divider(height=20, color="transparent"))
         
-        content, _, _ = IconTitle.create(
+        def on_state_change(enabled):
+            print(f"状态变化: {'启用' if enabled else '禁用'}")
+        
+        icon_title = IconTitle.create(
             config=config,
             title="测试标题",
             icon="HOME",
             enabled=True,
+            on_state_change=on_state_change,
         )
         
         page.add(ft.Container(
-            content=content,
+            content=icon_title,
             padding=20,
             bgcolor=config.获取颜色("bg_card"),
             border_radius=8,
         ))
+        
+        page.add(ft.Divider(height=20, color="transparent"))
+        
+        # 测试外部控制
+        def external_toggle(e):
+            icon_title.toggle_state()
+        
+        page.add(ft.ElevatedButton("外部切换状态", on_click=external_toggle))
     
     ft.run(main)
