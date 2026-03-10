@@ -99,7 +99,7 @@ if __name__ == "__main__":
         page.padding = 20
         page.bgcolor = config.获取颜色("bg_primary")
         
-        level_options = [f"{i:02d}" for i in range(1, 21)]
+        level_options = [f"{i:02d}" for i in range(1, 41)]
         
         page.add(LabelDropdown.create(
             config=config,
