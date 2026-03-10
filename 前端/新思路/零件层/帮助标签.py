@@ -56,18 +56,12 @@ class HelpTag:
             ),
             width=box_size,
             height=box_size,
-            alignment=ft.Alignment(0, 0),  # 水平垂直居中
             tooltip=help_text,
             opacity=0.7 if enabled else 0.3,
         )
         
-        # 创建外层容器确保问号图标在上侧
-        return ft.Container(
-            content=help_container,
-            width=box_size,
-            height=box_size,
-            alignment=ft.Alignment(0, -2),  # 水平居中，垂直更靠上
-        )
+        # 直接返回容器，取消放置修正
+        return help_container
 
 
 # 兼容别名
