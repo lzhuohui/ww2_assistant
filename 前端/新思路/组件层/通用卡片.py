@@ -122,7 +122,7 @@ class UniversalCard:
             main_row_items,
             spacing=0,
             alignment=ft.MainAxisAlignment.START,
-            vertical_alignment=ft.CrossAxisAlignment.START,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
             height=card_height,
             width=card_width,
         )
