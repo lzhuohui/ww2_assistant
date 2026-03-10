@@ -383,6 +383,103 @@ class UniversalCard:
                 controls.append(ft.Divider(height=default_card_spacing, color="transparent"))
         
         return ft.Column(controls, spacing=0)
+    
+    @staticmethod
+    def create_dropdown_card(
+        config: 界面配置,
+        title: str,
+        options: List[str],
+        value: str = None,
+        icon: str = None,
+        description: str = None,
+        enabled: bool = True,
+        on_change: Callable[[str], None] = None,
+        on_state_change: Callable[[bool], None] = None,
+        help_text: str = None,
+        dropdown_width: int = 120,
+        **kwargs
+    ) -> ft.Container:
+        """快捷创建下拉卡片"""
+        from 组件层.自定义下拉框 import CustomDropDown
+        
+        dropdown = CustomDropDown(
+            config=config,
+            options=options,
+            value=value,
+            width=dropdown_width,
+            on_change=on_change,
+        )
+        
+        return UniversalCard.create(
+            config=config,
+            title=title,
+            icon=icon,
+            description=description,
+            controls=[dropdown.create()],
+            enabled=enabled,
+            on_state_change=on_state_change,
+            help_text=help_text,
+            **kwargs
+        )
+    
+    @staticmethod
+    def create_switch_card(
+        config: 界面配置,
+        title: str,
+        value: bool = False,
+        icon: str = None,
+        description: str = None,
+        enabled: bool = True,
+        on_change: Callable[[bool], None] = None,
+        on_state_change: Callable[[bool], None] = None,
+        help_text: str = None,
+        **kwargs
+    ) -> ft.Container:
+        """快捷创建开关卡片"""
+        from 组件层.椭圆开关 import EllipseSwitch
+        
+        switch = EllipseSwitch(
+            config=config,
+            value=value,
+            on_change=on_change,
+        )
+        
+        return UniversalCard.create(
+            config=config,
+            title=title,
+            icon=icon,
+            description=description,
+            controls=[switch.create()],
+            enabled=enabled,
+            on_state_change=on_state_change,
+            help_text=help_text,
+            **kwargs
+        )
+    
+    @staticmethod
+    def create_multirow_card(
+        config: 界面配置,
+        title: str,
+        controls: List[ft.Control],
+        icon: str = None,
+        items_per_row: int = None,
+        enabled: bool = True,
+        on_state_change: Callable[[bool], None] = None,
+        help_text: str = None,
+        **kwargs
+    ) -> ft.Container:
+        """快捷创建多行卡片"""
+        return UniversalCard.create(
+            config=config,
+            title=title,
+            icon=icon,
+            controls=controls,
+            items_per_row=items_per_row,
+            enabled=enabled,
+            on_state_change=on_state_change,
+            help_text=help_text,
+            **kwargs
+        )
 
 
 # 兼容别名
