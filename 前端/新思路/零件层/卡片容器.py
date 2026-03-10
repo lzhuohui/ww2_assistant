@@ -46,10 +46,11 @@ class CardContainer:
         shadow_config = config.定义尺寸.get("阴影", {})
         
         shadow_blur_default = shadow_config.get("blur_default", 4)
-        shadow_blur_hover = shadow_config.get("blur_hover", 8)
+        shadow_blur_hover = shadow_config.get("blur_hover", 12)
         shadow_spread = shadow_config.get("spread", 0)
+        shadow_spread_hover = shadow_config.get("spread_hover", 0)
         shadow_offset_y = shadow_config.get("offset_y", 2)
-        shadow_offset_y_hover = shadow_config.get("offset_y_hover", 3)
+        shadow_offset_y_hover = shadow_config.get("offset_y_hover", 4)
         
         card_border_radius = ui_config.get("card_radius", 8)
         card_border_width = ui_config.get("card_border_width", 1)
@@ -76,11 +77,13 @@ class CardContainer:
                 container.bgcolor = theme_colors.get("bg_hover")
                 container.border = ft.Border.all(card_border_width, theme_colors.get("border"))
                 container.shadow = ft.BoxShadow(
-                    spread_radius=shadow_spread,
+                    spread_radius=shadow_spread_hover,
                     blur_radius=shadow_blur_hover,
                     color=theme_colors.get("shadow"),
                     offset=ft.Offset(0, shadow_offset_y_hover),
                 )
+                # 添加轻微上浮效果，模拟Win11动画
+                container.margin = ft.Margin(0, -2, 0, 2)
             else:
                 container.bgcolor = theme_colors.get("bg_card")
                 container.border = ft.Border.all(card_border_width, theme_colors.get("border_light"))
@@ -90,6 +93,8 @@ class CardContainer:
                     color=theme_colors.get("shadow"),
                     offset=ft.Offset(0, shadow_offset_y),
                 )
+                # 恢复默认边距
+                container.margin = ft.Margin(0, 0, 0, 0)
             container.update()
         
         container.on_hover = on_hover
