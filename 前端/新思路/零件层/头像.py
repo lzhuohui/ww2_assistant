@@ -35,6 +35,11 @@ from typing import Callable, Optional
 from 配置.界面配置 import 界面配置
 
 
+# *** 用户指定变量 - AI不得修改 ***
+# (用户指定的变量放在这里，用户没有指定之前就空着)
+# *********************************
+
+
 class Avatar:
     """头像 - 独立功能模块"""
     

@@ -30,6 +30,11 @@ from typing import Callable, Optional
 from 配置.界面配置 import 界面配置
 
 
+# *** 用户指定变量 - AI不得修改 ***
+# (用户指定的变量放在这里，用户没有指定之前就空着)
+# *********************************
+
+
 class LabelInput:
     """标签输入框 - 独立功能模块"""
     
@@ -38,7 +43,7 @@ class LabelInput:
         config: 界面配置,
         label: str,
         value: str = "",
-        width: int = 120,
+        width: int = None,
         on_change: Callable[[str], None] = None,
         **kwargs
     ) -> ft.Row:
@@ -49,13 +54,18 @@ class LabelInput:
             config: 界面配置对象
             label: 标签文本
             value: 初始值
-            width: 输入框宽度
+            width: 输入框宽度（可选，默认从配置中获取）
             on_change: 值变化回调
         
         返回:
             ft.Row: 标签输入框容器
         """
         theme_colors = config.当前主题颜色
+        ui_config = config.定义尺寸.get("组件", {})
+        
+        # 从配置文件获取默认值
+        default_width = ui_config.get("input_width", 120)
+        current_width = width if width is not None else default_width
         
         # 创建标签文本（自适应宽度）
         label_control = ft.Text(
@@ -68,14 +78,15 @@ class LabelInput:
         # 创建输入框
         input_control = ft.TextField(
             value=value,
-            width=width,
-            height=32,
             text_size=14,
             color=theme_colors.get("text_primary"),
-            bgcolor=theme_colors.get("bg_secondary"),
+            bgcolor=theme_colors.get("bg_input"),
             border_color=theme_colors.get("border"),
-            border_radius=6,
-            content_padding=ft.Padding(left=8, right=8, top=0, bottom=0),
+            focused_border_color=theme_colors.get("accent"),
+            border_radius=4,
+            dense=True,
+            content_padding=ft.Padding(left=8, right=8, top=8, bottom=8),
+            width=current_width,
             on_change=lambda e: on_change(e.control.value) if on_change else None,
         )
         

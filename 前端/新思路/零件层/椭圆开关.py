@@ -30,6 +30,11 @@ from typing import Callable, Optional
 from 配置.界面配置 import 界面配置
 
 
+# *** 用户指定变量 - AI不得修改 ***
+# (用户指定的变量放在这里，用户没有指定之前就空着)
+# *********************************
+
+
 class EllipseSwitch:
     """椭圆开关 - 独立功能模块"""
     
@@ -37,8 +42,8 @@ class EllipseSwitch:
     def create(
         config: 界面配置,
         value: bool = False,
-        width: int = 60,
-        height: int = 26,
+        width: int = None,
+        height: int = None,
         on_change: Callable[[bool], None] = None,
         **kwargs
     ) -> ft.Container:
@@ -48,14 +53,21 @@ class EllipseSwitch:
         参数:
             config: 界面配置对象
             value: 初始状态
-            width: 开关宽度
-            height: 开关高度
+            width: 开关宽度（可选，默认从配置中获取）
+            height: 开关高度（可选，默认从配置中获取）
             on_change: 状态变化回调
         
         返回:
-            ft.Container: 开关容器，具备状态切换能力
+            ft.Container: 开关容器
         """
         theme_colors = config.当前主题颜色
+        ui_config = config.定义尺寸.get("组件", {})
+        
+        # 从配置文件获取默认值
+        default_width = ui_config.get("switch_width", 60)
+        default_height = ui_config.get("switch_height", 26)
+        current_width = width if width is not None else default_width
+        current_height = height if height is not None else default_height
         
         accent_color = theme_colors.get("accent", "#0078D4")
         track_off_color = theme_colors.get("switch_track_off", "#333333")
@@ -63,7 +75,7 @@ class EllipseSwitch:
         thumb_off_color = theme_colors.get("switch_thumb_off", "#AAAAAA")
         border_color = theme_colors.get("switch_border", "#555555")
         
-        thumb_diameter = height - 4
+        thumb_diameter = current_height - 4
         thumb_padding = 2
         
         # 内部状态
@@ -71,9 +83,9 @@ class EllipseSwitch:
         
         # 创建轨道
         track = ft.Container(
-            width=width,
-            height=height,
-            border_radius=height / 2,
+            width=current_width,
+            height=current_height,
+            border_radius=current_height / 2,
             bgcolor=accent_color if value else track_off_color,
             animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
             border=ft.Border.all(1, border_color) if not value else None,
@@ -105,8 +117,8 @@ class EllipseSwitch:
         # 创建Stack
         stack = ft.Stack(
             [track, thumb_container],
-            width=width,
-            height=height,
+            width=current_width,
+            height=current_height,
             clip_behavior=ft.ClipBehavior.HARD_EDGE,
         )
         

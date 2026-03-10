@@ -31,6 +31,11 @@ from 配置.界面配置 import 界面配置
 from 新思路.零件层.自定义下拉框 import CustomDropDown
 
 
+# *** 用户指定变量 - AI不得修改 ***
+# (用户指定的变量放在这里，用户没有指定之前就空着)
+# *********************************
+
+
 class LabelDropdown:
     """标签下拉框 - 独立功能模块"""
     
@@ -40,7 +45,7 @@ class LabelDropdown:
         label: str,
         options: List[str] = None,
         value: str = None,
-        width: int = 120,
+        width: int = None,
         on_change: Callable[[str], None] = None,
         **kwargs
     ) -> ft.Row:
@@ -52,13 +57,18 @@ class LabelDropdown:
             label: 标签文本
             options: 选项列表
             value: 初始值
-            width: 下拉框宽度
+            width: 下拉框宽度（可选，默认从配置中获取）
             on_change: 值变化回调
         
         返回:
             ft.Row: 标签下拉框容器
         """
         theme_colors = config.当前主题颜色
+        ui_config = config.定义尺寸.get("组件", {})
+        
+        # 从配置文件获取默认值
+        default_width = ui_config.get("dropdown_width", 120)
+        current_width = width if width is not None else default_width
         
         # 创建标签文本（自适应宽度）
         label_control = ft.Text(
@@ -73,7 +83,7 @@ class LabelDropdown:
             config=config,
             options=options or [],
             value=value if value is not None else (options[0] if options else ""),
-            width=width,
+            width=current_width,
             on_change=on_change,
         )
         

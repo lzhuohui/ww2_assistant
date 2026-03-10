@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from 配置.界面配置 import 界面配置
 from 新思路.组件层.基础设置卡片 import BasicSettingsCard
-from 新思路.零件层.主题预览卡片 import ThemeSelector
+from 新思路.组件层.主题设置卡片 import ThemeSettingsCard
 
 
 class SystemSettingsPage:
@@ -66,35 +66,10 @@ class SystemSettingsPage:
             print(f"主题切换: {theme_name}")
             # TODO: 实际切换主题逻辑
         
-        theme_selector = ThemeSelector.create(
+        theme_card = ThemeSettingsCard.create(
             config=config,
-            current_theme="浅色",
+            title="主题设置",
             on_theme_change=handle_theme_change,
-        )
-        
-        # 个性化卡片内容
-        personalization_content = ft.Column(
-            [
-                ft.Text("主题", size=14, color=theme_colors.get("text_primary")),
-                ft.Container(height=10),
-                theme_selector,
-            ],
-            spacing=0,
-        )
-        
-        # 个性化卡片
-        personalization_card = ft.Container(
-            content=ft.Column(
-                [
-                    ft.Text("个性化", size=16, weight=ft.FontWeight.BOLD, color=theme_colors.get("text_primary")),
-                    ft.Container(height=15),
-                    personalization_content,
-                ],
-                spacing=0,
-            ),
-            padding=15,
-            bgcolor=theme_colors.get("bg_card"),
-            border_radius=8,
         )
         
         # ========== 页面容器 ==========
@@ -111,8 +86,8 @@ class SystemSettingsPage:
                 # 基础设置卡片
                 basic_card,
                 ft.Container(height=15),
-                # 个性化卡片
-                personalization_card,
+                # 主题设置卡片
+                theme_card,
             ],
             spacing=0,
             scroll=ft.ScrollMode.AUTO,

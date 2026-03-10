@@ -30,6 +30,11 @@ from typing import Callable, Optional
 from 配置.界面配置 import 界面配置
 
 
+# *** 用户指定变量 - AI不得修改 ***
+# (用户指定的变量放在这里，用户没有指定之前就空着)
+# *********************************
+
+
 class NavButton:
     """导航按钮 - 独立功能模块"""
     
@@ -38,7 +43,7 @@ class NavButton:
         config: 界面配置,
         name: str = "通用设置",
         icon: str = "SETTINGS",
-        width: float = 200,
+        width: float = None,
         on_click: Callable = None,
         **kwargs
     ) -> ft.Container:
@@ -49,13 +54,18 @@ class NavButton:
             config: 界面配置对象
             name: 按钮名称
             icon: 图标名称
-            width: 按钮宽度
+            width: 按钮宽度（可选，默认从配置中获取）
             on_click: 点击回调
         
         返回:
             ft.Container: 导航按钮容器
         """
         theme_colors = config.当前主题颜色
+        ui_config = config.定义尺寸.get("界面", {})
+        
+        # 从配置文件获取默认值
+        default_width = ui_config.get("nav_button_width", 200)
+        current_width = width if width is not None else default_width
         
         # 内部状态
         is_selected = False
@@ -100,7 +110,7 @@ class NavButton:
         content_container = ft.Container(
             content=content,
             padding=4,
-            width=width,
+            width=current_width,
         )
         
         def update_appearance():
@@ -108,12 +118,12 @@ class NavButton:
             nonlocal is_selected, is_hovering
             
             if is_selected:
-                bg_container.width = width
+                bg_container.width = current_width
                 bg_container.bgcolor = theme_colors["bg_selected"]
                 icon_control.color = "#FFFFFF"
                 text_control.color = "#FFFFFF"
             elif is_hovering:
-                bg_container.width = width
+                bg_container.width = current_width
                 bg_container.bgcolor = theme_colors["bg_hover"]
                 icon_control.color = theme_colors["accent"]
                 text_control.color = theme_colors["text_primary"]
@@ -157,7 +167,7 @@ class NavButton:
             bgcolor="transparent",
             on_click=handle_click,
             on_hover=handle_hover,
-            width=width,
+            width=current_width,
             height=36,
         )
         

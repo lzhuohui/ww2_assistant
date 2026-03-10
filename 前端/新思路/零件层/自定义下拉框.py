@@ -30,6 +30,11 @@ from typing import Callable, List, Optional
 from 配置.界面配置 import 界面配置
 
 
+# *** 用户指定变量 - AI不得修改 ***
+# (用户指定的变量放在这里，用户没有指定之前就空着)
+# *********************************
+
+
 class CustomDropDown:
     """自定义下拉框 - 独立功能模块"""
     
@@ -38,8 +43,8 @@ class CustomDropDown:
         config: 界面配置,
         options: List[str] = None,
         value: str = None,
-        width: int = 100,
-        height: int = 32,
+        width: int = None,
+        height: int = None,
         on_change: Callable[[str], None] = None,
         **kwargs
     ) -> ft.PopupMenuButton:
@@ -50,14 +55,21 @@ class CustomDropDown:
             config: 界面配置对象
             options: 选项列表
             value: 初始值
-            width: 宽度
-            height: 高度
+            width: 宽度（可选，默认从配置中获取）
+            height: 高度（可选，默认从配置中获取）
             on_change: 值变化回调
         
         返回:
             ft.PopupMenuButton: 下拉框控件
         """
         theme_colors = config.当前主题颜色
+        ui_config = config.定义尺寸.get("组件", {})
+        
+        # 从配置文件获取默认值
+        default_width = ui_config.get("dropdown_width", 100)
+        default_height = ui_config.get("dropdown_height", 32)
+        current_width = width if width is not None else default_width
+        current_height = height if height is not None else default_height
         
         # 默认选项
         current_options = options or ["选项A", "选项B", "选项C"]
@@ -85,8 +97,8 @@ class CustomDropDown:
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
             ),
-            width=width,
-            height=height,
+            width=current_width,
+            height=current_height,
             border_radius=6,
             bgcolor=theme_colors.get("bg_secondary"),
             border=ft.Border.all(1, theme_colors.get("border")),
@@ -126,8 +138,8 @@ class CustomDropDown:
             menu_padding=0,
             menu_position=ft.PopupMenuPosition.UNDER,
             size_constraints=ft.BoxConstraints(
-                min_width=width,
-                max_width=width,
+                min_width=current_width,
+                max_width=current_width,
             ),
         )
         
