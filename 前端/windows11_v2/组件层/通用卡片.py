@@ -10,14 +10,15 @@
 功能:
     1. 自动适配：根据控件数量自动选择模式
     2. 统一风格：边距、阴影、圆角、边框统一
-    3. 状态切换：双击左侧区域切换启用/禁用状态
+    3. 状态切换：单击左侧区域切换启用/禁用状态
     4. 悬停效果：统一的悬停视觉反馈
+    5. 帮助提示：右上角"?"标签，点击显示帮助内容
 
 数据来源:
     所有配置数据从界面配置获取。
 
 使用场景:
-    替代下拉卡片、开关卡片、多行卡片。
+    所有需要卡片布局的界面。
 
 可独立运行调试: python 通用卡片.py
 """
@@ -37,7 +38,7 @@ from 原子层.界面配置 import 界面配置
 
 
 class UniversalCard:
-    """通用卡片 - 统一的单行/多行卡片组件"""
+    """通用卡片 - 统一的卡片组件"""
     
     @staticmethod
     def create(
@@ -49,6 +50,7 @@ class UniversalCard:
         items_per_row: int = None,
         enabled: bool = True,
         on_state_change: Callable[[bool], None] = None,
+        help_text: str = None,
         height: int = None,
         width: int = None,
         **kwargs
@@ -135,19 +137,37 @@ class UniversalCard:
                 opacity=1.0 if current_enabled else 0.4,
             )
         
+        help_icon = None
+        if help_text:
+            help_icon = ft.IconButton(
+                icon=ft.Icons.HELP_OUTLINE,
+                icon_size=14,
+                icon_color=theme_colors.get("text_secondary"),
+                tooltip=help_text,
+                opacity=0.7 if current_enabled else 0.3,
+                style=ft.ButtonStyle(
+                    padding=0,
+                ),
+            )
+        
         if is_single_row:
+            left_row_items = [
+                icon_control if icon_control else ft.Container(),
+                ft.Column(
+                    [
+                        title_control,
+                        desc_control if desc_control else ft.Container(),
+                    ],
+                    spacing=4,
+                    alignment=ft.MainAxisAlignment.CENTER,
+                ),
+            ]
+            
+            if help_icon:
+                left_row_items.append(help_icon)
+            
             left_content = ft.Row(
-                [
-                    icon_control if icon_control else ft.Container(),
-                    ft.Column(
-                        [
-                            title_control,
-                            desc_control if desc_control else ft.Container(),
-                        ],
-                        spacing=4,
-                        alignment=ft.MainAxisAlignment.CENTER,
-                    ),
-                ],
+                left_row_items,
                 spacing=12,
                 alignment=ft.MainAxisAlignment.START,
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
@@ -159,30 +179,32 @@ class UniversalCard:
                 top=0,
                 bottom=0,
                 alignment=ft.Alignment(-1, 0),
+                on_click=lambda e: toggle_state(e) if not is_single_row else None,
             )
         else:
+            left_column_items = [
+                icon_control if icon_control else ft.Container(),
+                title_control,
+            ]
+            
+            if help_icon:
+                left_column_items.insert(0, help_icon)
+            
             left_content = ft.Column(
-                [
-                    icon_control,
-                    title_control,
-                ],
+                left_column_items,
                 spacing=spacing_config.get("spacing_xs", 4),
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 alignment=ft.MainAxisAlignment.CENTER,
             )
             
-            left_gesture = ft.GestureDetector(
-                content=left_content,
-                on_double_tap=None,
-            )
-            
             left_container = ft.Container(
-                content=left_gesture,
+                content=left_content,
                 left=card_padding,
                 top=0,
                 bottom=0,
                 width=left_width,
                 alignment=ft.Alignment(0, 0),
+                on_click=lambda e: toggle_state(e),
             )
         
         divider = None
@@ -291,6 +313,10 @@ class UniversalCard:
             title_control.opacity = 1.0 if current_enabled else 0.4
             title_control.update()
             
+            if help_icon:
+                help_icon.opacity = 0.7 if current_enabled else 0.3
+                help_icon.update()
+            
             if divider:
                 divider.opacity = divider_opacity if current_enabled else 0.2
                 divider.update()
@@ -301,9 +327,6 @@ class UniversalCard:
             
             if on_state_change:
                 on_state_change(current_enabled)
-        
-        if not is_single_row:
-            left_gesture.on_double_tap = toggle_state
         
         def on_hover(e):
             if e.data == "true":
@@ -350,6 +373,7 @@ class UniversalCard:
                 items_per_row=card_config_item.get("items_per_row"),
                 enabled=card_config_item.get("enabled", True),
                 on_state_change=card_config_item.get("on_state_change"),
+                help_text=card_config_item.get("help_text"),
                 height=card_config_item.get("height"),
                 width=card_config_item.get("width"),
             )
@@ -363,9 +387,6 @@ class UniversalCard:
 
 # 兼容别名
 通用卡片 = UniversalCard
-下拉卡片 = UniversalCard
-开关卡片 = UniversalCard
-多行卡片 = UniversalCard
 
 
 # ==================== 调试逻辑 ====================
@@ -389,6 +410,7 @@ if __name__ == "__main__":
             description="请选择一个选项",
             icon="SETTINGS",
             controls=[dropdown.create()],
+            help_text="点击切换启用/禁用状态",
         ))
         
         page.add(ft.Divider(height=20, color="transparent"))
@@ -399,6 +421,7 @@ if __name__ == "__main__":
             description="开启或关闭此功能",
             icon="POWER_SETTINGS_NEW",
             controls=[switch.create()],
+            help_text="点击切换启用/禁用状态",
         ))
         
         page.add(ft.Divider(height=20, color="transparent"))
@@ -426,6 +449,7 @@ if __name__ == "__main__":
             controls=controls,
             enabled=True,
             on_state_change=on_state_change,
+            help_text="点击切换启用/禁用状态，禁用后该配置不会生效",
         ))
     
     ft.run(main)
