@@ -107,6 +107,7 @@ class 界面配置:
         },
         "字重": {
             "font_weight_normal": ft.FontWeight.NORMAL,
+            "font_weight_medium": ft.FontWeight.W_500,
             "font_weight_bold": ft.FontWeight.BOLD,
         },
         "间距": {
@@ -129,15 +130,40 @@ class 界面配置:
             "icon_size_large": 24,
         },
         "界面": {
-            "peripheral_margin": 10,          # 外围边距
-            "nav_width": 240,                 # 导航栏宽度
-            "user_info_height": 80,           # 用户信息高度
-            "card_padding": 16,               # 卡片内边距
-            "item_padding": 12,               # 项目内边距
-            "card_spacing": 5,                # 卡片间距（标准间距）
-            "card_radius": 8,                 # 卡片圆角（Win11风格）
-            "card_border_width": 1,           # 卡片边框宽度
-        }
+            "peripheral_margin": 10,
+            "nav_width": 240,
+            "user_info_height": 80,
+            "card_padding": 16,
+            "item_padding": 12,
+            "card_spacing": 5,
+            "card_radius": 8,
+            "card_border_width": 1,
+        },
+        "卡片": {
+            "default_height": 70,
+            "default_spacing": 10,
+            "items_per_row": 6,
+            "row_height": 32,
+            "icon_size": 24,
+            "title_size": 14,
+            "desc_size": 12,
+        },
+        "多行卡片": {
+            "divider_width": 2,
+            "divider_height": 60,
+            "divider_opacity": 0.7,
+            "divider_blur": 6,
+            "left_width": 60,
+            "divider_left": 90,
+            "content_left": 130,
+        },
+        "阴影": {
+            "blur_default": 4,
+            "blur_hover": 8,
+            "spread": 0,
+            "offset_y": 2,
+            "offset_y_hover": 3,
+        },
     }
     
     def __init__(self, 主题名称: str = "深色"):

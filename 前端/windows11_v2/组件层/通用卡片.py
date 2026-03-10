@@ -14,7 +14,7 @@
     4. 悬停效果：统一的悬停视觉反馈
 
 数据来源:
-    主题颜色从界面配置获取。
+    所有配置数据从界面配置获取。
 
 使用场景:
     替代下拉卡片、开关卡片、多行卡片。
@@ -32,37 +32,11 @@ from 原子层.界面配置 import 界面配置
 
 
 # ==================== 用户指定变量区 ====================
-# 单行模式
-DEFAULT_CARD_HEIGHT = 70          # 单行卡片默认高度
-DEFAULT_CARD_SPACING = 10         # 卡片之间的间距
-
-# 多行模式
-ITEMS_PER_ROW = 6                 # 每行控件数量
-ROW_HEIGHT = 32                   # 每行高度
-DIVIDER_WIDTH = 2                 # 分割线宽度
-DIVIDER_HEIGHT = 60               # 分割线高度
-DIVIDER_OPACITY = 0.7             # 分割线透明度
-DIVIDER_BLUR = 6                  # 分割线模糊
-LEFT_WIDTH = 60                   # 左侧区域宽度
-DIVIDER_LEFT = 90                 # 分割线左边距
-CONTENT_LEFT = 130                # 内容区域左边距
-
-# 通用
-DEFAULT_ICON_SIZE = 24            # 图标大小
-DEFAULT_TITLE_SIZE = 14           # 标题字体大小
-DEFAULT_DESC_SIZE = 12            # 描述字体大小
-
-# Win11 Fluent Design 阴影配置
-SHADOW_BLUR_DEFAULT = 4           # 默认阴影模糊半径（Win11风格：轻微深度）
-SHADOW_BLUR_HOVER = 8             # 悬停阴影模糊半径（Win11风格：增强深度）
-SHADOW_SPREAD = 0                 # 阴影扩散半径
-SHADOW_OFFSET_Y = 2               # 阴影Y轴偏移（模拟光源从上方照射）
-CARD_BORDER_RADIUS = 8            # 卡片圆角（Win11风格：8px）
-CARD_BORDER_WIDTH = 1             # 卡片边框宽度
+# 所有数据从配置文件动态获取，此处仅保留模块级默认值（调试用）
 # ========================================================
 
 
-class UniversalCard:  # 通用卡片组件
+class UniversalCard:
     """通用卡片 - 统一的单行/多行卡片组件"""
     
     @staticmethod
@@ -72,7 +46,7 @@ class UniversalCard:  # 通用卡片组件
         icon: str = None,
         description: str = None,
         controls: List[ft.Control] = None,
-        items_per_row: int = ITEMS_PER_ROW,
+        items_per_row: int = None,
         enabled: bool = True,
         on_state_change: Callable[[bool], None] = None,
         height: int = None,
@@ -86,14 +60,46 @@ class UniversalCard:  # 通用卡片组件
         spacing_config = config.定义尺寸.get("间距", {})
         radius_config = config.定义尺寸.get("圆角", {})
         ui_config = config.定义尺寸.get("界面", {})
+        card_config = config.定义尺寸.get("卡片", {})
+        multirow_config = config.定义尺寸.get("多行卡片", {})
+        shadow_config = config.定义尺寸.get("阴影", {})
+        
+        default_card_height = card_config.get("default_height", 70)
+        default_card_spacing = card_config.get("default_spacing", 10)
+        default_items_per_row = card_config.get("items_per_row", 6)
+        default_row_height = card_config.get("row_height", 32)
+        default_icon_size = card_config.get("icon_size", 24)
+        default_title_size = card_config.get("title_size", 14)
+        default_desc_size = card_config.get("desc_size", 12)
+        
+        divider_width = multirow_config.get("divider_width", 2)
+        divider_height = multirow_config.get("divider_height", 60)
+        divider_opacity = multirow_config.get("divider_opacity", 0.7)
+        divider_blur = multirow_config.get("divider_blur", 6)
+        left_width = multirow_config.get("left_width", 60)
+        divider_left = multirow_config.get("divider_left", 90)
+        content_left = multirow_config.get("content_left", 130)
+        
+        shadow_blur_default = shadow_config.get("blur_default", 4)
+        shadow_blur_hover = shadow_config.get("blur_hover", 8)
+        shadow_spread = shadow_config.get("spread", 0)
+        shadow_offset_y = shadow_config.get("offset_y", 2)
+        shadow_offset_y_hover = shadow_config.get("offset_y_hover", 3)
+        
+        card_border_radius = ui_config.get("card_radius", 8)
+        card_border_width = ui_config.get("card_border_width", 1)
+        card_padding = ui_config.get("card_padding", 16)
+        item_padding = ui_config.get("item_padding", 12)
+        
+        actual_items_per_row = items_per_row if items_per_row is not None else default_items_per_row
         
         current_enabled = enabled
         control_list = controls or []
         
         is_single_row = len(control_list) == 1
         
-        card_height = height or (DEFAULT_CARD_HEIGHT if is_single_row else None)
-        card_width = width or ui_config.get("card_width", 800)
+        card_height = height or (default_card_height if is_single_row else None)
+        card_width = width or 800
         
         icon_value = None
         if icon:
@@ -107,14 +113,14 @@ class UniversalCard:  # 通用卡片组件
         if icon_value:
             icon_control = ft.Icon(
                 icon_value,
-                size=DEFAULT_ICON_SIZE,
+                size=default_icon_size,
                 color=theme_colors.get("accent"),
                 opacity=1.0 if current_enabled else 0.4,
             )
         
         title_control = ft.Text(
             title,
-            size=DEFAULT_TITLE_SIZE,
+            size=default_title_size,
             weight=weight_config.get("font_weight_medium", ft.FontWeight.W_500),
             color=theme_colors.get("text_primary"),
             opacity=1.0 if current_enabled else 0.4,
@@ -124,7 +130,7 @@ class UniversalCard:  # 通用卡片组件
         if description and is_single_row:
             desc_control = ft.Text(
                 description,
-                size=DEFAULT_DESC_SIZE,
+                size=default_desc_size,
                 color=theme_colors.get("text_secondary"),
                 opacity=1.0 if current_enabled else 0.4,
             )
@@ -149,7 +155,7 @@ class UniversalCard:  # 通用卡片组件
             
             left_container = ft.Container(
                 content=left_content,
-                left=ui_config.get("card_padding", 16),
+                left=card_padding,
                 top=0,
                 bottom=0,
                 alignment=ft.Alignment(-1, 0),
@@ -172,36 +178,38 @@ class UniversalCard:  # 通用卡片组件
             
             left_container = ft.Container(
                 content=left_gesture,
-                left=ui_config.get("card_padding", 16),
+                left=card_padding,
                 top=0,
                 bottom=0,
-                width=LEFT_WIDTH,
+                width=left_width,
                 alignment=ft.Alignment(0, 0),
             )
         
         divider = None
         if not is_single_row:
             divider = ft.Container(
-                width=DIVIDER_WIDTH,
-                height=DIVIDER_HEIGHT,
+                width=divider_width,
+                height=divider_height,
                 bgcolor=theme_colors.get("accent"),
-                opacity=DIVIDER_OPACITY if current_enabled else 0.2,
+                opacity=divider_opacity if current_enabled else 0.2,
                 shadow=ft.BoxShadow(
-                    blur_radius=DIVIDER_BLUR,
+                    blur_radius=divider_blur,
                     color=theme_colors.get("accent"),
                     spread_radius=0,
                 ) if current_enabled else None,
-                left=DIVIDER_LEFT,
+                left=divider_left,
                 top=0,
                 bottom=0,
             )
+        
+        right_content = None
         
         if is_single_row:
             single_control = control_list[0] if control_list else ft.Container()
             
             right_container = ft.Container(
                 content=single_control,
-                right=ui_config.get("card_padding", 16),
+                right=card_padding,
                 top=0,
                 bottom=0,
                 alignment=ft.Alignment(1, 0),
@@ -215,8 +223,8 @@ class UniversalCard:  # 通用卡片组件
             stack_height = card_height
         else:
             rows = []
-            for i in range(0, len(control_list), items_per_row):
-                row_items = control_list[i:i+items_per_row]
+            for i in range(0, len(control_list), actual_items_per_row):
+                row_items = control_list[i:i+actual_items_per_row]
                 row = ft.Row(
                     row_items,
                     spacing=spacing_config.get("spacing_md", 12),
@@ -226,8 +234,8 @@ class UniversalCard:  # 通用卡片组件
             
             row_count = len(rows)
             row_spacing = spacing_config.get("spacing_sm", 8)
-            padding_vertical = ui_config.get("item_padding", 12) * 2
-            content_height = row_count * ROW_HEIGHT + (row_count - 1) * row_spacing if row_count > 0 else 0
+            padding_vertical = item_padding * 2
+            content_height = row_count * default_row_height + (row_count - 1) * row_spacing if row_count > 0 else 0
             stack_height = content_height + padding_vertical
             
             right_content = ft.Column(
@@ -238,9 +246,9 @@ class UniversalCard:  # 通用卡片组件
             
             right_container = ft.Container(
                 content=right_content,
-                left=CONTENT_LEFT,
-                right=ui_config.get("card_padding", 16),
-                top=ui_config.get("item_padding", 12),
+                left=content_left,
+                right=card_padding,
+                top=item_padding,
                 height=content_height,
                 alignment=ft.Alignment(-1, 0),
             )
@@ -261,19 +269,19 @@ class UniversalCard:  # 通用卡片组件
         container = ft.Container(
             content=main_stack,
             bgcolor=theme_colors.get("bg_card"),
-            border_radius=CARD_BORDER_RADIUS,
-            border=ft.Border.all(CARD_BORDER_WIDTH, theme_colors.get("border_light")),
+            border_radius=card_border_radius,
+            border=ft.Border.all(card_border_width, theme_colors.get("border_light")),
             shadow=ft.BoxShadow(
-                spread_radius=SHADOW_SPREAD,
-                blur_radius=SHADOW_BLUR_DEFAULT,
+                spread_radius=shadow_spread,
+                blur_radius=shadow_blur_default,
                 color=theme_colors.get("shadow"),
-                offset=ft.Offset(0, SHADOW_OFFSET_Y),
+                offset=ft.Offset(0, shadow_offset_y),
             ),
             animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
             clip_behavior=ft.ClipBehavior.NONE,
         )
         
-        def toggle_state(e):  # 切换启用/禁用状态
+        def toggle_state(e):
             nonlocal current_enabled
             current_enabled = not current_enabled
             
@@ -284,7 +292,7 @@ class UniversalCard:  # 通用卡片组件
             title_control.update()
             
             if divider:
-                divider.opacity = DIVIDER_OPACITY if current_enabled else 0.2
+                divider.opacity = divider_opacity if current_enabled else 0.2
                 divider.update()
             
             if not is_single_row and right_content:
@@ -297,24 +305,24 @@ class UniversalCard:  # 通用卡片组件
         if not is_single_row:
             left_gesture.on_double_tap = toggle_state
         
-        def on_hover(e):  # 悬停效果
+        def on_hover(e):
             if e.data == "true":
                 container.bgcolor = theme_colors.get("bg_hover")
-                container.border = ft.Border.all(CARD_BORDER_WIDTH, theme_colors.get("border"))
+                container.border = ft.Border.all(card_border_width, theme_colors.get("border"))
                 container.shadow = ft.BoxShadow(
-                    spread_radius=SHADOW_SPREAD,
-                    blur_radius=SHADOW_BLUR_HOVER,
+                    spread_radius=shadow_spread,
+                    blur_radius=shadow_blur_hover,
                     color=theme_colors.get("shadow"),
-                    offset=ft.Offset(0, SHADOW_OFFSET_Y + 1),
+                    offset=ft.Offset(0, shadow_offset_y_hover),
                 )
             else:
                 container.bgcolor = theme_colors.get("bg_card")
-                container.border = ft.Border.all(CARD_BORDER_WIDTH, theme_colors.get("border_light"))
+                container.border = ft.Border.all(card_border_width, theme_colors.get("border_light"))
                 container.shadow = ft.BoxShadow(
-                    spread_radius=SHADOW_SPREAD,
-                    blur_radius=SHADOW_BLUR_DEFAULT,
+                    spread_radius=shadow_spread,
+                    blur_radius=shadow_blur_default,
                     color=theme_colors.get("shadow"),
-                    offset=ft.Offset(0, SHADOW_OFFSET_Y),
+                    offset=ft.Offset(0, shadow_offset_y),
                 )
             container.update()
         
@@ -327,25 +335,28 @@ class UniversalCard:  # 通用卡片组件
         config: 界面配置,
         card_configs: List[dict],
     ) -> ft.Column:
+        card_config = config.定义尺寸.get("卡片", {})
+        default_card_spacing = card_config.get("default_spacing", 10)
+        
         controls = []
         
-        for i, card_config in enumerate(card_configs):
+        for i, card_config_item in enumerate(card_configs):
             card = UniversalCard.create(
                 config=config,
-                title=card_config.get("title"),
-                icon=card_config.get("icon"),
-                description=card_config.get("description"),
-                controls=card_config.get("controls"),
-                items_per_row=card_config.get("items_per_row", ITEMS_PER_ROW),
-                enabled=card_config.get("enabled", True),
-                on_state_change=card_config.get("on_state_change"),
-                height=card_config.get("height"),
-                width=card_config.get("width"),
+                title=card_config_item.get("title"),
+                icon=card_config_item.get("icon"),
+                description=card_config_item.get("description"),
+                controls=card_config_item.get("controls"),
+                items_per_row=card_config_item.get("items_per_row"),
+                enabled=card_config_item.get("enabled", True),
+                on_state_change=card_config_item.get("on_state_change"),
+                height=card_config_item.get("height"),
+                width=card_config_item.get("width"),
             )
             controls.append(card)
             
             if i < len(card_configs) - 1:
-                controls.append(ft.Divider(height=DEFAULT_CARD_SPACING, color="transparent"))
+                controls.append(ft.Divider(height=default_card_spacing, color="transparent"))
         
         return ft.Column(controls, spacing=0)
 
