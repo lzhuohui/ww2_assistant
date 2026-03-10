@@ -87,6 +87,14 @@ class 界面配置:
             "divider_left": 90,
             "content_left": 130,
         },
+        "通用卡片": {
+            "control_margin_left": 20,
+            "control_margin_right": 16,
+            "control_h_spacing": 20,
+            "control_v_spacing": 10,
+            "controls_per_row": 2,
+            "vertical_center": True,
+        },
         "阴影": {
             "blur_default": 4,
             "blur_hover": 8,

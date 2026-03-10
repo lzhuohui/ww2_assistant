@@ -7,17 +7,19 @@
     - 不直接操作零件内部控件
     - 通过零件暴露的接口进行控制
     - 负责布局和协调
+    - 支持多行控件布局
 
 功能:
     1. 组合零件模块
     2. 协调状态切换
     3. 布局排列
+    4. 支持多行控件
 
 数据来源:
     所有配置数据从配置目录获取。
 
 使用场景:
-    被扩展卡片模块调用，不直接使用。
+    被扩展卡片模块调用，也可直接使用。
 
 可独立运行调试: python 通用卡片.py
 """
@@ -36,7 +38,7 @@ from 新思路.零件层.分割线 import Divider
 
 
 class UniversalCard:
-    """通用卡片 - 装配模式，组合零件模块"""
+    """通用卡片 - 装配模式，组合零件模块，支持多行控件"""
     
     @staticmethod
     def create(
@@ -48,6 +50,7 @@ class UniversalCard:
         help_text: str = None,
         height: int = None,
         width: int = None,
+        controls: List[ft.Control] = None,
         **kwargs
     ) -> ft.Container:
         """
@@ -62,6 +65,7 @@ class UniversalCard:
             help_text: 帮助提示文字
             height: 卡片高度
             width: 卡片宽度
+            controls: 右侧控件列表（支持多行）
         
         返回:
             ft.Container: 完整的卡片容器
@@ -73,6 +77,9 @@ class UniversalCard:
         multirow_config = config.定义尺寸.get("多行卡片", {})
         
         card_padding = ui_config.get("card_padding", 16)
+        left_width = multirow_config.get("left_width", 60)
+        divider_left = multirow_config.get("divider_left", 90)
+        content_left = multirow_config.get("content_left", 130)
         
         card_height = height or card_config.get("default_height", 70)
         card_width = width or 800
@@ -130,30 +137,37 @@ class UniversalCard:
                 divider.opacity = multirow_config.get("divider_opacity", 0.7) if new_enabled else 0.2
                 divider.update()
         
-        # 创建布局
-        icon_title_container = ft.Container(
-            content=icon_title,
+        # ========== 左侧布局 ==========
+        # 使用Stack布局，将帮助标签放置在图标标题的右上角
+        left_stack_children = [icon_title]
+        
+        if help_tag:
+            # 帮助标签放置在图标标题的右上角
+            left_stack_children.append(
+                ft.Container(
+                    content=help_tag,
+                    left=50,  # 图标标题右侧
+                    top=-5,   # 右上角
+                )
+            )
+        
+        left_content = ft.Stack(
+            left_stack_children,
+            width=left_width,
+            height=60,
+            clip_behavior=ft.ClipBehavior.NONE,
+        )
+        
+        left_container = ft.Container(
+            content=left_content,
             left=card_padding,
             top=0,
             bottom=0,
-            alignment=ft.Alignment(-1, 0),
+            width=left_width,
+            alignment=ft.Alignment(0, 0),
         )
         
-        stack_children = [icon_title_container]
-        
-        # 计算帮助标签位置
-        if help_tag:
-            help_left = card_padding + 60 + 4
-            help_tag.left = help_left
-            help_tag.top = 0
-            stack_children.append(help_tag)
-        
-        # 计算分割线位置
-        if help_tag:
-            divider_left = help_left + 18 + 4
-        else:
-            divider_left = card_padding + 60 + 4
-        
+        # ========== 分割线布局 ==========
         divider_container = ft.Container(
             content=divider,
             left=divider_left,
@@ -161,9 +175,66 @@ class UniversalCard:
             bottom=0,
             alignment=ft.Alignment(-1, 0),
         )
-        stack_children.append(divider_container)
         
-        # 创建主布局
+        # ========== 右侧内容布局 ==========
+        stack_children = [left_container, divider_container]
+        
+        if controls:
+            # 获取通用卡片配置
+            card_params = config.定义尺寸.get("通用卡片", {})
+            control_margin_left = card_params.get("control_margin_left", 20)
+            control_margin_right = card_params.get("control_margin_right", 16)
+            control_h_spacing = card_params.get("control_h_spacing", 20)
+            control_v_spacing = card_params.get("control_v_spacing", 10)
+            controls_per_row = card_params.get("controls_per_row", 2)
+            vertical_center = card_params.get("vertical_center", True)
+            
+            # 计算行数
+            num_controls = len(controls)
+            num_rows = (num_controls + controls_per_row - 1) // controls_per_row
+            
+            # 创建每行的控件
+            rows = []
+            for row_idx in range(num_rows):
+                start_idx = row_idx * controls_per_row
+                end_idx = min(start_idx + controls_per_row, num_controls)
+                row_controls = controls[start_idx:end_idx]
+                
+                # 创建一行控件
+                row = ft.Row(
+                    row_controls,
+                    spacing=control_h_spacing,
+                    alignment=ft.MainAxisAlignment.START,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                )
+                rows.append(row)
+            
+            # 创建右侧内容容器
+            content_column = ft.Column(
+                rows,
+                spacing=control_v_spacing,
+                scroll=ft.ScrollMode.AUTO,
+            )
+            
+            # 计算卡片高度
+            control_height = 40  # 每个控件的高度
+            total_controls_height = num_rows * control_height + (num_rows - 1) * control_v_spacing
+            min_card_height = max(card_height, total_controls_height + 40)  # 40是上下边距
+            
+            content_container = ft.Container(
+                content=content_column,
+                left=content_left,
+                top=0,
+                bottom=0,
+                right=control_margin_right,
+                alignment=ft.Alignment(-1, 0) if vertical_center else ft.Alignment(-1, -1),
+            )
+            stack_children.append(content_container)
+            
+            # 更新卡片高度
+            card_height = min_card_height
+        
+        # ========== 创建主布局 ==========
         main_stack = ft.Stack(
             stack_children,
             height=card_height,
@@ -171,7 +242,7 @@ class UniversalCard:
             clip_behavior=ft.ClipBehavior.NONE,
         )
         
-        # 创建卡片容器
+        # ========== 创建卡片容器 ==========
         container = CardContainer.create(
             config=config,
             content=main_stack,
@@ -179,7 +250,7 @@ class UniversalCard:
             width=card_width,
         )
         
-        # 暴露控制接口
+        # ========== 暴露控制接口 ==========
         def set_state(new_enabled: bool):
             """设置卡片状态"""
             nonlocal current_enabled
@@ -206,6 +277,8 @@ class UniversalCard:
 
 # 兼容别名
 通用卡片 = UniversalCard
+MultiRowCard = UniversalCard
+多行卡片 = UniversalCard
 
 
 # ==================== 调试逻辑 ====================
@@ -217,8 +290,32 @@ if __name__ == "__main__":
     
     # 3. 正常启动被测模块
     def main(page: ft.Page):
-        page.padding = 0
+        page.padding = 20
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(UniversalCard.create(配置, title="主界面", icon="HOME", enabled=True, help_text="点击切换状态"))  # 只能更改此处**被测调用模块名称**
+        
+        # 创建多个控件
+        controls = [
+            ft.Dropdown(
+                options=[ft.dropdown.Option(f"选项{i}") for i in range(1, 4)],
+                value="选项1",
+                width=120,
+            ),
+            ft.Dropdown(
+                options=[ft.dropdown.Option(f"选项{i}") for i in range(1, 4)],
+                value="选项2",
+                width=120,
+            ),
+            ft.TextField(value="输入框", width=120),
+        ]
+        
+        page.add(UniversalCard.create(
+            配置,
+            title="多行卡片测试",
+            icon="HOME",
+            enabled=True,
+            help_text="点击切换状态",
+            controls=controls,
+            height=150,
+        ))  # 只能更改此处**被测调用模块名称**
     
     ft.run(main)

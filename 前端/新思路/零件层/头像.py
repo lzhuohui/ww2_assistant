@@ -320,8 +320,14 @@ class Avatar:
                     start_scan()
         
         import threading
+        # 延迟启动扫描动画，等待控件添加到页面
+        def delayed_start_scan():
+            time.sleep(3)  # 等待3秒确保控件已添加到页面
+            if show_scan:
+                threading.Thread(target=scan_timer, daemon=True).start()
+        
         if show_scan:
-            threading.Thread(target=scan_timer, daemon=True).start()
+            threading.Thread(target=delayed_start_scan, daemon=True).start()
         
         # 创建完整容器
         container = ft.Container(

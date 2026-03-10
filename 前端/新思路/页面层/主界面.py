@@ -5,6 +5,7 @@
 设计思路:
     组装组件，构建完整的主界面。
     采用装配模式，协调各组件交互。
+    匹配Win11设置界面风格。
 
 功能:
     1. 组装用户信息卡片
@@ -29,107 +30,131 @@ import flet as ft
 from 配置.界面配置 import 界面配置
 from 新思路.组件层.用户信息卡片 import UserInfoCard
 from 新思路.组件层.导航栏 import NavBar
+from 新思路.页面层.系统设置页面 import SystemSettingsPage
 
 
 class MainPage:
     """主界面 - 页面层"""
     
-    @staticmethod
-    def create(config: 界面配置) -> ft.Container:
+    def __init__(self, config: 界面配置):
+        self.config = config
+        self.theme_colors = config.当前主题颜色
+        self.current_nav = "系统"
+        self.content_area = None
+        self.page = None
+    
+    def create(self) -> ft.Container:
         """
         创建主界面
-        
-        参数:
-            config: 界面配置对象
         
         返回:
             ft.Container: 主界面容器
         """
-        theme_colors = config.当前主题颜色
-        
-        # 内部状态
-        current_nav = "系统设置"
-        
         # 创建用户信息卡片
         user_info_card = UserInfoCard.create(
-            config=config,
-            username="测试用户",
+            config=self.config,
+            username="试用用户",
+            is_registered=False,
+            expire_days=7,
         )
         
         # 创建导航栏
-        def handle_nav_change(nav_name: str):
-            nonlocal current_nav
-            current_nav = nav_name
-            # TODO: 切换内容区域
-            print(f"导航切换: {nav_name}")
-        
         nav_bar = NavBar.create(
-            config=config,
-            on_nav_change=handle_nav_change,
+            config=self.config,
+            on_nav_change=self.handle_nav_change,
         )
         
-        # 左侧面板（用户信息 + 导航栏）
-        left_panel = ft.Column(
-            [
-                user_info_card,
-                ft.Container(height=10),
-                nav_bar,
-            ],
-            width=240,
-            spacing=0,
-            scroll=ft.ScrollMode.AUTO,
-            alignment=ft.MainAxisAlignment.START,
-        )
-        
-        # 右侧内容区域（设置信息）
-        # TODO: 根据导航切换内容
-        content_area = ft.Container(
+        # 左侧导航面板（Win11风格）
+        left_panel = ft.Container(
             content=ft.Column(
                 [
-                    ft.Text(
-                        "系统设置",
-                        size=24,
-                        weight=ft.FontWeight.BOLD,
-                        color=theme_colors.get("text_primary"),
+                    # 用户信息区域
+                    ft.Container(
+                        content=user_info_card,
+                        padding=ft.Padding(left=12, right=12, top=16, bottom=12),
                     ),
-                    ft.Container(height=20),
-                    ft.Text(
-                        "这里是设置内容区域",
-                        size=14,
-                        color=theme_colors.get("text_secondary"),
+                    # 分割线
+                    ft.Container(
+                        content=ft.Divider(height=1, color=self.theme_colors.get("border")),
+                        padding=ft.Padding(left=12, right=12),
+                    ),
+                    # 导航栏
+                    ft.Container(
+                        content=nav_bar,
+                        padding=ft.Padding(left=8, right=8, top=8, bottom=8),
+                        expand=True,
                     ),
                 ],
                 spacing=0,
+                scroll=ft.ScrollMode.AUTO,
             ),
-            padding=ft.Padding.all(20),
+            width=280,
+            bgcolor=self.theme_colors.get("bg_secondary"),
+            border_radius=ft.BorderRadius(top_left=0, top_right=8, bottom_left=0, bottom_right=8),
+        )
+        
+        # 右侧内容区域（Win11风格）
+        self.content_area = ft.Container(
+            content=self.get_page_content(self.current_nav),
+            padding=ft.Padding(left=40, right=40, top=32, bottom=32),
             expand=True,
         )
         
-        # 主布局（左右分栏）
+        # 主布局（左右分栏，Win11风格）
         main_layout = ft.Row(
             [
+                left_panel,
+                # 内容区域
                 ft.Container(
-                    content=left_panel,
-                    width=240,
-                    bgcolor=theme_colors.get("bg_secondary"),
-                    alignment=ft.Alignment(-1, -1),
+                    content=self.content_area,
+                    expand=True,
                 ),
-                ft.VerticalDivider(width=1, color=theme_colors.get("border")),
-                content_area,
             ],
             expand=True,
-            spacing=0,
+            spacing=16,
             vertical_alignment=ft.CrossAxisAlignment.START,
         )
         
         # 页面容器
         page_container = ft.Container(
             content=main_layout,
-            bgcolor=theme_colors.get("bg_primary"),
+            bgcolor=self.theme_colors.get("bg_primary"),
+            padding=ft.Padding.all(0),
             expand=True,
         )
         
         return page_container
+    
+    def get_page_content(self, nav_name: str) -> ft.Control:
+        """获取页面内容"""
+        if nav_name == "系统":
+            return SystemSettingsPage.create(self.config)
+        else:
+            # 其他页面暂未实现
+            return ft.Column(
+                [
+                    ft.Text(
+                        nav_name,
+                        size=28,
+                        weight=ft.FontWeight.BOLD,
+                        color=self.theme_colors.get("text_primary"),
+                    ),
+                    ft.Container(height=24),
+                    ft.Text(
+                        f"{nav_name}页面开发中...",
+                        size=14,
+                        color=self.theme_colors.get("text_secondary"),
+                    ),
+                ],
+                spacing=0,
+                expand=True,
+            )
+    
+    def handle_nav_change(self, nav_name: str):
+        """处理导航切换"""
+        self.current_nav = nav_name
+        self.content_area.content = self.get_page_content(nav_name)
+        self.content_area.update()
 
 
 # 兼容别名
@@ -147,6 +172,7 @@ if __name__ == "__main__":
     def main(page: ft.Page):
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(MainPage.create(配置))  # 只能更改此处**被测调用模块名称**
+        main_page = MainPage(配置)
+        page.add(main_page.create())  # 只能更改此处**被测调用模块名称**
     
     ft.run(main)
