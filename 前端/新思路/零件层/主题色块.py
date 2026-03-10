@@ -104,7 +104,7 @@ class ThemeColorBlock:
                     ),
                     color_block,
                 ],
-                spacing=8,
+                spacing=4,
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
             ),
             on_click=lambda e: on_click(theme_name) if on_click else None,

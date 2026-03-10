@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-主题设置卡片 - 组件层（新思路）
+调色板设置卡片 - 组件层（新思路）
 
 设计思路:
-    组装零件，构建主题设置卡片。
+    组装零件，构建调色板设置卡片。
     采用装配模式，协调各零件交互。
     使用通用卡片组件，保持统一风格。
 
 功能:
     1. 调用通用卡片组件
-    2. 显示主题预览效果
-    3. 点击切换主题
+    2. 显示高对比度调色板预览效果
+    3. 点击切换调色板
 
 数据来源:
     所有配置数据从配置目录获取。
@@ -18,7 +18,7 @@
 使用场景:
     被页面层模块调用。
 
-可独立运行调试: python 主题设置卡片.py
+可独立运行调试: python 调色板设置卡片.py
 """
 
 import sys
@@ -37,22 +37,22 @@ from 新思路.零件层.主题色块 import ThemeColorBlock
 # *********************************
 
 
-class ThemeSettingsCard:
-    """主题设置卡片 - 组件层"""
+class PaletteSettingsCard:
+    """调色板设置卡片 - 组件层"""
     
     @staticmethod
     def create(
         config: 界面配置,
-        title: str = "主题设置",
-        icon: str = "PALETTE",
+        title: str = "高对比度调色板",
+        icon: str = "CONTRAST",
         enabled: bool = True,
         on_state_change: Callable[[bool], None] = None,
         help_text: str = None,
-        on_theme_change: Callable[[str], None] = None,
+        on_palette_change: Callable[[str], None] = None,
         **kwargs
     ) -> ft.Container:
         """
-        创建主题设置卡片
+        创建调色板设置卡片
         
         参数:
             config: 界面配置对象
@@ -61,71 +61,71 @@ class ThemeSettingsCard:
             enabled: 初始启用状态
             on_state_change: 状态变化回调
             help_text: 帮助提示文字
-            on_theme_change: 主题变化回调
+            on_palette_change: 调色板变化回调
         
         返回:
-            ft.Container: 主题设置卡片容器
+            ft.Container: 调色板设置卡片容器
         """
         theme_colors = config.当前主题颜色
-        current_theme = config.主题名称
+        current_palette = config.调色板名称
         
-        # 从配置文件获取所有主题颜色
+        # 从配置文件获取所有调色板颜色
         from 配置.主题配置 import 主题配置
-        all_themes = 主题配置.主题颜色
+        all_palettes = 主题配置.高对比度调色板
         
-        # 构建预览用的简化主题数据
-        themes = {}
-        for theme_name, theme_data in all_themes.items():
-            themes[theme_name] = {
-                "bg": theme_data.get("bg_primary", "#FFFFFF"),
-                "panel": theme_data.get("bg_secondary", "#F3F3F3"),
-                "text": theme_data.get("text_primary", "#1A1A1A"),
-                "accent": theme_data.get("accent", "#0078D4"),
+        # 构建预览用的简化调色板数据
+        palettes = {}
+        for palette_name, palette_data in all_palettes.items():
+            palettes[palette_name] = {
+                "bg": palette_data.get("bg_primary", "#000000"),
+                "panel": palette_data.get("bg_secondary", "#000000"),
+                "text": palette_data.get("text_primary", "#FFFFFF"),
+                "accent": palette_data.get("accent", "#00BCFF"),
             }
         
-        # 存储主题卡片引用
-        theme_cards_refs = {}
+        # 存储调色板卡片引用
+        palette_cards_refs = {}
         
-        def create_theme_preview(theme_name: str, is_selected: bool) -> ft.Container:
-            """创建单个主题预览卡片"""
-            theme = themes.get(theme_name, themes["浅色"])
+        def create_palette_preview(palette_name: str, is_selected: bool) -> ft.Container:
+            """创建单个调色板预览卡片"""
+            palette = palettes.get(palette_name, palettes["水生"])
             
             # 使用主题色块零件
             block = ThemeColorBlock.create(
                 config=config,
-                theme_name=theme_name,
-                bg_color=theme["bg"],
-                accent_color=theme["accent"],
+                theme_name=palette_name,
+                bg_color=palette["bg"],
+                accent_color=palette["accent"],
                 is_selected=is_selected,
-                on_click=lambda tn=theme_name: handle_theme_click(tn),
+                on_click=lambda pn=palette_name: handle_palette_click(pn),
             )
             
             # 存储引用
-            theme_cards_refs[theme_name] = block
+            palette_cards_refs[palette_name] = block
             
             return block
         
-        def handle_theme_click(theme_name: str):
-            """处理主题点击"""
-            if on_theme_change:
-                on_theme_change(theme_name)
+        def handle_palette_click(palette_name: str):
+            """处理调色板点击"""
+            if on_palette_change:
+                on_palette_change(palette_name)
         
-        def update_selection(selected_theme: str):
+        def update_selection(selected_palette: str):
             """更新选中状态"""
-            for name, block in theme_cards_refs.items():
-                is_selected = (name == selected_theme)
+            for name, block in palette_cards_refs.items():
+                is_selected = (name == selected_palette)
                 block.set_selected(is_selected)
         
-        # 创建主题卡片列表
-        theme_names = ["浅色", "深色", "日出", "捕捉", "聚焦", "流畅"]
-        theme_cards = [
-            create_theme_preview(name, name == current_theme)
-            for name in theme_names
+        # 创建调色板卡片列表
+        palette_names = ["水生", "沙漠", "黄昏", "夜空"]
+        palette_cards = [
+            create_palette_preview(name, name == current_palette)
+            for name in palette_names
         ]
         
-        # 创建主题选择器行
+        # 创建调色板选择器行
         content = ft.Row(
-            theme_cards,
+            palette_cards,
             alignment=ft.MainAxisAlignment.START,
             spacing=20,
             wrap=True,
@@ -149,7 +149,7 @@ class ThemeSettingsCard:
 
 
 # 兼容别名
-主题设置卡片 = ThemeSettingsCard
+调色板设置卡片 = PaletteSettingsCard
 
 
 # ==================== 调试逻辑 ====================
@@ -163,6 +163,6 @@ if __name__ == "__main__":
     def main(page: ft.Page):
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(ThemeSettingsCard.create(配置))  # 只能更改此处**被测调用模块名称**
+        page.add(PaletteSettingsCard.create(配置))  # 只能更改此处**被测调用模块名称**
     
     ft.run(main)
