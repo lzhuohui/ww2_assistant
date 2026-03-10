@@ -89,50 +89,57 @@ class UniversalCard:
             enabled=current_enabled,
         )
         
-        # 创建主Row布局，从左到右排列：图标标题-帮助标签-分割线
-        main_row_items = [
-            # 图标标题
-            ft.Container(
-                content=icon_title_content,
-                padding=ft.Padding(left=card_padding, top=0, right=0, bottom=0),
-                on_click=lambda e: toggle_state(e),
-            )
-        ]
-        
-        # 添加帮助标签
-        if help_icon:
-            main_row_items.append(
-                ft.Container(
-                    content=help_icon,
-                    padding=ft.Padding(left=4, top=0, right=0, bottom=0),
-                    on_click=lambda e: toggle_state(e),
-                )
-            )
-        
-        # 添加分割线
-        main_row_items.append(
-            ft.Container(
-                content=divider,
-                padding=ft.Padding(left=4, top=0, right=0, bottom=0),
-            )
+        # 创建图标标题容器（左侧，垂直居中）
+        icon_title_container = ft.Container(
+            content=icon_title_content,
+            left=card_padding,
+            top=0,
+            bottom=0,
+            alignment=ft.Alignment(-1, 0),  # 左对齐，垂直居中
+            on_click=lambda e: toggle_state(e),
         )
         
-        # 创建主Row布局
-        main_row = ft.Row(
-            main_row_items,
-            spacing=0,
-            alignment=ft.MainAxisAlignment.START,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        # 创建Stack布局元素列表
+        stack_children = [icon_title_container]
+        
+        # 计算帮助标签位置（紧跟图标标题右侧，顶部对齐）
+        if help_icon:
+            # 图标标题的宽度约为60px，加上左侧内边距
+            help_left = card_padding + 60 + 4  # 图标标题宽度 + 间距
+            help_icon.left = help_left
+            help_icon.top = 0  # 顶部对齐
+            stack_children.append(help_icon)
+        
+        # 计算分割线位置（紧跟帮助标签右侧，垂直居中）
+        if help_icon:
+            # 帮助标签的宽度约为18px
+            divider_left = help_left + 18 + 4  # 帮助标签位置 + 宽度 + 间距
+        else:
+            # 没有帮助标签时，分割线紧跟图标标题
+            divider_left = card_padding + 60 + 4
+        
+        divider_container = ft.Container(
+            content=divider,
+            left=divider_left,
+            top=0,
+            bottom=0,
+            alignment=ft.Alignment(-1, 0),  # 左对齐，垂直居中
+        )
+        stack_children.append(divider_container)
+        
+        # 创建主Stack布局
+        main_stack = ft.Stack(
+            stack_children,
             height=card_height,
             width=card_width,
+            clip_behavior=ft.ClipBehavior.NONE,
         )
         
         container = CardContainer.create(
             config=config,
-            content=main_row,
+            content=main_stack,
             height=card_height,
             width=card_width,
-            enabled=current_enabled,
         )
         
         def toggle_state(e):
