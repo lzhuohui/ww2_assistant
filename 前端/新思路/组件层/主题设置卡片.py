@@ -29,6 +29,7 @@ import flet as ft
 from typing import Callable, List, Dict, Any
 from 配置.界面配置 import 界面配置
 from 新思路.组件层.通用卡片 import UniversalCard
+from 新思路.零件层.主题色块 import ThemeColorBlock
 
 
 # *** 用户指定变量 - AI不得修改 ***
@@ -68,21 +69,19 @@ class ThemeSettingsCard:
         theme_colors = config.当前主题颜色
         current_theme = config.主题名称
         
-        # 主题颜色定义
-        themes = {
-            "浅色": {
-                "bg": "#FFFFFF",
-                "panel": "#F3F3F3",
-                "text": "#1A1A1A",
-                "accent": "#0078D4",
-            },
-            "深色": {
-                "bg": "#202020",
-                "panel": "#2D2D2D",
-                "text": "#FFFFFF",
-                "accent": "#60CDFF",
-            },
-        }
+        # 从配置文件获取所有主题颜色
+        from 配置.主题配置 import 主题配置
+        all_themes = 主题配置.主题颜色
+        
+        # 构建预览用的简化主题数据
+        themes = {}
+        for theme_name, theme_data in all_themes.items():
+            themes[theme_name] = {
+                "bg": theme_data.get("bg_primary", "#FFFFFF"),
+                "panel": theme_data.get("bg_secondary", "#F3F3F3"),
+                "text": theme_data.get("text_primary", "#1A1A1A"),
+                "accent": theme_data.get("accent", "#0078D4"),
+            }
         
         # 存储主题卡片引用
         theme_cards_refs = {}
@@ -91,95 +90,20 @@ class ThemeSettingsCard:
             """创建单个主题预览卡片"""
             theme = themes.get(theme_name, themes["浅色"])
             
-            # 创建预览内容
-            preview_content = ft.Column(
-                [
-                    # 模拟标题栏
-                    ft.Container(
-                        content=ft.Text(
-                            "标题",
-                            size=8,
-                            color=theme["text"],
-                        ),
-                        bgcolor=theme["panel"],
-                        padding=2,
-                    ),
-                    # 模拟内容区
-                    ft.Container(
-                        content=ft.Column(
-                            [
-                                ft.Container(
-                                    content=ft.Text("内容行", size=6, color=theme["text"]),
-                                    bgcolor=theme["panel"],
-                                    padding=1,
-                                ),
-                                ft.Container(
-                                    content=ft.Text("内容行", size=6, color=theme["text"]),
-                                    bgcolor=theme["panel"],
-                                    padding=1,
-                                ),
-                            ],
-                            spacing=2,
-                        ),
-                        padding=2,
-                    ),
-                ],
-                spacing=0,
-            )
-            
-            # 创建预览卡片
-            preview_card = ft.Container(
-                content=preview_content,
-                width=80,
-                height=60,
-                bgcolor=theme["bg"],
-                border_radius=4,
-                border=ft.Border.all(2, theme["accent"] if is_selected else "transparent"),
-            )
-            
-            # 主题名称
-            theme_label = ft.Text(
-                theme_name,
-                size=12,
-                color=theme_colors.get("text_primary"),
-            )
-            
-            # 选中标记
-            check_icon = ft.Icon(
-                ft.Icons.CHECK_CIRCLE,
-                size=16,
-                color=theme["accent"],
-                visible=is_selected,
-            )
-            
-            # 完整卡片
-            card = ft.Container(
-                content=ft.Column(
-                    [
-                        preview_card,
-                        ft.Container(height=4),
-                        ft.Row(
-                            [theme_label, check_icon],
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            spacing=4,
-                        ),
-                    ],
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    spacing=0,
-                ),
-                on_click=lambda e: handle_theme_click(theme_name),
-                ink=True,
-                border_radius=8,
+            # 使用主题色块零件
+            block = ThemeColorBlock.create(
+                config=config,
+                theme_name=theme_name,
+                bg_color=theme["bg"],
+                accent_color=theme["accent"],
+                is_selected=is_selected,
+                on_click=lambda tn=theme_name: handle_theme_click(tn),
             )
             
             # 存储引用
-            theme_cards_refs[theme_name] = {
-                "card": card,
-                "preview": preview_card,
-                "check": check_icon,
-            }
+            theme_cards_refs[theme_name] = block
             
-            return card
+            return block
         
         def handle_theme_click(theme_name: str):
             """处理主题点击"""
@@ -188,15 +112,9 @@ class ThemeSettingsCard:
         
         def update_selection(selected_theme: str):
             """更新选中状态"""
-            for name, refs in theme_cards_refs.items():
+            for name, block in theme_cards_refs.items():
                 is_selected = (name == selected_theme)
-                theme = themes.get(name, themes["浅色"])
-                refs["preview"].border = ft.Border.all(2, theme["accent"] if is_selected else "transparent")
-                refs["check"].visible = is_selected
-            
-            # 更新显示
-            if card.page:
-                card.update()
+                block.set_selected(is_selected)
         
         # 创建主题卡片列表
         theme_names = ["浅色", "深色"]
@@ -242,12 +160,8 @@ if __name__ == "__main__":
     
     # 3. 正常启动被测模块
     def main(page: ft.Page):
-        page.padding = 20
+        page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        
-        def on_theme_change(theme_name: str):
-            print(f"主题切换: {theme_name}")
-        
-        page.add(ThemeSettingsCard.create(配置, on_theme_change=on_theme_change))  # 只能更改此处**被测调用模块名称**
+        page.add(ThemeSettingsCard.create(配置))  # 只能更改此处**被测调用模块名称**
     
     ft.run(main)
