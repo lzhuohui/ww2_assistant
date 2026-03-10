@@ -59,8 +59,8 @@ class UniversalCard:
         multirow_config = config.定义尺寸.get("多行卡片", {})
         
         card_padding = ui_config.get("card_padding", 16)
-        left_width = multirow_config.get("left_width", 60)
-        divider_left = multirow_config.get("divider_left", 90)
+        left_width = multirow_config.get("left_width", 80)  # 增加宽度确保图标标题能够居中显示
+        divider_left = multirow_config.get("divider_left", 110)  # 相应调整分割线位置
         
         card_height = height or card_config.get("default_height", 70)
         card_width = width or 800
