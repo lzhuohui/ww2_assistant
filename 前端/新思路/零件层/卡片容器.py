@@ -44,13 +44,17 @@ class CardContainer:
         
         ui_config = config.定义尺寸.get("界面", {})
         shadow_config = config.定义尺寸.get("阴影", {})
+        animation_config = config.定义尺寸.get("动画", {})
         
         shadow_blur_default = shadow_config.get("blur_default", 4)
         shadow_blur_hover = shadow_config.get("blur_hover", 12)
-        shadow_spread = shadow_config.get("spread", 0)
-        shadow_spread_hover = shadow_config.get("spread_hover", 0)
+        shadow_spread = shadow_config.get("spread", 1)
+        shadow_spread_hover = shadow_config.get("spread_hover", 2)
         shadow_offset_y = shadow_config.get("offset_y", 2)
         shadow_offset_y_hover = shadow_config.get("offset_y_hover", 4)
+        
+        animation_duration = animation_config.get("duration_fast", 150)
+        animation_curve = getattr(ft.AnimationCurve, animation_config.get("curve", "EASE_OUT"), ft.AnimationCurve.EASE_OUT)
         
         card_border_radius = ui_config.get("card_radius", 8)
         card_border_width = ui_config.get("card_border_width", 1)
@@ -68,7 +72,7 @@ class CardContainer:
                 color=theme_colors.get("shadow"),
                 offset=ft.Offset(0, shadow_offset_y),
             ),
-            animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
+            animate=ft.Animation(animation_duration, animation_curve),
             clip_behavior=ft.ClipBehavior.NONE,
         )
         

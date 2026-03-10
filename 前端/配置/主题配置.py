@@ -28,70 +28,92 @@ class 主题配置:
     # ==================== 主题颜色定义 ====================
     主题颜色 = {
         "深色": {
-            # 背景色系
-            "bg_primary": "#1C1C1C",          # 主背景色
-            "bg_secondary": "#2D2D2D",        # 次背景色
-            "bg_card": "#252525",             # 卡片背景色
+            # 背景色系（Win11规范）
+            "bg_primary": "#202020",          # 主背景色
+            "bg_secondary": "#252525",        # 次背景色（导航栏）
+            "bg_card": "#2D2D2D",             # 卡片背景色
             "bg_input": "#2D2D2D",            # 输入框背景色
-            "bg_selected": "#0078D4",         # 选中背景色
+            "bg_selected": "#4D4D4D",         # 选中背景色
             "bg_hover": "#3D3D3D",            # 悬停背景色
+            "bg_pressed": "#4A4A4A",          # 按下背景色
             
-            # 文字色系
-            "text_primary": "#F2F2F2",        # 主文本色
-            "text_secondary": "#CCCCCC",      # 次文本色
-            "text_hint": "#999999",           # 提示文本色
-            "text_disabled": "#606060",       # 禁用文本色
+            # 文字色系（Win11规范）
+            "text_primary": "#FFFFFF",        # 主文本色
+            "text_secondary": "#C5C5C5",      # 次文本色
+            "text_hint": "#8A8A8A",           # 提示文本色
+            "text_disabled": "#5C5C5C",       # 禁用文本色
             
-            # 边框色系
-            "border": "#404040",              # 边框色
-            "border_light": "#383838",        # 浅边框色
+            # 边框色系（Win11规范）
+            "border": "#3D3D3D",              # 边框色
+            "border_light": "#333333",        # 浅边框色
             "divider": "#333333",             # 分隔线色
             
-            # 强调色系
+            # 强调色系（Win11规范）
             "accent": "#0078D4",              # 强调色
+            "accent_hover": "#1A86D9",        # 悬停强调色
+            "accent_pressed": "#006CBD",      # 按下强调色
             "accent_light": "#2B579A",        # 浅强调色
             
-            # 开关色系
-            "switch_thumb_on": "#FFFFFF",     # 开关按钮开启色
-            "switch_thumb_off": "#AAAAAA",    # 开关按钮关闭色
-            "switch_track_off": "#333333",    # 开关关闭轨道色
-            "switch_border": "#555555",       # 开关边框色
+            # 状态色系（Win11规范）
+            "success": "#6CCB5F",             # 成功色
+            "warning": "#FCE100",             # 警告色
+            "error": "#FF6B6B",               # 错误色
+            "info": "#60CDFF",                # 信息色
             
-            # 阴影
-            "shadow": "#00000040",            # 阴影色
+            # 开关色系（Win11规范）
+            "switch_thumb_on": "#FFFFFF",     # 开关按钮开启色
+            "switch_thumb_off": "#FFFFFF",    # 开关按钮关闭色
+            "switch_track_on": "#0078D4",     # 开关开启轨道色
+            "switch_track_off": "#4A4A4A",    # 开关关闭轨道色
+            "switch_border_off": "#666666",   # 开关关闭边框色
+            
+            # 阴影色系（Win11规范）
+            "shadow": "rgba(0, 0, 0, 0.25)",  # 阴影色
+            "shadow_hover": "rgba(0, 0, 0, 0.35)", # 悬停阴影色
         },
         "浅色": {
-            # 背景色系
+            # 背景色系（Win11规范）
             "bg_primary": "#F3F3F3",          # 主背景色
-            "bg_secondary": "#FFFFFF",        # 次背景色
+            "bg_secondary": "#FFFFFF",        # 次背景色（导航栏）
             "bg_card": "#FFFFFF",             # 卡片背景色
             "bg_input": "#FFFFFF",            # 输入框背景色
             "bg_selected": "#0078D4",         # 选中背景色
             "bg_hover": "#E5E5E5",            # 悬停背景色
+            "bg_pressed": "#D0D0D0",          # 按下背景色
             
-            # 文字色系
+            # 文字色系（Win11规范）
             "text_primary": "#1A1A1A",        # 主文本色
             "text_secondary": "#666666",      # 次文本色
             "text_hint": "#999999",           # 提示文本色
             "text_disabled": "#CCCCCC",       # 禁用文本色
             
-            # 边框色系
-            "border": "#D1D1D1",              # 边框色
-            "border_light": "#E5E5E5",        # 浅边框色
-            "divider": "#E5E5E5",             # 分隔线色
+            # 边框色系（Win11规范）
+            "border": "#D0D0D0",              # 边框色
+            "border_light": "#E0E0E0",        # 浅边框色
+            "divider": "#E0E0E0",             # 分隔线色
             
-            # 强调色系
+            # 强调色系（Win11规范）
             "accent": "#0078D4",              # 强调色
+            "accent_hover": "#1A86D9",        # 悬停强调色
+            "accent_pressed": "#006CBD",      # 按下强调色
             "accent_light": "#CCE4F7",        # 浅强调色
             
-            # 开关色系
+            # 状态色系（Win11规范）
+            "success": "#6CCB5F",             # 成功色
+            "warning": "#FCE100",             # 警告色
+            "error": "#FF6B6B",               # 错误色
+            "info": "#60CDFF",                # 信息色
+            
+            # 开关色系（Win11规范）
             "switch_thumb_on": "#FFFFFF",     # 开关按钮开启色
             "switch_thumb_off": "#666666",    # 开关按钮关闭色
+            "switch_track_on": "#0078D4",     # 开关开启轨道色
             "switch_track_off": "#CCCCCC",    # 开关关闭轨道色
-            "switch_border": "#999999",       # 开关边框色
+            "switch_border_off": "#999999",   # 开关关闭边框色
             
-            # 阴影
-            "shadow": "#00000020",            # 阴影色
+            # 阴影色系（Win11规范）
+            "shadow": "rgba(0, 0, 0, 0.1)",   # 阴影色
+            "shadow_hover": "rgba(0, 0, 0, 0.15)", # 悬停阴影色
         }
     }
     

@@ -29,11 +29,13 @@ class 界面配置:
     # ==================== 尺寸定义 ====================
     定义尺寸 = {
         "字体": {
-            "font_size_xs": 11,
-            "font_size_sm": 12,
-            "font_size_md": 14,
-            "font_size_lg": 16,
-            "font_size_xl": 20,
+            "font_size_xs": 10,      # 微小文本（辅助信息、标签）
+            "font_size_sm": 12,      # 小号（次要文字、描述）
+            "font_size_md": 14,      # 中号（正文、按钮）
+            "font_size_lg": 16,      # 大号（小标题）
+            "font_size_xl": 20,      # 超大号（标题）
+            "font_size_xxl": 24,     # 特大号（页面标题）
+            "font_size_title": 28,   # 标题号（大标题）
         },
         "字重": {
             "font_weight_normal": ft.FontWeight.NORMAL,
@@ -54,10 +56,17 @@ class 界面配置:
             "radius_lg": 16,
         },
         "组件": {
-            "button_height": 36,
+            "button_height": 32,
+            "button_height_large": 40,
             "icon_size_small": 16,
             "icon_size_medium": 20,
             "icon_size_large": 24,
+            "input_height": 35,
+            "dropdown_height": 35,
+            "switch_width": 44,
+            "switch_height": 22,
+            "switch_width_small": 40,
+            "switch_height_small": 20,
         },
         "界面": {
             "peripheral_margin": 10,
@@ -110,10 +119,17 @@ class 界面配置:
         },
         "阴影": {
             "blur_default": 4,
-            "blur_hover": 8,
-            "spread": 0,
+            "blur_hover": 12,
+            "spread": 1,
+            "spread_hover": 2,
             "offset_y": 2,
-            "offset_y_hover": 3,
+            "offset_y_hover": 4,
+        },
+        "动画": {
+            "duration_fast": 150,
+            "duration_normal": 300,
+            "duration_slow": 500,
+            "curve": "EASE_OUT",
         },
     }
     
