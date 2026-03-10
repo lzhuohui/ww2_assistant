@@ -80,16 +80,23 @@ class UniversalCard:
             enabled=current_enabled,
         )
         
-        left_row_items = [icon_title_content]
+        # 创建包含图标标题和帮助标签的Stack，使帮助标签左上角与图标标题右上角重合
         if help_icon:
-            left_row_items.append(help_icon)
-        
-        left_content = ft.Row(
-            left_row_items,
-            spacing=spacing_config.get("spacing_xs", 4),
-            alignment=ft.MainAxisAlignment.CENTER,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
-        )
+            # 调整帮助标签的位置
+            help_icon.left = 50  # 向右移动到图标标题的右上角
+            help_icon.top = 0     # 顶部对齐
+            
+            left_content = ft.Stack(
+                [
+                    icon_title_content,
+                    help_icon
+                ],
+                width=left_width,
+                height=card_height,
+                alignment=ft.Alignment(0, 0),
+            )
+        else:
+            left_content = icon_title_content
         
         left_container = ft.Container(
             content=left_content,
