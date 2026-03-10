@@ -26,6 +26,7 @@ class 主题配置:
     """主题配置类 - 提供主题颜色管理"""
     
     # ==================== 主题颜色定义 ====================
+    # 基础主题（深色/浅色）
     主题颜色 = {
         "深色": {
             # 背景色系（Win11规范）
@@ -114,19 +115,166 @@ class 主题配置:
             # 阴影色系（Win11规范）
             "shadow": "rgba(0, 0, 0, 0.1)",   # 阴影色
             "shadow_hover": "rgba(0, 0, 0, 0.15)", # 悬停阴影色
-        }
+        },
     }
     
-    def __init__(self, 主题名称: str = "深色"):
+    # ==================== 高对比度调色板定义 ====================
+    高对比度调色板 = {
+        # 高对比度调色板 - Aquatic（水生）
+        "水生": {
+            "bg_primary": "#000000",
+            "bg_secondary": "#000000",
+            "bg_card": "#000000",
+            "bg_input": "#000000",
+            "bg_selected": "#1A1A1A",
+            "bg_hover": "#1A1A1A",
+            "bg_pressed": "#2A2A2A",
+            "text_primary": "#FFFFFF",
+            "text_secondary": "#B4E7FF",
+            "text_hint": "#7AC4FF",
+            "text_disabled": "#5C5C5C",
+            "border": "#00BCFF",
+            "border_light": "#00BCFF",
+            "divider": "#00BCFF",
+            "accent": "#00BCFF",
+            "accent_hover": "#33C9FF",
+            "accent_pressed": "#00A3D9",
+            "accent_light": "#004B6E",
+            "success": "#00FF00",
+            "warning": "#FFFF00",
+            "error": "#FF0000",
+            "info": "#00BCFF",
+            "switch_thumb_on": "#FFFFFF",
+            "switch_thumb_off": "#FFFFFF",
+            "switch_track_on": "#00BCFF",
+            "switch_track_off": "#333333",
+            "switch_border_off": "#00BCFF",
+            "shadow": "rgba(0, 0, 0, 0.5)",
+            "shadow_hover": "rgba(0, 0, 0, 0.7)",
+        },
+        # 高对比度调色板 - Desert（沙漠）
+        "沙漠": {
+            "bg_primary": "#000000",
+            "bg_secondary": "#000000",
+            "bg_card": "#000000",
+            "bg_input": "#000000",
+            "bg_selected": "#1A1A1A",
+            "bg_hover": "#1A1A1A",
+            "bg_pressed": "#2A2A2A",
+            "text_primary": "#FFFFFF",
+            "text_secondary": "#FFD699",
+            "text_hint": "#FFB84D",
+            "text_disabled": "#5C5C5C",
+            "border": "#FFB900",
+            "border_light": "#FFB900",
+            "divider": "#FFB900",
+            "accent": "#FFB900",
+            "accent_hover": "#FFC733",
+            "accent_pressed": "#CC9400",
+            "accent_light": "#4D3700",
+            "success": "#00FF00",
+            "warning": "#FFFF00",
+            "error": "#FF0000",
+            "info": "#FFB900",
+            "switch_thumb_on": "#FFFFFF",
+            "switch_thumb_off": "#FFFFFF",
+            "switch_track_on": "#FFB900",
+            "switch_track_off": "#333333",
+            "switch_border_off": "#FFB900",
+            "shadow": "rgba(0, 0, 0, 0.5)",
+            "shadow_hover": "rgba(0, 0, 0, 0.7)",
+        },
+        # 高对比度调色板 - Dusk（黄昏）
+        "黄昏": {
+            "bg_primary": "#000000",
+            "bg_secondary": "#000000",
+            "bg_card": "#000000",
+            "bg_input": "#000000",
+            "bg_selected": "#1A1A1A",
+            "bg_hover": "#1A1A1A",
+            "bg_pressed": "#2A2A2A",
+            "text_primary": "#FFFFFF",
+            "text_secondary": "#FFB3D9",
+            "text_hint": "#FF80BF",
+            "text_disabled": "#5C5C5C",
+            "border": "#FF00FF",
+            "border_light": "#FF00FF",
+            "divider": "#FF00FF",
+            "accent": "#FF00FF",
+            "accent_hover": "#FF33FF",
+            "accent_pressed": "#CC00CC",
+            "accent_light": "#4D004D",
+            "success": "#00FF00",
+            "warning": "#FFFF00",
+            "error": "#FF0000",
+            "info": "#FF00FF",
+            "switch_thumb_on": "#FFFFFF",
+            "switch_thumb_off": "#FFFFFF",
+            "switch_track_on": "#FF00FF",
+            "switch_track_off": "#333333",
+            "switch_border_off": "#FF00FF",
+            "shadow": "rgba(0, 0, 0, 0.5)",
+            "shadow_hover": "rgba(0, 0, 0, 0.7)",
+        },
+        # 高对比度调色板 - Night sky（夜空）
+        "夜空": {
+            "bg_primary": "#000000",
+            "bg_secondary": "#000000",
+            "bg_card": "#000000",
+            "bg_input": "#000000",
+            "bg_selected": "#1A1A1A",
+            "bg_hover": "#1A1A1A",
+            "bg_pressed": "#2A2A2A",
+            "text_primary": "#FFFFFF",
+            "text_secondary": "#B3D9FF",
+            "text_hint": "#66B3FF",
+            "text_disabled": "#5C5C5C",
+            "border": "#0066FF",
+            "border_light": "#0066FF",
+            "divider": "#0066FF",
+            "accent": "#0066FF",
+            "accent_hover": "#3385FF",
+            "accent_pressed": "#0052CC",
+            "accent_light": "#00265C",
+            "success": "#00FF00",
+            "warning": "#FFFF00",
+            "error": "#FF0000",
+            "info": "#0066FF",
+            "switch_thumb_on": "#FFFFFF",
+            "switch_thumb_off": "#FFFFFF",
+            "switch_track_on": "#0066FF",
+            "switch_track_off": "#333333",
+            "switch_border_off": "#0066FF",
+            "shadow": "rgba(0, 0, 0, 0.5)",
+            "shadow_hover": "rgba(0, 0, 0, 0.7)",
+        },
+    }
+    
+    def __init__(self, 主题名称: str = "深色", 调色板名称: str = None):
         """初始化主题配置"""
         self._主题名称 = 主题名称
-        self.当前主题颜色 = self.主题颜色.get(主题名称, self.主题颜色["深色"])
+        self._调色板名称 = 调色板名称
+        
+        # 优先使用调色板，如果没有则使用主题
+        if 调色板名称 and 调色板名称 in self.高对比度调色板:
+            self.当前主题颜色 = self.高对比度调色板[调色板名称]
+        else:
+            self.当前主题颜色 = self.主题颜色.get(主题名称, self.主题颜色["深色"])
     
     def 切换主题(self, 主题名称: str):
         """切换主题"""
         if 主题名称 in self.主题颜色:
             self._主题名称 = 主题名称
+            self._调色板名称 = None
             self.当前主题颜色 = self.主题颜色[主题名称]
+            return True
+        return False
+    
+    def 切换调色板(self, 调色板名称: str):
+        """切换高对比度调色板"""
+        if 调色板名称 in self.高对比度调色板:
+            self._调色板名称 = 调色板名称
+            self.当前主题颜色 = self.高对比度调色板[调色板名称]
             return True
         return False
     
@@ -138,6 +286,19 @@ class 主题配置:
     def 主题名称(self) -> str:
         """获取当前主题名称"""
         return self._主题名称
+    
+    @property
+    def 调色板名称(self) -> str:
+        """获取当前调色板名称"""
+        return self._调色板名称
+    
+    def 获取所有主题(self) -> list:
+        """获取所有主题名称"""
+        return list(self.主题颜色.keys())
+    
+    def 获取所有调色板(self) -> list:
+        """获取所有调色板名称"""
+        return list(self.高对比度调色板.keys())
 
 
 # ==================== 调试逻辑 ====================

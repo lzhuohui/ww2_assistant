@@ -68,10 +68,12 @@ class ThemeSettingsCard:
         """
         theme_colors = config.当前主题颜色
         current_theme = config.主题名称
+        current_palette = config.调色板名称
         
         # 从配置文件获取所有主题颜色
         from 配置.主题配置 import 主题配置
         all_themes = 主题配置.主题颜色
+        all_palettes = 主题配置.高对比度调色板
         
         # 构建预览用的简化主题数据
         themes = {}
@@ -83,8 +85,19 @@ class ThemeSettingsCard:
                 "accent": theme_data.get("accent", "#0078D4"),
             }
         
+        # 构建预览用的简化调色板数据
+        palettes = {}
+        for palette_name, palette_data in all_palettes.items():
+            palettes[palette_name] = {
+                "bg": palette_data.get("bg_primary", "#000000"),
+                "panel": palette_data.get("bg_secondary", "#000000"),
+                "text": palette_data.get("text_primary", "#FFFFFF"),
+                "accent": palette_data.get("accent", "#00BCFF"),
+            }
+        
         # 存储主题卡片引用
         theme_cards_refs = {}
+        palette_cards_refs = {}
         
         def create_theme_preview(theme_name: str, is_selected: bool) -> ft.Container:
             """创建单个主题预览卡片"""
@@ -119,8 +132,52 @@ class ThemeSettingsCard:
         # 创建主题卡片列表
         theme_names = ["浅色", "深色"]
         theme_cards = [
-            create_theme_preview(name, name == current_theme)
+            create_theme_preview(name, name == current_theme and not current_palette)
             for name in theme_names
+        ]
+        
+        # 创建调色板预览卡片
+        def create_palette_preview(palette_name: str, is_selected: bool) -> ft.Container:
+            """创建单个调色板预览卡片"""
+            palette = palettes.get(palette_name, palettes["水生"])
+            
+            # 使用主题色块零件
+            block = ThemeColorBlock.create(
+                config=config,
+                theme_name=palette_name,
+                bg_color=palette["bg"],
+                accent_color=palette["accent"],
+                is_selected=is_selected,
+                on_click=lambda pn=palette_name: handle_palette_click(pn),
+            )
+            
+            # 存储引用
+            palette_cards_refs[palette_name] = block
+            
+            return block
+        
+        def handle_palette_click(palette_name: str):
+            """处理调色板点击"""
+            if on_theme_change:
+                on_theme_change(None, palette_name)  # None表示主题，palette_name表示调色板
+        
+        def update_selection(selected_theme: str = None, selected_palette: str = None):
+            """更新选中状态"""
+            # 更新主题选中状态
+            for name, block in theme_cards_refs.items():
+                is_selected = (name == selected_theme and not selected_palette)
+                block.set_selected(is_selected)
+            
+            # 更新调色板选中状态
+            for name, block in palette_cards_refs.items():
+                is_selected = (name == selected_palette)
+                block.set_selected(is_selected)
+        
+        # 创建调色板卡片列表
+        palette_names = ["水生", "沙漠", "黄昏", "夜空"]
+        palette_cards = [
+            create_palette_preview(name, name == current_palette)
+            for name in palette_names
         ]
         
         # 创建主题选择器行
@@ -128,6 +185,27 @@ class ThemeSettingsCard:
             theme_cards,
             alignment=ft.MainAxisAlignment.START,
             spacing=20,
+        )
+        
+        # 创建调色板选择器行
+        palette_selector = ft.Row(
+            palette_cards,
+            alignment=ft.MainAxisAlignment.START,
+            spacing=20,
+        )
+        
+        # 创建完整内容
+        content = ft.Column(
+            [
+                ft.Text("主题", size=14, color=theme_colors.get("text_primary")),
+                ft.Container(height=10),
+                theme_selector,
+                ft.Container(height=20),
+                ft.Text("高对比度调色板", size=14, color=theme_colors.get("text_primary")),
+                ft.Container(height=10),
+                palette_selector,
+            ],
+            spacing=0,
         )
         
         # 调用通用卡片组件
@@ -138,7 +216,7 @@ class ThemeSettingsCard:
             enabled=enabled,
             on_state_change=on_state_change,
             help_text=help_text,
-            controls=[theme_selector],
+            controls=[content],
         )
         
         # 暴露控制接口

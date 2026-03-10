@@ -62,9 +62,21 @@ class SystemSettingsPage:
         
         # ========== 个性化卡片 ==========
         # 主题选择器
-        def handle_theme_change(theme_name: str):
-            print(f"主题切换: {theme_name}")
-            # TODO: 实际切换主题逻辑
+        def handle_theme_change(theme_name: str = None, palette_name: str = None):
+            """处理主题切换"""
+            if palette_name:
+                # 切换调色板
+                config.切换调色板(palette_name)
+                print(f"调色板切换: {palette_name}")
+            elif theme_name:
+                # 切换主题
+                config.切换主题(theme_name)
+                print(f"主题切换: {theme_name}")
+            
+            # 更新页面显示
+            if page:
+                page.bgcolor = config.当前主题颜色.get("bg_primary")
+                page.update()
         
         theme_card = ThemeSettingsCard.create(
             config=config,

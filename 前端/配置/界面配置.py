@@ -133,13 +133,17 @@ class 界面配置:
         },
     }
     
-    def __init__(self, 主题名称: str = "深色"):
+    def __init__(self, 主题名称: str = "深色", 调色板名称: str = None):
         """初始化界面配置"""
-        self._主题配置 = 主题配置(主题名称)
+        self._主题配置 = 主题配置(主题名称, 调色板名称)
     
     def 切换主题(self, 主题名称: str):
         """切换主题"""
         return self._主题配置.切换主题(主题名称)
+    
+    def 切换调色板(self, 调色板名称: str):
+        """切换调色板"""
+        return self._主题配置.切换调色板(调色板名称)
     
     def 获取颜色(self, 颜色名称: str) -> str:
         """获取指定颜色的值"""
@@ -151,12 +155,17 @@ class 界面配置:
         return 分类数据.get(名称)
     
     @property
-    def 主题名称(self) -> str:
+    def 主题名称(self):
         """获取当前主题名称"""
         return self._主题配置.主题名称
     
     @property
-    def 当前主题颜色(self) -> Dict[str, str]:
+    def 调色板名称(self):
+        """获取当前调色板名称"""
+        return self._主题配置.调色板名称
+    
+    @property
+    def 当前主题颜色(self):
         """获取当前主题颜色"""
         return self._主题配置.当前主题颜色
 
