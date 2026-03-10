@@ -8,7 +8,7 @@
 
 功能:
     1. 图标：问号图标
-    2. 提示：悬停/点击显示帮助内容
+    2. 提示：点击显示帮助内容（兼容模拟器和手机）
     3. 状态切换：内置切换逻辑，通过回调通知外部
     4. 外部控制：支持外部设置状态
 
@@ -66,6 +66,10 @@ class HelpTag:
         # 计算外框尺寸，刚好包裹问号文字
         box_size = icon_size + 4
         
+        # 提示框尺寸
+        tip_width = 200
+        tip_padding = 12
+        
         # 创建图标控件
         icon_control = ft.Icon(
             ft.Icons.HELP_OUTLINE,
@@ -73,8 +77,75 @@ class HelpTag:
             color=theme_colors.get("text_secondary"),
         )
         
+        # 创建提示框内容
+        tip_content = ft.Container(
+            content=ft.Column(
+                [
+                    ft.Row(
+                        [
+                            ft.Text(
+                                "帮助",
+                                size=12,
+                                weight=ft.FontWeight.BOLD,
+                                color=theme_colors.get("text_primary"),
+                            ),
+                            ft.IconButton(
+                                icon=ft.Icons.CLOSE,
+                                icon_size=14,
+                                icon_color=theme_colors.get("text_secondary"),
+                                style=ft.ButtonStyle(padding=0),
+                                on_click=lambda e: hide_tip(),
+                            ),
+                        ],
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    ),
+                    ft.Divider(height=8, color="transparent"),
+                    ft.Text(
+                        help_text,
+                        size=12,
+                        color=theme_colors.get("text_secondary"),
+                    ),
+                ],
+                spacing=0,
+            ),
+            width=tip_width,
+            padding=tip_padding,
+            bgcolor=theme_colors.get("bg_card"),
+            border_radius=8,
+            border=ft.Border.all(1, theme_colors.get("border")),
+            shadow=ft.BoxShadow(
+                spread_radius=0,
+                blur_radius=8,
+                color=theme_colors.get("shadow"),
+                offset=ft.Offset(0, 2),
+            ),
+            visible=False,
+        )
+        
         # 内部状态
         current_enabled = enabled
+        tip_visible = False
+        
+        def hide_tip():
+            """隐藏提示框"""
+            nonlocal tip_visible
+            tip_visible = False
+            tip_content.visible = False
+            tip_content.update()
+        
+        def show_tip():
+            """显示提示框"""
+            nonlocal tip_visible
+            tip_visible = True
+            tip_content.visible = True
+            tip_content.update()
+        
+        def toggle_tip():
+            """切换提示框显示状态"""
+            if tip_visible:
+                hide_tip()
+            else:
+                show_tip()
         
         def set_state(new_enabled: bool, notify: bool = True):
             """设置状态"""
@@ -87,29 +158,48 @@ class HelpTag:
             if notify and on_state_change:
                 on_state_change(current_enabled)
         
-        def toggle_state(e=None):
+        def toggle_state():
             """切换状态"""
             set_state(not current_enabled)
         
         def handle_click(e):
             """处理点击事件"""
-            toggle_state()
+            toggle_tip()
             if on_click:
                 on_click(e)
         
-        container = ft.Container(
+        # 创建图标容器
+        icon_container = ft.Container(
             content=icon_control,
             width=box_size,
             height=box_size,
-            tooltip=help_text,
-            opacity=0.7 if enabled else 0.3,
             on_click=handle_click,
+        )
+        
+        # 创建主容器（包含图标和提示框）
+        container = ft.Container(
+            content=ft.Stack(
+                [
+                    icon_container,
+                    ft.Container(
+                        content=tip_content,
+                        left=box_size + 8,
+                        top=0,
+                    ),
+                ],
+                width=box_size,
+                height=box_size,
+            ),
+            opacity=0.7 if enabled else 0.3,
         )
         
         # 暴露控制接口
         container.set_state = set_state
         container.toggle_state = toggle_state
         container.get_state = lambda: current_enabled
+        container.show_tip = show_tip
+        container.hide_tip = hide_tip
+        container.toggle_tip = toggle_tip
         
         return container
 
@@ -126,7 +216,7 @@ if __name__ == "__main__":
         page.padding = 20
         page.bgcolor = config.获取颜色("bg_primary")
         
-        page.add(ft.Text("帮助标签测试（独立功能模块）:", color=config.获取颜色("text_secondary")))
+        page.add(ft.Text("帮助标签测试（点击显示/隐藏提示框）:", color=config.获取颜色("text_secondary")))
         page.add(ft.Divider(height=20, color="transparent"))
         
         def on_state_change(enabled):
@@ -134,7 +224,7 @@ if __name__ == "__main__":
         
         help_tag = HelpTag.create(
             config=config,
-            help_text="这是帮助提示内容",
+            help_text="这是帮助提示内容，可以显示多行文字。\n点击问号图标显示/隐藏提示框。\n点击关闭按钮或再次点击问号图标关闭提示框。",
             enabled=True,
             on_state_change=on_state_change,
         )
@@ -150,8 +240,8 @@ if __name__ == "__main__":
         
         # 测试外部控制
         def external_toggle(e):
-            help_tag.toggle_state()
+            help_tag.toggle_tip()
         
-        page.add(ft.ElevatedButton("外部切换状态", on_click=external_toggle))
+        page.add(ft.ElevatedButton("外部切换提示框", on_click=external_toggle))
     
     ft.run(main)
