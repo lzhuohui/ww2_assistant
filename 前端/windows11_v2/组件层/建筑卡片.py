@@ -3,10 +3,10 @@
 建筑卡片 - 组件层
 
 设计思路:
-    本模块是组件层模块，组合多行卡片和标签下拉框。
+    本模块是组件层模块，组合通用卡片和标签下拉框。
 
 功能:
-    1. 使用多行卡片作为容器
+    1. 使用通用卡片作为容器
     2. 使用标签下拉框作为配置项
     3. 专门用于建筑等级配置
 
@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import flet as ft
 from typing import List, Dict, Any, Callable
 from 原子层.界面配置 import 界面配置
-from 组件层.多行卡片 import MultiRowCard
+from 组件层.通用卡片 import UniversalCard
 from 组件层.标签下拉框 import LabelDropdown
 
 
@@ -36,7 +36,7 @@ from 组件层.标签下拉框 import LabelDropdown
 
 
 class BuildingCard:  # 建筑卡片组件
-    """建筑卡片 - 多行卡片 + 标签下拉框"""
+    """建筑卡片 - 通用卡片 + 标签下拉框"""
     
     @staticmethod
     def create(
@@ -64,7 +64,7 @@ class BuildingCard:  # 建筑卡片组件
                     on_change=callback,
                 ))
         
-        return MultiRowCard.create(
+        return UniversalCard.create(
             config=config,
             title=title,
             icon=icon,
