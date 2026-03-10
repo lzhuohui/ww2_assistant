@@ -38,7 +38,7 @@ class CustomDropDown:
         config: 界面配置,
         options: List[str] = None,
         value: str = None,
-        width: int = 120,
+        width: int = 100,
         height: int = 32,
         on_change: Callable[[str], None] = None,
         **kwargs

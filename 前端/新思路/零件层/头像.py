@@ -244,12 +244,39 @@ class Avatar:
             if not show_glow or editing:
                 return
             
+            # 等待控件添加到页面
+            retry_count = 0
+            while retry_count < 50:  # 最多等待5秒
+                try:
+                    if main_content.page:
+                        break
+                except RuntimeError:
+                    pass
+                await asyncio.sleep(0.1)
+                retry_count += 1
+            
+            try:
+                if not main_content.page:
+                    glow_running = False
+                    return
+            except RuntimeError:
+                glow_running = False
+                return
+            
             glow_running = True
             
             while glow_running and not editing:
                 for i, color in enumerate(glow_colors):
                     if not glow_running or editing:
                         break
+                    # 检查控件是否仍在页面中
+                    try:
+                        if not main_content.page:
+                            glow_running = False
+                            return
+                    except RuntimeError:
+                        glow_running = False
+                        return
                     main_content.shadow = ft.BoxShadow(
                         spread_radius=2,
                         blur_radius=8,
@@ -264,16 +291,22 @@ class Avatar:
         def start_glow():
             if show_glow and not editing and not glow_running:
                 import threading
+                import asyncio
+                
+                async def delayed_run_glow():
+                    await asyncio.sleep(0.5)  # 额外等待0.5秒
+                    await run_glow_animation()
+                
                 loop = asyncio.new_event_loop()
                 threading.Thread(
-                    target=lambda: loop.run_until_complete(run_glow_animation()),
+                    target=lambda: loop.run_until_complete(delayed_run_glow()),
                     daemon=True
                 ).start()
         
         # 启动光影渐变动画（延迟启动，等待控件添加到页面）
         if show_glow:
             def delayed_start_glow():
-                time.sleep(1)  # 等待1秒确保控件已添加到页面
+                time.sleep(3)  # 等待3秒确保控件已添加到页面
                 start_glow()
             
             import threading
@@ -294,10 +327,18 @@ class Avatar:
             for i in range(0, int(diameter), 2):
                 if not scan_running or editing:
                     break
+                # 检查控件是否仍在页面中
+                if not main_stack.page:
+                    scan_running = False
+                    return
                 scan_line.top = i
                 main_stack.update()
                 await asyncio.sleep(0.02)
             
+            # 检查控件是否仍在页面中
+            if not main_stack.page:
+                scan_running = False
+                return
             scan_line.visible = False
             main_stack.update()
             scan_running = False

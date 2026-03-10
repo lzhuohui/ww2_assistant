@@ -123,7 +123,12 @@ class NavButton:
                 icon_control.color = theme_colors["accent"]
                 text_control.color = theme_colors["text_secondary"]
             
-            container.update()
+            # 只有在控件已添加到页面时才更新
+            try:
+                if container.page:
+                    container.update()
+            except RuntimeError:
+                pass  # 控件尚未添加到页面，跳过更新
         
         def set_selected(selected: bool):
             """设置选中状态"""

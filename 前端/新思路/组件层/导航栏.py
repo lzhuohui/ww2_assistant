@@ -38,6 +38,7 @@ class NavBar:
         config: 界面配置,
         nav_items: List[Dict] = None,
         on_nav_change: Callable[[str], None] = None,
+        padding: ft.Padding = None,
         **kwargs
     ) -> ft.Column:
         """
@@ -47,11 +48,13 @@ class NavBar:
             config: 界面配置对象
             nav_items: 导航项列表 [{"name": "系统设置", "icon": "SETTINGS"}, ...]
             on_nav_change: 导航切换回调
+            padding: 内边距（可选，默认从配置中获取）
         
         返回:
             ft.Column: 导航栏容器
         """
         theme_colors = config.当前主题颜色
+        ui_config = config.定义尺寸.get("界面", {})
         
         # 默认导航项
         default_nav_items = [
@@ -63,6 +66,15 @@ class NavBar:
         ]
         
         current_nav_items = nav_items if nav_items else default_nav_items
+        
+        # 默认内边距（从配置中获取）
+        if padding is None:
+            padding = ft.Padding(
+                left=ui_config.get("nav_padding_left", 8),
+                right=ui_config.get("nav_padding_right", 8),
+                top=ui_config.get("nav_padding_top", 8),
+                bottom=ui_config.get("nav_padding_bottom", 8),
+            )
         
         # 内部状态
         current_selected = 0
@@ -88,9 +100,9 @@ class NavBar:
                 icon=item["icon"],
                 on_click=lambda e, idx=i, name=item["name"]: handle_nav_click(idx, name),
             )
-            # 默认选中第一个（不调用update，等控件添加到页面后自动生效）
+            # 默认选中第一个（通过暴露的接口设置）
             if i == 0:
-                btn._selected = True
+                btn.set_selected(True)
             nav_buttons.append(btn)
         
         # 导航栏容器
@@ -98,9 +110,17 @@ class NavBar:
             nav_buttons,
             spacing=4,
             scroll=ft.ScrollMode.AUTO,
+            expand=True,
         )
         
-        return nav_column
+        # 导航栏容器（带内边距）
+        nav_container = ft.Container(
+            content=nav_column,
+            padding=padding,
+            expand=True,
+        )
+        
+        return nav_container
 
 
 # 兼容别名

@@ -65,39 +65,43 @@ class MainPage:
         )
         
         # 左侧导航面板（Win11风格）
+        ui_config = self.config.定义尺寸.get("界面", {})
+        
         left_panel = ft.Container(
             content=ft.Column(
                 [
                     # 用户信息区域
-                    ft.Container(
-                        content=user_info_card,
-                        padding=ft.Padding(left=12, right=12, top=16, bottom=12),
-                    ),
+                    user_info_card,
                     # 分割线
                     ft.Container(
                         content=ft.Divider(height=1, color=self.theme_colors.get("border")),
-                        padding=ft.Padding(left=12, right=12),
+                        padding=ft.Padding(
+                            left=ui_config.get("divider_padding_left", 12),
+                            right=ui_config.get("divider_padding_right", 12),
+                        ),
                     ),
-                    # 导航栏
-                    ft.Container(
-                        content=nav_bar,
-                        padding=ft.Padding(left=8, right=8, top=8, bottom=8),
-                        expand=True,
-                    ),
+                    # 导航栏（导航栏.py已经包含内边距）
+                    nav_bar,
                 ],
                 spacing=0,
                 scroll=ft.ScrollMode.AUTO,
+                expand=True,
             ),
-            width=280,
+            width=ui_config.get("left_panel_width", 280),
             bgcolor=self.theme_colors.get("bg_secondary"),
-            border_radius=ft.BorderRadius(top_left=0, top_right=8, bottom_left=0, bottom_right=8),
         )
         
         # 右侧内容区域（Win11风格）
         self.content_area = ft.Container(
             content=self.get_page_content(self.current_nav),
-            padding=ft.Padding(left=40, right=40, top=32, bottom=32),
+            padding=ft.Padding(
+                left=ui_config.get("content_padding_left", 40),
+                right=ui_config.get("content_padding_right", 40),
+                top=ui_config.get("content_padding_top", 32),
+                bottom=ui_config.get("content_padding_bottom", 32),
+            ),
             expand=True,
+            bgcolor=self.theme_colors.get("bg_primary"),
         )
         
         # 主布局（左右分栏，Win11风格）
@@ -105,13 +109,10 @@ class MainPage:
             [
                 left_panel,
                 # 内容区域
-                ft.Container(
-                    content=self.content_area,
-                    expand=True,
-                ),
+                self.content_area,
             ],
             expand=True,
-            spacing=16,
+            spacing=0,
             vertical_alignment=ft.CrossAxisAlignment.START,
         )
         

@@ -55,13 +55,13 @@ class UserInfoCard:
         """
         theme_colors = config.当前主题颜色
         
-        # 创建头像
+        # 创建头像（暂时禁用动画，避免控件未添加到页面时的错误）
         avatar = Avatar.create(
             config=config,
             diameter=50,
             text="帅",
-            show_glow=True,
-            show_scan=True,
+            show_glow=False,
+            show_scan=False,
         )
         
         # 用户名文本
@@ -130,6 +130,7 @@ class UserInfoCard:
         container = ft.Container(
             content=user_info,
             bgcolor=theme_colors.get("bg_secondary"),
+            width=280,
         )
         
         return container
