@@ -3,14 +3,14 @@
 通用卡片 - 组件层（新思路）
 
 设计思路:
-    调用原子模块组合成卡片组件。
+    调用零件模块组合成卡片组件。
     - 容器：卡片容器.py
     - 左侧：图标标题.py + 帮助标签.py
     - 分割线：分割线.py
     - 右侧：空着，由扩展卡片模块填充
 
 功能:
-    1. 组合原子模块
+    1. 组合零件模块
     2. 状态切换逻辑
     3. 布局排列
 
@@ -30,10 +30,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from typing import Callable, Optional, Tuple
 from 配置.界面配置 import 界面配置
-from 新思路.原子层.卡片容器 import CardContainer
-from 新思路.原子层.图标标题 import IconTitle
-from 新思路.原子层.帮助标签 import HelpTag
-from 新思路.原子层.分割线 import Divider
+from 新思路.零件层.卡片容器 import CardContainer
+from 新思路.零件层.图标标题 import IconTitle
+from 新思路.零件层.帮助标签 import HelpTag
+from 新思路.零件层.分割线 import Divider
 
 
 class UniversalCard:
