@@ -89,33 +89,37 @@ class UniversalCard:
             enabled=current_enabled,
         )
         
-        # 创建左侧内容，包含图标标题和帮助标签
-        left_row_items = [icon_title_content]
-        if help_icon:
-            left_row_items.append(help_icon)
-        
-        left_content = ft.Row(
-            left_row_items,
-            spacing=spacing_config.get("spacing_xs", 4),
-            alignment=ft.MainAxisAlignment.CENTER,
-            vertical_alignment=ft.CrossAxisAlignment.START,  # 顶部对齐
-        )
-        
-        # 创建左侧容器
-        left_container = ft.Container(
-            content=left_content,
-            padding=ft.Padding(left=card_padding, top=0, right=0, bottom=0),
-            height=card_height,
-            width=left_width,
-            on_click=lambda e: toggle_state(e),
-        )
-        
         # 创建主Row布局，从左到右排列：图标标题-帮助标签-分割线
+        main_row_items = [
+            # 图标标题
+            ft.Container(
+                content=icon_title_content,
+                padding=ft.Padding(left=card_padding, top=0, right=0, bottom=0),
+                on_click=lambda e: toggle_state(e),
+            )
+        ]
+        
+        # 添加帮助标签
+        if help_icon:
+            main_row_items.append(
+                ft.Container(
+                    content=help_icon,
+                    padding=ft.Padding(left=4, top=0, right=0, bottom=0),
+                    on_click=lambda e: toggle_state(e),
+                )
+            )
+        
+        # 添加分割线
+        main_row_items.append(
+            ft.Container(
+                content=divider,
+                padding=ft.Padding(left=4, top=0, right=0, bottom=0),
+            )
+        )
+        
+        # 创建主Row布局
         main_row = ft.Row(
-            [
-                left_container,
-                divider,
-            ],
+            main_row_items,
             spacing=0,
             alignment=ft.MainAxisAlignment.START,
             vertical_alignment=ft.CrossAxisAlignment.START,
