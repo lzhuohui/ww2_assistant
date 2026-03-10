@@ -67,6 +67,7 @@ class UniversalCard:
         
         current_enabled = enabled
         
+        # 创建图标标题内容
         icon_title_content, icon_control, title_control = IconTitle.create(
             config=config,
             title=title,
@@ -74,69 +75,57 @@ class UniversalCard:
             enabled=current_enabled,
         )
         
+        # 创建帮助标签
         help_icon = HelpTag.create(
             config=config,
             help_text=help_text,
             enabled=current_enabled,
         )
         
-        # 创建包含图标标题和帮助标签的Stack，使帮助标签左上角与图标标题右上角重合
-        if help_icon:
-            # 调整帮助标签的位置
-            help_icon.left = 50  # 向右移动到图标标题的右上角
-            help_icon.top = 0     # 顶部对齐
-            
-            left_content = ft.Stack(
-                [
-                    icon_title_content,
-                    help_icon
-                ],
-                width=left_width,
-                height=card_height,
-                alignment=ft.Alignment(0, 0),
-            )
-        else:
-            left_content = icon_title_content
-        
-        left_container = ft.Container(
-            content=left_content,
-            left=card_padding,
-            top=0,
-            bottom=0,
-            width=left_width,
-            alignment=ft.Alignment(0, 0),
-            on_click=lambda e: toggle_state(e),
-        )
-        
+        # 创建分割线
         divider = Divider.create(
             config=config,
             height=multirow_config.get("divider_height", 60),
             enabled=current_enabled,
         )
-        # 计算分割线位置，使其左上角与帮助标签的右上角重合
+        
+        # 创建左侧内容，包含图标标题和帮助标签
+        left_row_items = [icon_title_content]
         if help_icon:
-            # 帮助标签的位置是 left=50, top=0，宽度约为18
-            divider.left = card_padding + 50 + 18  # card_padding + 帮助标签的left + 帮助标签的宽度
-        else:
-            divider.left = divider_left
-        divider.top = 0
-        divider.bottom = 0
+            left_row_items.append(help_icon)
         
-        stack_children = [
-            left_container,
-            divider,
-        ]
+        left_content = ft.Row(
+            left_row_items,
+            spacing=spacing_config.get("spacing_xs", 4),
+            alignment=ft.MainAxisAlignment.CENTER,
+            vertical_alignment=ft.CrossAxisAlignment.START,  # 顶部对齐
+        )
         
-        main_stack = ft.Stack(
-            stack_children,
+        # 创建左侧容器
+        left_container = ft.Container(
+            content=left_content,
+            padding=ft.Padding(left=card_padding, top=0, right=0, bottom=0),
+            height=card_height,
+            width=left_width,
+            on_click=lambda e: toggle_state(e),
+        )
+        
+        # 创建主Row布局，从左到右排列：图标标题-帮助标签-分割线
+        main_row = ft.Row(
+            [
+                left_container,
+                divider,
+            ],
+            spacing=0,
+            alignment=ft.MainAxisAlignment.START,
+            vertical_alignment=ft.CrossAxisAlignment.START,
             height=card_height,
             width=card_width,
-            clip_behavior=ft.ClipBehavior.NONE,
         )
         
         container = CardContainer.create(
             config=config,
-            content=main_stack,
+            content=main_row,
             height=card_height,
             width=card_width,
             enabled=current_enabled,
