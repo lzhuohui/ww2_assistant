@@ -37,19 +37,27 @@ class HelpTag:
         help_text: str,
         enabled: bool = True,
         **kwargs
-    ) -> Optional[ft.IconButton]:
+    ) -> Optional[ft.Container]:
         if not help_text:
             return None
         
         theme_colors = config.当前主题颜色
         
-        return ft.IconButton(
+        icon_button = ft.IconButton(
             icon=ft.Icons.HELP_OUTLINE,
             icon_size=14,
             icon_color=theme_colors.get("text_secondary"),
             tooltip=help_text,
             opacity=0.7 if enabled else 0.3,
             style=ft.ButtonStyle(padding=0),
+        )
+        
+        # 创建容器确保问号图标在上部左右居中
+        return ft.Container(
+            content=icon_button,
+            width=20,
+            height=20,
+            alignment=ft.Alignment(0, -1),  # 水平居中，垂直靠上
         )
 
 
