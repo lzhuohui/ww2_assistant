@@ -57,7 +57,7 @@ class HelpTag:
             content=icon_button,
             width=20,
             height=20,
-            alignment=ft.Alignment(0, -1.5),  # 水平居中，垂直更靠上
+            alignment=ft.Alignment(0, -2),  # 水平居中，垂直更靠上
         )
 
 
