@@ -36,6 +36,7 @@ class HelpTag:
         config: 界面配置,
         help_text: str,
         enabled: bool = True,
+        icon_size: int = 14,
         **kwargs
     ) -> Optional[ft.Container]:
         if not help_text:
@@ -43,20 +44,28 @@ class HelpTag:
         
         theme_colors = config.当前主题颜色
         
-        icon_button = ft.IconButton(
-            icon=ft.Icons.HELP_OUTLINE,
-            icon_size=14,
-            icon_color=theme_colors.get("text_secondary"),
+        # 计算外框尺寸，刚好包裹问号文字
+        box_size = icon_size + 4  # 稍微大于文字尺寸，确保完全包裹
+        
+        # 创建包含问号的容器
+        help_container = ft.Container(
+            content=ft.Icon(
+                ft.Icons.HELP_OUTLINE,
+                size=icon_size,
+                color=theme_colors.get("text_secondary"),
+            ),
+            width=box_size,
+            height=box_size,
+            alignment=ft.Alignment(0, 0),  # 水平垂直居中
             tooltip=help_text,
             opacity=0.7 if enabled else 0.3,
-            style=ft.ButtonStyle(padding=0),
         )
         
-        # 创建容器确保问号图标在上侧
+        # 创建外层容器确保问号图标在上侧
         return ft.Container(
-            content=icon_button,
-            width=20,
-            height=20,
+            content=help_container,
+            width=box_size,
+            height=box_size,
             alignment=ft.Alignment(0, -2),  # 水平居中，垂直更靠上
         )
 
