@@ -129,7 +129,7 @@ class MainPage:
     def get_page_content(self, nav_name: str) -> ft.Control:
         """获取页面内容"""
         if nav_name == "系统":
-            return SystemSettingsPage.create(self.config, self.page)
+            return SystemSettingsPage.create(self.config, self.page, self.refresh)
         else:
             # 其他页面暂未实现
             return ft.Column(
@@ -156,6 +156,18 @@ class MainPage:
         self.current_nav = nav_name
         self.content_area.content = self.get_page_content(nav_name)
         self.content_area.update()
+    
+    def refresh(self):
+        """刷新整个界面（主题切换后调用）"""
+        # 更新主题颜色
+        self.theme_colors = self.config.当前主题颜色
+        
+        # 刷新页面显示
+        if self.page:
+            self.page.bgcolor = self.theme_colors.get("bg_primary")
+            self.page.clean()
+            self.page.add(self.create())
+            self.page.update()
 
 
 # 兼容别名

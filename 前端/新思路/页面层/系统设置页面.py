@@ -25,6 +25,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
+from typing import Callable
 from 配置.界面配置 import 界面配置
 from 新思路.组件层.基础设置卡片 import BasicSettingsCard
 from 新思路.组件层.主题设置卡片 import ThemeSettingsCard
@@ -35,13 +36,14 @@ class SystemSettingsPage:
     """系统设置页面 - 页面层"""
     
     @staticmethod
-    def create(config: 界面配置, page: ft.Page = None) -> ft.Column:
+    def create(config: 界面配置, page: ft.Page = None, on_refresh: Callable[[], None] = None) -> ft.Column:
         """
         创建系统设置页面
         
         参数:
             config: 界面配置对象
             page: 页面对象（可选，用于更新页面显示）
+            on_refresh: 刷新回调（主题/调色板切换后调用）
         
         返回:
             ft.Column: 系统设置页面容器
@@ -67,6 +69,7 @@ class SystemSettingsPage:
         theme_card = ThemeSettingsCard.create(
             config=config,
             page=page,
+            on_refresh=on_refresh,
             title="主题设置",
         )
         
@@ -74,6 +77,7 @@ class SystemSettingsPage:
         palette_card = PaletteSettingsCard.create(
             config=config,
             page=page,
+            on_refresh=on_refresh,
             title="高对比度调色板",
         )
         

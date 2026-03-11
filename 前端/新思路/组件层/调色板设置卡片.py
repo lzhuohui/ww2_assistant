@@ -44,6 +44,7 @@ class PaletteSettingsCard:
     def create(
         config: 界面配置,
         page: ft.Page = None,
+        on_refresh: Callable[[], None] = None,
         title: str = "高对比度调色板",
         icon: str = "CONTRAST",
         enabled: bool = True,
@@ -57,6 +58,7 @@ class PaletteSettingsCard:
         参数:
             config: 界面配置对象
             page: 页面对象（可选，用于更新页面显示）
+            on_refresh: 刷新回调（调色板切换后调用）
             title: 卡片标题
             icon: 图标名称
             enabled: 初始启用状态
@@ -114,10 +116,9 @@ class PaletteSettingsCard:
             # 更新选中状态
             update_selection(palette_name)
             
-            # 更新页面显示
-            if page:
-                page.bgcolor = config.当前主题颜色.get("bg_primary")
-                page.update()
+            # 调用刷新回调
+            if on_refresh:
+                on_refresh()
         
         def update_selection(selected_palette: str):
             """更新选中状态"""
