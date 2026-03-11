@@ -63,42 +63,18 @@ class SystemSettingsPage:
         )
         
         # ========== 个性化卡片 ==========
-        # 主题选择器
-        def handle_theme_change(theme_name: str):
-            """处理主题切换"""
-            if theme_name:
-                # 切换主题
-                config.切换主题(theme_name)
-                print(f"主题切换: {theme_name}")
-            
-            # 更新页面显示
-            if page:
-                page.bgcolor = config.当前主题颜色.get("bg_primary")
-                page.update()
-        
+        # 主题设置卡片（已集成切换功能）
         theme_card = ThemeSettingsCard.create(
             config=config,
+            page=page,
             title="主题设置",
-            on_theme_change=handle_theme_change,
         )
         
-        # 调色板选择器
-        def handle_palette_change(palette_name: str):
-            """处理调色板切换"""
-            if palette_name:
-                # 切换调色板
-                config.切换调色板(palette_name)
-                print(f"调色板切换: {palette_name}")
-            
-            # 更新页面显示
-            if page:
-                page.bgcolor = config.当前主题颜色.get("bg_primary")
-                page.update()
-        
+        # 调色板设置卡片（已集成切换功能）
         palette_card = PaletteSettingsCard.create(
             config=config,
+            page=page,
             title="高对比度调色板",
-            on_palette_change=handle_palette_change,
         )
         
         # ========== 页面容器 ==========

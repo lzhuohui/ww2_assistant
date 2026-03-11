@@ -43,12 +43,12 @@ class PaletteSettingsCard:
     @staticmethod
     def create(
         config: 界面配置,
+        page: ft.Page = None,
         title: str = "高对比度调色板",
         icon: str = "CONTRAST",
         enabled: bool = True,
         on_state_change: Callable[[bool], None] = None,
         help_text: str = None,
-        on_palette_change: Callable[[str], None] = None,
         **kwargs
     ) -> ft.Container:
         """
@@ -56,12 +56,12 @@ class PaletteSettingsCard:
         
         参数:
             config: 界面配置对象
+            page: 页面对象（可选，用于更新页面显示）
             title: 卡片标题
             icon: 图标名称
             enabled: 初始启用状态
             on_state_change: 状态变化回调
             help_text: 帮助提示文字
-            on_palette_change: 调色板变化回调
         
         返回:
             ft.Container: 调色板设置卡片容器
@@ -107,8 +107,17 @@ class PaletteSettingsCard:
         
         def handle_palette_click(palette_name: str):
             """处理调色板点击"""
-            if on_palette_change:
-                on_palette_change(palette_name)
+            # 切换调色板
+            config.切换调色板(palette_name)
+            print(f"调色板切换: {palette_name}")
+            
+            # 更新选中状态
+            update_selection(palette_name)
+            
+            # 更新页面显示
+            if page:
+                page.bgcolor = config.当前主题颜色.get("bg_primary")
+                page.update()
         
         def update_selection(selected_palette: str):
             """更新选中状态"""
