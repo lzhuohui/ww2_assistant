@@ -129,7 +129,7 @@ class MainPage:
     def get_page_content(self, nav_name: str) -> ft.Control:
         """获取页面内容"""
         if nav_name == "系统":
-            return SystemSettingsPage.create(self.config)
+            return SystemSettingsPage.create(self.config, self.page)
         else:
             # 其他页面暂未实现
             return ft.Column(

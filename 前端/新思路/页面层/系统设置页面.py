@@ -35,12 +35,13 @@ class SystemSettingsPage:
     """系统设置页面 - 页面层"""
     
     @staticmethod
-    def create(config: 界面配置) -> ft.Column:
+    def create(config: 界面配置, page: ft.Page = None) -> ft.Column:
         """
         创建系统设置页面
         
         参数:
             config: 界面配置对象
+            page: 页面对象（可选，用于更新页面显示）
         
         返回:
             ft.Column: 系统设置页面容器
