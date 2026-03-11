@@ -40,6 +40,9 @@ from 新思路.零件层.主题色块 import ThemeColorBlock
 class PaletteSettingsCard:
     """调色板设置卡片 - 组件层"""
     
+    # 默认不使用高对比度调色板
+    默认调色板 = None  # None表示不使用高对比度调色板
+    
     @staticmethod
     def create(
         config: 界面配置,
@@ -61,7 +64,7 @@ class PaletteSettingsCard:
             on_refresh: 刷新回调（调色板切换后调用）
             title: 卡片标题
             icon: 图标名称
-            enabled: 初始启用状态
+            enabled: 初始启用状态（True=使用当前调色板，False=不使用高对比度调色板）
             on_state_change: 状态变化回调
             help_text: 帮助提示文字
         
@@ -109,6 +112,10 @@ class PaletteSettingsCard:
         
         def handle_palette_click(palette_name: str):
             """处理调色板点击"""
+            # 只有启用时才允许切换调色板
+            if not card.get_state():
+                return
+            
             # 切换调色板
             config.切换调色板(palette_name)
             print(f"调色板切换: {palette_name}")
@@ -119,6 +126,23 @@ class PaletteSettingsCard:
             # 调用刷新回调
             if on_refresh:
                 on_refresh()
+        
+        def handle_state_change(new_enabled: bool):
+            """处理状态变化"""
+            if not new_enabled:
+                # 禁用时，清除调色板（不使用高对比度）
+                config.切换调色板(None)
+                update_selection(None)
+                if on_refresh:
+                    on_refresh()
+            
+            # 更新调色板选择器的启用状态
+            for name, block in palette_cards_refs.items():
+                block.opacity = 1.0 if new_enabled else 0.4
+            
+            # 调用外部回调
+            if on_state_change:
+                on_state_change(new_enabled)
         
         def update_selection(selected_palette: str):
             """更新选中状态"""
@@ -147,13 +171,23 @@ class PaletteSettingsCard:
             title=title,
             icon=icon,
             enabled=enabled,
-            on_state_change=on_state_change,
+            on_state_change=handle_state_change,
             help_text=help_text,
             controls=[content],
         )
         
         # 暴露控制接口
         card.update_selection = update_selection
+        
+        # 添加获取有效调色板的方法
+        def get_effective_palette() -> str:
+            """获取有效调色板（启用时返回当前调色板，禁用时返回None）"""
+            if card.get_state():
+                return config.调色板名称
+            else:
+                return PaletteSettingsCard.默认调色板
+        
+        card.get_effective_palette = get_effective_palette
         
         return card
 

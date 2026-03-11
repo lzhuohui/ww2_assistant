@@ -36,6 +36,14 @@ from 新思路.零件层.标签输入框 import LabelInput
 class BasicSettingsCard:
     """基础设置卡片 - 组件层"""
     
+    # 默认值定义
+    默认值 = {
+        "挂机模式": "自动挂机",
+        "指令速度": "正常",
+        "尝试次数": "15",
+        "清换限量": "1.0",
+    }
+    
     @staticmethod
     def create(
         config: 界面配置,
@@ -90,6 +98,7 @@ class BasicSettingsCard:
                     value=value or (options[0] if options else ""),
                     width=width,
                     on_change=on_change,
+                    enabled=enabled,
                 )
             else:  # input
                 control = LabelInput.create(
@@ -98,10 +107,24 @@ class BasicSettingsCard:
                     value=value,
                     width=width,
                     on_change=on_change,
+                    enabled=enabled,
                 )
             
             controls.append(control)
             settings_refs[label] = control
+        
+        # 处理状态变化
+        def handle_state_change(new_enabled: bool):
+            """处理状态变化"""
+            # 更新所有设置项的启用状态（通过透明度模拟禁用效果）
+            for label, control in settings_refs.items():
+                control.opacity = 1.0 if new_enabled else 0.4
+                control.disabled = not new_enabled
+                control.update()
+            
+            # 调用外部回调
+            if on_state_change:
+                on_state_change(new_enabled)
         
         # 调用通用卡片组件（高度自动计算）
         card = UniversalCard.create(
@@ -109,7 +132,7 @@ class BasicSettingsCard:
             title=title,
             icon=icon,
             enabled=enabled,
-            on_state_change=on_state_change,
+            on_state_change=handle_state_change,
             help_text=help_text,
             controls=controls,
         )
@@ -130,9 +153,17 @@ class BasicSettingsCard:
             """获取所有设置项的值"""
             return {label: control.get_value() for label, control in settings_refs.items()}
         
+        def get_effective_values() -> Dict[str, Any]:
+            """获取有效值（启用时返回当前值，禁用时返回默认值）"""
+            if card.get_state():
+                return get_all_values()
+            else:
+                return BasicSettingsCard.默认值.copy()
+        
         card.get_value = get_value
         card.set_value = set_value
         card.get_all_values = get_all_values
+        card.get_effective_values = get_effective_values
         
         return card
 

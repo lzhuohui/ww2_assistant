@@ -40,6 +40,9 @@ from 新思路.零件层.主题色块 import ThemeColorBlock
 class ThemeSettingsCard:
     """主题设置卡片 - 组件层"""
     
+    # 默认主题
+    默认主题 = "深色"
+    
     @staticmethod
     def create(
         config: 界面配置,
@@ -61,7 +64,7 @@ class ThemeSettingsCard:
             on_refresh: 刷新回调（主题切换后调用）
             title: 卡片标题
             icon: 图标名称
-            enabled: 初始启用状态
+            enabled: 初始启用状态（True=使用当前主题，False=使用默认主题）
             on_state_change: 状态变化回调
             help_text: 帮助提示文字
         
@@ -109,6 +112,10 @@ class ThemeSettingsCard:
         
         def handle_theme_click(theme_name: str):
             """处理主题点击"""
+            # 只有启用时才允许切换主题
+            if not card.get_state():
+                return
+            
             # 切换主题
             config.切换主题(theme_name)
             print(f"主题切换: {theme_name}")
@@ -119,6 +126,23 @@ class ThemeSettingsCard:
             # 调用刷新回调
             if on_refresh:
                 on_refresh()
+        
+        def handle_state_change(new_enabled: bool):
+            """处理状态变化"""
+            if not new_enabled:
+                # 禁用时，切换到默认主题
+                config.切换主题(ThemeSettingsCard.默认主题)
+                update_selection(ThemeSettingsCard.默认主题)
+                if on_refresh:
+                    on_refresh()
+            
+            # 更新主题选择器的启用状态
+            for name, block in theme_cards_refs.items():
+                block.opacity = 1.0 if new_enabled else 0.4
+            
+            # 调用外部回调
+            if on_state_change:
+                on_state_change(new_enabled)
         
         def update_selection(selected_theme: str):
             """更新选中状态"""
@@ -147,13 +171,23 @@ class ThemeSettingsCard:
             title=title,
             icon=icon,
             enabled=enabled,
-            on_state_change=on_state_change,
+            on_state_change=handle_state_change,
             help_text=help_text,
             controls=[content],
         )
         
         # 暴露控制接口
         card.update_selection = update_selection
+        
+        # 添加获取有效主题的方法
+        def get_effective_theme() -> str:
+            """获取有效主题（启用时返回当前主题，禁用时返回默认主题）"""
+            if card.get_state():
+                return config.主题名称
+            else:
+                return ThemeSettingsCard.默认主题
+        
+        card.get_effective_theme = get_effective_theme
         
         return card
 
