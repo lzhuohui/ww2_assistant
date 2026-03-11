@@ -186,6 +186,7 @@ if __name__ == "__main__":
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
         main_page = MainPage(配置)
+        main_page.page = page  # 设置page引用，用于刷新
         page.add(main_page.create())  # 只能更改此处**被测调用模块名称**
     
     ft.run(main)
