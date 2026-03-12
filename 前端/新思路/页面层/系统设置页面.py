@@ -55,9 +55,23 @@ class SystemSettingsPage:
         def on_value_change(config_key: str, value: any):
             """值变化回调"""
             print(f"配置变化: {config_key} = {value}")
-            # 如果是主题或调色板变化，调用刷新回调
-            if config_key in ["主题模式", "调色板模式"] and on_refresh:
-                on_refresh()
+            
+            # 处理主题切换
+            if config_key == "主题模式" and value:
+                config.切换主题(value)
+                if on_refresh:
+                    on_refresh()
+            
+            # 处理调色板切换
+            elif config_key == "调色板模式":
+                if value:
+                    # 切换到指定调色板
+                    config.切换调色板(value)
+                else:
+                    # 取消调色板效果
+                    config.切换调色板(None)
+                if on_refresh:
+                    on_refresh()
         
         # 使用配置驱动创建三个卡片
         basic_card = UniversalCard.create_from_config(
