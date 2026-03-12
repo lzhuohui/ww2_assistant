@@ -1,0 +1,278 @@
+# -*- coding: utf-8 -*-
+"""
+控件工厂 - 零件层
+
+设计思路:
+    根据配置动态创建控件，支持多种控件类型。
+    使用工厂模式，统一控件创建接口。
+
+功能:
+    1. 创建标准控件（下拉框、输入框、开关等）
+    2. 创建色块控件（主题色块、调色板色块）
+    3. 支持配置驱动创建
+    4. 支持控件缓存和复用
+
+数据来源:
+    卡片配置文件。
+
+使用场景:
+    被通用卡片组件调用。
+"""
+
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import flet as ft
+from typing import Callable, List, Dict, Any, Optional
+from 配置.界面配置 import 界面配置
+from 新思路.零件层.标签下拉框 import LabelDropdown
+from 新思路.零件层.标签输入框 import LabelInput
+from 新思路.零件层.圆形开关 import CircleSwitch
+from 新思路.零件层.主题色块 import ThemeColorBlock
+
+
+class ControlFactory:
+    """控件工厂 - 根据配置创建控件"""
+    
+    # 控件模板缓存
+    _template_cache = {}
+    
+    @staticmethod
+    def create_controls(
+        config: 界面配置,
+        card_config: Dict[str, Any],
+        config_manager: Any,
+        on_value_change: Callable[[str, Any], None] = None,
+    ) -> List[ft.Control]:
+        """
+        根据配置创建控件列表
+        
+        参数:
+            config: 界面配置对象
+            card_config: 卡片配置字典
+            config_manager: 配置管理器
+            on_value_change: 值变化回调函数
+        
+        返回:
+            控件列表
+        """
+        card_type = card_config.get("card_type", "standard")
+        
+        if card_type == "standard":
+            return ControlFactory._create_standard_controls(
+                config, card_config, config_manager, on_value_change
+            )
+        elif card_type == "color_blocks":
+            return ControlFactory._create_color_blocks(
+                config, card_config, config_manager, on_value_change
+            )
+        else:
+            return []
+    
+    @staticmethod
+    def _create_standard_controls(
+        config: 界面配置,
+        card_config: Dict[str, Any],
+        config_manager: Any,
+        on_value_change: Callable[[str, Any], None] = None,
+    ) -> List[ft.Control]:
+        """创建标准控件（下拉框、输入框、开关等）"""
+        controls = []
+        card_name = card_config.get("title", "")
+        
+        for control_config in card_config.get("controls", []):
+            control_type = control_config.get("type")
+            config_key = control_config.get("config_key")
+            
+            # 获取当前值
+            current_value = config_manager.get_value(card_name, config_key)
+            
+            # 根据类型创建控件
+            if control_type == "dropdown":
+                control = ControlFactory._create_dropdown(
+                    config=config,
+                    control_config=control_config,
+                    current_value=current_value,
+                    on_change=lambda value, key=config_key: ControlFactory._handle_value_change(
+                        card_name, key, value, config_manager, on_value_change
+                    ),
+                )
+            elif control_type == "input":
+                control = ControlFactory._create_input(
+                    config=config,
+                    control_config=control_config,
+                    current_value=current_value,
+                    on_change=lambda value, key=config_key: ControlFactory._handle_value_change(
+                        card_name, key, value, config_manager, on_value_change
+                    ),
+                )
+            elif control_type == "switch":
+                control = ControlFactory._create_switch(
+                    config=config,
+                    control_config=control_config,
+                    current_value=current_value,
+                    on_change=lambda value, key=config_key: ControlFactory._handle_value_change(
+                        card_name, key, value, config_manager, on_value_change
+                    ),
+                )
+            else:
+                continue
+            
+            controls.append(control)
+        
+        return controls
+    
+    @staticmethod
+    def _create_color_blocks(
+        config: 界面配置,
+        card_config: Dict[str, Any],
+        config_manager: Any,
+        on_value_change: Callable[[str, Any], None] = None,
+    ) -> List[ft.Control]:
+        """创建色块控件"""
+        blocks_config = card_config.get("blocks_config", {})
+        card_name = card_config.get("title", "")
+        config_key = blocks_config.get("config_key")
+        
+        # 获取当前选中的值
+        current_selected = config_manager.get_value(card_name, config_key)
+        
+        # 创建色块列表
+        blocks = []
+        for item in blocks_config.get("items", []):
+            name = item.get("name")
+            color = item.get("color")
+            is_selected = name == current_selected
+            
+            block = ThemeColorBlock.create(
+                config=config,
+                theme_name=name,
+                bg_color=color,
+                is_selected=is_selected,
+                on_click=lambda clicked_name: ControlFactory._handle_block_click(
+                    clicked_name=clicked_name,
+                    card_name=card_name,
+                    blocks_config=blocks_config,
+                    config_manager=config_manager,
+                    on_value_change=on_value_change,
+                ),
+            )
+            blocks.append(block)
+        
+        return blocks
+    
+    @staticmethod
+    def _create_dropdown(
+        config: 界面配置,
+        control_config: Dict[str, Any],
+        current_value: Any,
+        on_change: Callable[[Any], None] = None,
+    ) -> ft.Control:
+        """创建下拉框控件"""
+        return LabelDropdown.create(
+            config=config,
+            label=control_config.get("label", ""),
+            options=control_config.get("options", []),
+            value=current_value or control_config.get("value"),
+            on_change=on_change,
+        )
+    
+    @staticmethod
+    def _create_input(
+        config: 界面配置,
+        control_config: Dict[str, Any],
+        current_value: Any,
+        on_change: Callable[[Any], None] = None,
+    ) -> ft.Control:
+        """创建输入框控件"""
+        return LabelInput.create(
+            config=config,
+            label=control_config.get("label", ""),
+            value=current_value or control_config.get("value", ""),
+            on_change=on_change,
+        )
+    
+    @staticmethod
+    def _create_switch(
+        config: 界面配置,
+        control_config: Dict[str, Any],
+        current_value: Any,
+        on_change: Callable[[Any], None] = None,
+    ) -> ft.Control:
+        """创建开关控件"""
+        return CircleSwitch.create(
+            config=config,
+            label=control_config.get("label", ""),
+            value=current_value if current_value is not None else control_config.get("value", False),
+            on_change=on_change,
+        )
+    
+    @staticmethod
+    def _handle_value_change(
+        card_name: str,
+        config_key: str,
+        value: Any,
+        config_manager: Any,
+        on_value_change: Callable[[str, Any], None] = None,
+    ):
+        """处理值变化"""
+        # 保存到配置管理器
+        config_manager.set_value(card_name, config_key, value)
+        
+        # 调用外部回调
+        if on_value_change:
+            on_value_change(config_key, value)
+    
+    @staticmethod
+    def _handle_block_click(
+        clicked_name: str,
+        card_name: str,
+        blocks_config: Dict[str, Any],
+        config_manager: Any,
+        on_value_change: Callable[[str, Any], None] = None,
+    ):
+        """处理色块点击"""
+        config_key = blocks_config.get("config_key")
+        supports_deselect = blocks_config.get("supports_deselect", False)
+        current_selected = config_manager.get_value(card_name, config_key)
+        
+        # 支持取消选择
+        if supports_deselect and clicked_name == current_selected:
+            new_value = None
+        else:
+            new_value = clicked_name
+        
+        # 保存到配置管理器
+        config_manager.set_value(card_name, config_key, new_value)
+        
+        # 调用外部回调
+        if on_value_change:
+            on_value_change(config_key, new_value)
+
+
+# 兼容别名
+控件工厂 = ControlFactory
+
+
+# ==================== 调试逻辑 ====================
+if __name__ == "__main__":
+    from 配置.配置管理器 import ConfigManager
+    
+    # 1. 界面配置初始化
+    配置 = 界面配置()
+    config_manager = ConfigManager()
+    
+    # 2. 测试创建标准控件
+    print("测试创建标准控件:")
+    basic_config = config_manager.get_card_config("基础设置")
+    controls = ControlFactory.create_controls(配置, basic_config, config_manager)
+    print(f"创建了 {len(controls)} 个控件")
+    
+    # 3. 测试创建色块控件
+    print("\n测试创建色块控件:")
+    theme_config = config_manager.get_card_config("主题设置")
+    blocks = ControlFactory.create_controls(配置, theme_config, config_manager)
+    print(f"创建了 {len(blocks)} 个色块")
+    
+    print("\n测试完成")

@@ -21,6 +21,7 @@
 # 卡片配置字典
 卡片配置 = {
     "基础设置": {
+        "card_type": "standard",  # 卡片类型：standard/color_blocks
         "title": "基础设置",
         "icon": "SETTINGS",
         "subtitle": "通用配置描述",
@@ -57,21 +58,42 @@
         ]
     },
     "主题设置": {
+        "card_type": "color_blocks",  # 色块类型卡片
         "title": "主题设置",
         "icon": "PALETTE",
         "subtitle": "主题配置描述",
-        "controls_type": "theme_block",
-        "themes": ["浅色", "深色", "日出", "捕捉", "聚焦"],
-        "selected": "深色",
-        "config_key": "主题模式"
+        "controls_per_row": 6,
+        "blocks_config": {
+            "type": "theme",  # 色块类型：theme/palette/custom
+            "items": [
+                {"name": "浅色", "color": "#FFFFFF"},
+                {"name": "深色", "color": "#1A1A2E"},
+                {"name": "日出", "color": "#FFE4B5"},
+                {"name": "捕捉", "color": "#98FB98"},
+                {"name": "聚焦", "color": "#87CEEB"},
+            ],
+            "selected": "深色",
+            "config_key": "主题模式",
+            "supports_deselect": False,  # 不支持取消选择
+        }
     },
     "调色板设置": {
+        "card_type": "color_blocks",
         "title": "调色板",
         "icon": "CONTRAST",
         "subtitle": "高对比度调色板配置",
-        "controls_type": "palette_block",
-        "palettes": ["水生", "沙漠", "黄昏", "夜空"],
-        "selected": None,
-        "config_key": "调色板模式"
+        "controls_per_row": 4,
+        "blocks_config": {
+            "type": "palette",
+            "items": [
+                {"name": "水生", "color": "#006994"},
+                {"name": "沙漠", "color": "#C19A6B"},
+                {"name": "黄昏", "color": "#FF6B6B"},
+                {"name": "夜空", "color": "#2C3E50"},
+            ],
+            "selected": None,
+            "config_key": "调色板模式",
+            "supports_deselect": True,  # 支持取消选择
+        }
     }
 }
