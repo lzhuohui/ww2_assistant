@@ -30,11 +30,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
-from typing import Callable, Optional, List
+from typing import Callable, Optional, List, Dict, Any
 from 配置.界面配置 import 界面配置
 from 新思路.零件层.卡片容器 import CardContainer
 from 新思路.零件层.图标标题v2 import IconTitleV2
 from 新思路.零件层.标签下拉框 import LabelDropdown
+from 新思路.零件层.控件工厂 import ControlFactory
 
 # *** 用户指定变量 - AI不得修改 ***
 # 布局参数
@@ -256,6 +257,51 @@ class UniversalCard:
         container.get_state = get_state
         
         return container
+    
+    @staticmethod
+    def create_from_config(
+        config: 界面配置,
+        card_name: str,
+        config_manager: Any,
+        on_value_change: Callable[[str, Any], None] = None,
+        **kwargs
+    ) -> ft.Container:
+        """
+        根据配置创建卡片
+        
+        参数:
+            config: 界面配置对象
+            card_name: 卡片名称
+            config_manager: 配置管理器
+            on_value_change: 值变化回调函数
+        
+        返回:
+            ft.Container: 完整的卡片容器
+        """
+        # 获取卡片配置
+        card_config = config_manager.get_card_config(card_name)
+        
+        if not card_config:
+            raise ValueError(f"未找到卡片配置: {card_name}")
+        
+        # 使用控件工厂创建控件
+        controls = ControlFactory.create_controls(
+            config=config,
+            card_config=card_config,
+            config_manager=config_manager,
+            on_value_change=on_value_change,
+        )
+        
+        # 调用原有的create方法
+        return UniversalCard.create(
+            config=config,
+            title=card_config.get("title"),
+            icon=card_config.get("icon"),
+            subtitle=card_config.get("subtitle"),
+            controls=controls,
+            controls_per_row=card_config.get("controls_per_row", 1),
+            **kwargs
+        )
 
 
 # 兼容别名

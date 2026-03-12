@@ -27,7 +27,7 @@ import flet as ft
 from typing import Callable
 from 配置.界面配置 import 界面配置
 from 配置.配置管理器 import ConfigManager
-from 新思路.组件层.通用卡片配置驱动扩展 import UniversalCard
+from 新思路.组件层.通用卡片 import UniversalCard
 
 
 class SystemSettingsPage:
