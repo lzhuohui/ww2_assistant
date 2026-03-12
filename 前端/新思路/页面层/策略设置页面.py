@@ -4,6 +4,7 @@
 
 设计思路:
     使用配置驱动方式创建卡片，与系统设置页面保持一致。
+    对于switch_dropdown类型，直接使用控件工厂创建的卡片，避免双层包装。
 
 功能:
     1. 建筑速建卡片（配置驱动）
@@ -27,7 +28,7 @@ import flet as ft
 from typing import Callable
 from 配置.界面配置 import 界面配置
 from 配置.配置管理器 import ConfigManager
-from 新思路.组件层.通用卡片 import UniversalCard
+from 新思路.零件层.控件工厂 import ControlFactory
 
 
 class StrategySettingsPage:
@@ -56,27 +57,30 @@ class StrategySettingsPage:
             """值变化回调"""
             print(f"配置变化: {config_key} = {value}")
         
-        # 使用配置驱动创建三个卡片
-        building_speed_card = UniversalCard.create_from_config(
+        # 使用控件工厂创建卡片（switch_dropdown类型直接返回卡片，不需要包装）
+        building_speed_controls = ControlFactory.create_controls(
             config=config,
-            card_name="建筑速建",
+            card_config=config_manager.get_card_config("建筑速建"),
             config_manager=config_manager,
             on_value_change=on_value_change,
         )
+        building_speed_card = building_speed_controls[0] if building_speed_controls else None
         
-        resource_speed_card = UniversalCard.create_from_config(
+        resource_speed_controls = ControlFactory.create_controls(
             config=config,
-            card_name="资源速产",
+            card_config=config_manager.get_card_config("资源速产"),
             config_manager=config_manager,
             on_value_change=on_value_change,
         )
+        resource_speed_card = resource_speed_controls[0] if resource_speed_controls else None
         
-        points_keep_card = UniversalCard.create_from_config(
+        points_keep_controls = ControlFactory.create_controls(
             config=config,
-            card_name="策点保留",
+            card_config=config_manager.get_card_config("策点保留"),
             config_manager=config_manager,
             on_value_change=on_value_change,
         )
+        points_keep_card = points_keep_controls[0] if points_keep_controls else None
         
         # ========== 页面容器 ==========
         page_content = ft.Column(
