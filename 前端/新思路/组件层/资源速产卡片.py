@@ -74,6 +74,7 @@ class ResourceSpeedCard:
             config=config,
             title="资源速产",
             icon="BOLT",
+            subtitle="开启自动加速生产功能",
             enabled=enabled,
             on_state_change=on_state_change,
             settings=settings,

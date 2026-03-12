@@ -74,6 +74,7 @@ class BuildingSpeedCard:
             config=config,
             title="建筑速建",
             icon="ROCKET_LAUNCH",
+            subtitle="开启自动加速建设功能",
             enabled=enabled,
             on_state_change=on_state_change,
             settings=settings,

@@ -66,6 +66,7 @@ class PointsKeepCard:
             config=config,
             title="策点保留",
             icon="SAVINGS",
+            subtitle="达到设置保留的策略点数后允许使用策略",
             enabled=enabled,
             on_state_change=on_state_change,
             settings=settings,
