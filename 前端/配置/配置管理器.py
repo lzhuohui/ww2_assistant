@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 from 前端.配置.卡片配置 import 卡片配置
 from 前端.配置.策略配置 import 策略配置
+from 前端.配置.建筑配置 import 建筑配置
 
 
 class ConfigManager:
@@ -46,8 +47,11 @@ class ConfigManager:
         # 加载策略配置
         self.strategy_configs = 策略配置.copy()
         
+        # 加载建筑配置
+        self.building_configs = 建筑配置.copy()
+        
         # 合并所有配置
-        self.all_configs = {**self.card_configs, **self.strategy_configs}
+        self.all_configs = {**self.card_configs, **self.strategy_configs, **self.building_configs}
         
         # 加载用户配置
         self.user_config = self._load_user_config()
