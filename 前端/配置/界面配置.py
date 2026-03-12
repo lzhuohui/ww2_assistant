@@ -114,7 +114,7 @@ class 界面配置:
             "control_margin_right": 16,
             "control_h_spacing": 20,
             "control_v_spacing": 10,
-            "controls_per_row": 2,
+            "controls_per_row": 3,
             "vertical_center": True,
         },
         "阴影": {
@@ -124,6 +124,7 @@ class 界面配置:
             "spread_hover": 2,
             "offset_y": 2,
             "offset_y_hover": 4,
+            "inset": 16,  # 阴影收缩值（阴影比卡片小一个边距）
         },
         "动画": {
             "duration_fast": 150,

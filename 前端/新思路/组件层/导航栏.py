@@ -56,11 +56,15 @@ class NavBar:
         theme_colors = config.当前主题颜色
         ui_config = config.定义尺寸.get("界面", {})
         
-        # 默认导航项
+        # 默认导航项（9个，不需要滚动）
         default_nav_items = [
             {"name": "系统", "icon": "SETTINGS"},
+            {"name": "策略", "icon": "ROCKET_LAUNCH"},
             {"name": "任务", "icon": "ASSIGNMENT"},
-            {"name": "建设", "icon": "DOMAIN"},
+            {"name": "建筑", "icon": "DOMAIN"},
+            {"name": "集资", "icon": "SHOPPING_CART"},
+            {"name": "打扫", "icon": "BROOM"},
+            {"name": "打野", "icon": "GAME"},
             {"name": "账号", "icon": "ACCOUNT_CIRCLE"},
             {"name": "关于", "icon": "INFO"},
         ]

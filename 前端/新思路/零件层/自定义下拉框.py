@@ -31,7 +31,10 @@ from 配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改 ***
-# (用户指定的变量放在这里，用户没有指定之前就空着)
+# 默认宽度（像素）
+DEFAULT_WIDTH = 100
+# 默认高度（像素）
+DEFAULT_HEIGHT = 32
 # *********************************
 
 
@@ -46,6 +49,7 @@ class CustomDropDown:
         width: int = None,
         height: int = None,
         on_change: Callable[[str], None] = None,
+        enabled: bool = True,
         **kwargs
     ) -> ft.PopupMenuButton:
         """
@@ -55,21 +59,19 @@ class CustomDropDown:
             config: 界面配置对象
             options: 选项列表
             value: 初始值
-            width: 宽度（可选，默认从配置中获取）
-            height: 高度（可选，默认从配置中获取）
+            width: 宽度（可选，默认使用用户指定变量DEFAULT_WIDTH）
+            height: 高度（可选，默认使用用户指定变量DEFAULT_HEIGHT）
             on_change: 值变化回调
+            enabled: 启用状态（默认True）
         
         返回:
             ft.PopupMenuButton: 下拉框控件
         """
         theme_colors = config.当前主题颜色
-        ui_config = config.定义尺寸.get("组件", {})
         
-        # 从配置文件获取默认值
-        default_width = ui_config.get("dropdown_width", 100)
-        default_height = ui_config.get("dropdown_height", 32)
-        current_width = width if width is not None else default_width
-        current_height = height if height is not None else default_height
+        # 使用用户指定的默认值
+        current_width = width if width is not None else DEFAULT_WIDTH
+        current_height = height if height is not None else DEFAULT_HEIGHT
         
         # 默认选项
         current_options = options or ["选项A", "选项B", "选项C"]
@@ -109,6 +111,7 @@ class CustomDropDown:
         
         # 内部状态
         current_value_state = current_value
+        current_enabled_state = enabled
         
         def select_option(option_value: str):
             """选择选项"""
@@ -118,6 +121,21 @@ class CustomDropDown:
             selected_text.update()
             if on_change:
                 on_change(option_value)
+        
+        def set_enabled(new_enabled: bool):
+            """设置启用状态"""
+            nonlocal current_enabled_state
+            current_enabled_state = new_enabled
+            button_container.opacity = 1.0 if new_enabled else 0.5
+            button_container.update()
+            # 设置PopupMenuButton的disabled属性
+            control.disabled = not new_enabled
+            if control.page:
+                control.update()
+        
+        def get_enabled() -> bool:
+            """获取启用状态"""
+            return current_enabled_state
         
         # 创建菜单项
         menu_items = []
@@ -141,11 +159,16 @@ class CustomDropDown:
                 min_width=current_width,
                 max_width=current_width,
             ),
+            height=current_height,  # 设置高度属性
         )
         
         # 暴露控制接口
         control.get_value = lambda: current_value_state
         control.set_value = lambda v: select_option(v)
+        control.set_enabled = set_enabled
+        control.get_enabled = get_enabled
+        control.set_state = set_enabled  # 兼容别名
+        control.enabled = property(get_enabled, set_enabled)  # 兼容属性
         
         return control
 

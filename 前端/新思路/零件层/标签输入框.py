@@ -61,11 +61,6 @@ class LabelInput:
             ft.Row: 标签输入框容器
         """
         theme_colors = config.当前主题颜色
-        ui_config = config.定义尺寸.get("组件", {})
-        
-        # 从配置文件获取默认值
-        default_width = ui_config.get("input_width", 120)
-        current_width = width if width is not None else default_width
         
         # 创建标签文本（自适应宽度）
         label_control = ft.Text(
@@ -75,7 +70,7 @@ class LabelInput:
             no_wrap=True,
         )
         
-        # 创建输入框
+        # 创建输入框（宽度由调用者决定，或使用默认值120）
         input_control = ft.TextField(
             value=value,
             text_size=14,
@@ -86,7 +81,7 @@ class LabelInput:
             border_radius=4,
             dense=True,
             content_padding=ft.Padding(left=8, right=8, top=8, bottom=8),
-            width=current_width,
+            width=width if width is not None else 120,
             on_change=lambda e: on_change(e.control.value) if on_change else None,
         )
         

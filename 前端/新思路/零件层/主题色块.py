@@ -108,6 +108,7 @@ class ThemeColorBlock:
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
             ),
             on_click=lambda e: on_click(theme_name) if on_click else None,
+            height=current_block_size,  # 设置高度，与色块高度一致
         )
         
         # 暴露控制接口
@@ -117,7 +118,14 @@ class ThemeColorBlock:
             if card.page:
                 card.update()
         
+        def set_state(enabled: bool):
+            """设置启用状态"""
+            card.opacity = 1.0 if enabled else 0.4
+            if card.page:
+                card.update()
+        
         card.set_selected = set_selected
+        card.set_state = set_state
         
         return card
 

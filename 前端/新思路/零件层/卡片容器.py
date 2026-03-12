@@ -29,7 +29,8 @@ from 配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改 ***
-# (用户指定的变量放在这里，用户没有指定之前就空着)
+DEFAULT_WIDTH = 800
+DEFAULT_HEIGHT = 100
 # *********************************
 
 
@@ -47,20 +48,25 @@ class CardContainer:
     ) -> ft.Container:
         theme_colors = config.当前主题颜色
         
+        # 从配置获取界面参数
         ui_config = config.定义尺寸.get("界面", {})
-        shadow_config = config.定义尺寸.get("阴影", {})
-        animation_config = config.定义尺寸.get("动画", {})
         
+        # 从配置获取阴影参数
+        shadow_config = config.定义尺寸.get("阴影", {})
         shadow_blur_default = shadow_config.get("blur_default", 4)
         shadow_blur_hover = shadow_config.get("blur_hover", 12)
         shadow_spread = shadow_config.get("spread", 1)
         shadow_spread_hover = shadow_config.get("spread_hover", 2)
         shadow_offset_y = shadow_config.get("offset_y", 2)
         shadow_offset_y_hover = shadow_config.get("offset_y_hover", 4)
+        shadow_inset = -shadow_config.get("inset", 16)  # 阴影收缩值
         
+        # 从配置获取动画参数
+        animation_config = config.定义尺寸.get("动画", {})
         animation_duration = animation_config.get("duration_fast", 150)
         animation_curve = getattr(ft.AnimationCurve, animation_config.get("curve", "EASE_OUT"), ft.AnimationCurve.EASE_OUT)
         
+        # 从配置获取边框参数
         card_border_radius = ui_config.get("card_radius", 8)
         card_border_width = ui_config.get("card_border_width", 1)
         
@@ -72,7 +78,7 @@ class CardContainer:
             border_radius=card_border_radius,
             border=ft.Border.all(card_border_width, theme_colors.get("border_light")),
             shadow=ft.BoxShadow(
-                spread_radius=shadow_spread,
+                spread_radius=shadow_spread + shadow_inset,
                 blur_radius=shadow_blur_default,
                 color=theme_colors.get("shadow"),
                 offset=ft.Offset(0, shadow_offset_y),
@@ -86,27 +92,35 @@ class CardContainer:
                 container.bgcolor = theme_colors.get("bg_hover")
                 container.border = ft.Border.all(card_border_width, theme_colors.get("border"))
                 container.shadow = ft.BoxShadow(
-                    spread_radius=shadow_spread_hover,
+                    spread_radius=shadow_spread_hover + shadow_inset,
                     blur_radius=shadow_blur_hover,
                     color=theme_colors.get("shadow"),
                     offset=ft.Offset(0, shadow_offset_y_hover),
                 )
-                # 添加轻微上浮效果，模拟Win11动画
-                container.margin = ft.Margin(0, -2, 0, 2)
             else:
                 container.bgcolor = theme_colors.get("bg_card")
                 container.border = ft.Border.all(card_border_width, theme_colors.get("border_light"))
                 container.shadow = ft.BoxShadow(
-                    spread_radius=shadow_spread,
+                    spread_radius=shadow_spread + shadow_inset,
                     blur_radius=shadow_blur_default,
                     color=theme_colors.get("shadow"),
                     offset=ft.Offset(0, shadow_offset_y),
                 )
-                # 恢复默认边距
-                container.margin = ft.Margin(0, 0, 0, 0)
+            container.update()
+        
+        def on_click_down(e):
+            container.bgcolor = theme_colors.get("bg_pressed", "#4A4A4A")
+            container.scale = 0.98
+            container.update()
+        
+        def on_click_up(e):
+            container.bgcolor = theme_colors.get("bg_card")
+            container.scale = 1.0
             container.update()
         
         container.on_hover = on_hover
+        container.on_tap_down = on_click_down
+        container.on_tap_up = on_click_up
         
         return container
 
@@ -126,6 +140,6 @@ if __name__ == "__main__":
     def main(page: ft.Page):
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(CardContainer.create(配置, content=ft.Text("卡片内容"), height=100, width=400))  # 只能更改此处**被测调用模块名称**
+        page.add(CardContainer.create(配置, content=ft.Text("卡片内容"), height=DEFAULT_HEIGHT, width=DEFAULT_WIDTH))
     
     ft.run(main)

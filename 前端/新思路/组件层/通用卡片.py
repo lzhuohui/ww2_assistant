@@ -14,6 +14,7 @@
     2. 协调状态切换
     3. 布局排列
     4. 支持多行控件
+    5. 支持副标题（与主标题底部对齐）
 
 数据来源:
     所有配置数据从配置目录获取。
@@ -32,13 +33,50 @@ import flet as ft
 from typing import Callable, Optional, List
 from 配置.界面配置 import 界面配置
 from 新思路.零件层.卡片容器 import CardContainer
-from 新思路.零件层.图标标题 import IconTitle
-from 新思路.零件层.帮助标签 import HelpTag
-from 新思路.零件层.分割线 import Divider
+from 新思路.零件层.图标标题v2 import IconTitleV2
+from 新思路.零件层.标签下拉框 import LabelDropdown
+
+# *** 用户指定变量 - AI不得修改 ***
+# 布局参数
+DEFAULT_CARD_WIDTH = 800 # 卡片宽度（像素）
+DEFAULT_CONTROL_MARGIN_RIGHT = 20 # 控件右边距
+DEFAULT_CONTROL_H_SPACING = 16 # 控件水平间距
+DEFAULT_CONTROL_V_SPACING = 8 # 控件垂直间距
+DEFAULT_CONTROLS_PER_ROW = 1 # 每行控件数量
+# *********************************
 
 
 class UniversalCard:
     """通用卡片 - 装配模式，组合零件模块，支持多行控件"""
+    
+    def __init__(self, config):
+        """初始化通用卡片（支持调试逻辑）"""
+        self.config = config
+    
+    def render(self):
+        """渲染通用卡片（支持调试逻辑）"""
+        return UniversalCard.create(
+            config=self.config,
+            title="测试卡片",
+            icon="HOME",
+            enabled=True,
+            help_text="点击切换状态",
+            controls=[
+                LabelDropdown.create(
+                    config=self.config,
+                    label="模式",
+                    options=["自动挂机", "手动挂机", "半自动挂机"],
+                    value="自动挂机",
+                ),
+                LabelDropdown.create(
+                    config=self.config,
+                    label="策略",
+                    options=["策略A", "策略B", "策略C"],
+                    value="策略A",
+                ),
+            ],
+            subtitle="这是副标题",
+        )
     
     @staticmethod
     def create(
@@ -51,6 +89,8 @@ class UniversalCard:
         height: int = None,
         width: int = None,
         controls: List[ft.Control] = None,
+        subtitle: str = None,
+        controls_per_row: int = None,
         **kwargs
     ) -> ft.Container:
         """
@@ -66,6 +106,8 @@ class UniversalCard:
             height: 卡片高度
             width: 卡片宽度
             controls: 右侧控件列表（支持多行）
+            subtitle: 副标题（与主标题底部对齐）
+            controls_per_row: 每行控件数量（默认使用 DEFAULT_CONTROLS_PER_ROW）
         
         返回:
             ft.Container: 完整的卡片容器
@@ -74,165 +116,109 @@ class UniversalCard:
         
         ui_config = config.定义尺寸.get("界面", {})
         card_config = config.定义尺寸.get("卡片", {})
-        multirow_config = config.定义尺寸.get("多行卡片", {})
         
         card_padding = ui_config.get("card_padding", 16)
-        left_width = multirow_config.get("left_width", 60)
-        divider_left = multirow_config.get("divider_left", 90)
-        content_left = multirow_config.get("content_left", 130)
         
-        card_height = height or card_config.get("default_height", 70)
-        card_width = width or 800
+        card_width = width or DEFAULT_CARD_WIDTH
         
-        # 内部状态
         current_enabled = enabled
-        
-        # 零件列表，用于协调状态
+        current_controls_per_row = controls_per_row if controls_per_row is not None else DEFAULT_CONTROLS_PER_ROW
         parts: List = []
         
-        # 创建图标标题零件
+        # ========== 第一步：计算所有布局参数 ==========
+        num_rows = 0
+        total_controls_height = 0
+        card_height = 40  # 卡片高度默认值（无控件时）
+        
+        if controls:
+            control_v_spacing = DEFAULT_CONTROL_V_SPACING
+            
+            # 计算每行控件的最大高度
+            num_controls = len(controls)
+            num_rows = (num_controls + current_controls_per_row - 1) // current_controls_per_row
+            
+            # 获取每个控件的实际高度
+            for i, control in enumerate(controls):
+                control_height = getattr(control, 'height', 35) or 35
+                # 累加每行的高度
+                if i % current_controls_per_row == 0:
+                    total_controls_height += control_height
+            
+            card_height = total_controls_height + card_padding * (num_rows + 1)  # 卡片高度 = 控件高度 + 标准卡片边距 * (控件行数+1)
+        
         def on_icon_title_state_change(new_enabled: bool):
-            """图标标题状态变化时，同步其他零件"""
             nonlocal current_enabled
             current_enabled = new_enabled
             sync_parts_state(new_enabled)
             if on_state_change:
                 on_state_change(new_enabled)
         
-        icon_title = IconTitle.create(
+        # ========== 第二步：创建图标标题v2 ==========
+        icon_title = IconTitleV2.create(
             config=config,
             title=title,
             icon=icon,
             enabled=current_enabled,
             on_state_change=on_icon_title_state_change,
+            subtitle=subtitle,
+            divider_height=card_height,
         )
         parts.append(icon_title)
         
-        # 创建帮助标签零件
-        help_tag = None
-        if help_text:
-            help_tag = HelpTag.create(
-                config=config,
-                help_text=help_text,
-                enabled=current_enabled,
-            )
-            if help_tag:
-                parts.append(help_tag)
-        
-        # 创建分割线零件
-        divider = Divider.create(
-            config=config,
-            height=multirow_config.get("divider_height", 60),
-            enabled=current_enabled,
-        )
-        
         def sync_parts_state(new_enabled: bool):
-            """同步所有零件状态"""
             for part in parts:
                 if hasattr(part, 'set_state'):
                     part.set_state(new_enabled, notify=False)
-            
-            # 更新分割线
-            if divider:
-                divider.opacity = multirow_config.get("divider_opacity", 0.7) if new_enabled else 0.2
-                divider.update()
+            # 同步控件的启用状态
+            if controls:
+                for control in controls:
+                    # 设置透明度
+                    control.opacity = 1.0 if new_enabled else 0.4
+                    # 调用控件的set_state方法（如果存在）
+                    if hasattr(control, 'set_state'):
+                        control.set_state(new_enabled)
+                    if control.page:
+                        control.update()
         
-        # ========== 左侧布局 ==========
-        # 使用Stack布局，将帮助标签放置在图标标题的右上角
-        left_stack_children = [icon_title]
-        
-        if help_tag:
-            # 帮助标签放置在图标标题的右上角
-            left_stack_children.append(
-                ft.Container(
-                    content=help_tag,
-                    left=50,  # 图标标题右侧
-                    top=-5,   # 右上角
-                )
-            )
-        
-        left_content = ft.Stack(
-            left_stack_children,
-            width=left_width,
-            height=60,
-            clip_behavior=ft.ClipBehavior.NONE,
-        )
-        
+        # ========== 第三步：创建左侧区域 ==========
         left_container = ft.Container(
-            content=left_content,
-            left=card_padding,
-            top=0,
-            bottom=0,
-            width=left_width,
-            alignment=ft.Alignment(0, 0),
+            content=icon_title,
         )
         
-        # ========== 分割线布局 ==========
-        divider_container = ft.Container(
-            content=divider,
-            left=divider_left,
-            top=0,
-            bottom=0,
-            alignment=ft.Alignment(-1, 0),
-        )
-        
-        # ========== 右侧内容布局 ==========
-        stack_children = [left_container, divider_container]
+        # ========== 第四步：创建右侧控件 ==========
+        stack_children = [left_container]
         
         if controls:
-            # 获取通用卡片配置
-            card_params = config.定义尺寸.get("通用卡片", {})
-            control_margin_left = card_params.get("control_margin_left", 20)
-            control_margin_right = card_params.get("control_margin_right", 16)
-            control_h_spacing = card_params.get("control_h_spacing", 20)
-            control_v_spacing = card_params.get("control_v_spacing", 10)
-            controls_per_row = card_params.get("controls_per_row", 2)
-            vertical_center = card_params.get("vertical_center", True)
+            control_margin_right = DEFAULT_CONTROL_MARGIN_RIGHT
+            control_h_spacing = DEFAULT_CONTROL_H_SPACING
             
-            # 计算行数
-            num_controls = len(controls)
-            num_rows = (num_controls + controls_per_row - 1) // controls_per_row
-            
-            # 创建每行的控件
             rows = []
+            
             for row_idx in range(num_rows):
-                start_idx = row_idx * controls_per_row
-                end_idx = min(start_idx + controls_per_row, num_controls)
+                start_idx = row_idx * current_controls_per_row
+                end_idx = min(start_idx + current_controls_per_row, len(controls))
                 row_controls = controls[start_idx:end_idx]
                 
-                # 创建一行控件
                 row = ft.Row(
                     row_controls,
                     spacing=control_h_spacing,
-                    alignment=ft.MainAxisAlignment.START,
+                    alignment=ft.MainAxisAlignment.END,
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 )
                 rows.append(row)
             
-            # 创建右侧内容容器
             content_column = ft.Column(
                 rows,
-                spacing=control_v_spacing,
+                spacing=card_padding,  # 行间距 = 标准卡片边距
                 scroll=ft.ScrollMode.AUTO,
             )
             
-            # 计算卡片高度
-            control_height = 40  # 每个控件的高度
-            total_controls_height = num_rows * control_height + (num_rows - 1) * control_v_spacing
-            min_card_height = max(card_height, total_controls_height + 40)  # 40是上下边距
-            
             content_container = ft.Container(
                 content=content_column,
-                left=content_left,
-                top=0,
-                bottom=0,
                 right=control_margin_right,
-                alignment=ft.Alignment(-1, 0) if vertical_center else ft.Alignment(-1, -1),
+                top=card_padding,  # 上边距 = 标准卡片边距
             )
             stack_children.append(content_container)
-            
-            # 更新卡片高度
-            card_height = min_card_height
         
         # ========== 创建主布局 ==========
         main_stack = ft.Stack(
@@ -252,7 +238,6 @@ class UniversalCard:
         
         # ========== 暴露控制接口 ==========
         def set_state(new_enabled: bool):
-            """设置卡片状态"""
             nonlocal current_enabled
             current_enabled = new_enabled
             icon_title.set_state(new_enabled, notify=False)
@@ -261,11 +246,9 @@ class UniversalCard:
                 on_state_change(new_enabled)
         
         def toggle_state():
-            """切换卡片状态"""
             set_state(not current_enabled)
         
         def get_state() -> bool:
-            """获取当前状态"""
             return current_enabled
         
         container.set_state = set_state
@@ -290,32 +273,8 @@ if __name__ == "__main__":
     
     # 3. 正常启动被测模块
     def main(page: ft.Page):
-        page.padding = 20
+        page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        
-        # 创建多个控件
-        controls = [
-            ft.Dropdown(
-                options=[ft.dropdown.Option(f"选项{i}") for i in range(1, 4)],
-                value="选项1",
-                width=120,
-            ),
-            ft.Dropdown(
-                options=[ft.dropdown.Option(f"选项{i}") for i in range(1, 4)],
-                value="选项2",
-                width=120,
-            ),
-            ft.TextField(value="输入框", width=120),
-        ]
-        
-        page.add(UniversalCard.create(
-            配置,
-            title="多行卡片测试",
-            icon="HOME",
-            enabled=True,
-            help_text="点击切换状态",
-            controls=controls,
-            height=150,
-        ))  # 只能更改此处**被测调用模块名称**
+        page.add(UniversalCard(配置).render())
     
     ft.run(main)

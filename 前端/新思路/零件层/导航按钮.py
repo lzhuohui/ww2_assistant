@@ -31,7 +31,8 @@ from 配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改 ***
-# (用户指定的变量放在这里，用户没有指定之前就空着)
+# 导航按钮参数
+DEFAULT_WIDTH = 200
 # *********************************
 
 
@@ -61,11 +62,9 @@ class NavButton:
             ft.Container: 导航按钮容器
         """
         theme_colors = config.当前主题颜色
-        ui_config = config.定义尺寸.get("界面", {})
         
-        # 从配置文件获取默认值
-        default_width = ui_config.get("nav_button_width", 200)
-        current_width = width if width is not None else default_width
+        # 使用用户指定的默认值
+        current_width = width if width is not None else DEFAULT_WIDTH
         
         # 内部状态
         is_selected = False

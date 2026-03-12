@@ -3,14 +3,14 @@
 主题设置卡片 - 组件层（新思路）
 
 设计思路:
-    组装零件，构建主题设置卡片。
+    复刻基础设置卡片的结构，使用主题色块作为控件。
     采用装配模式，协调各零件交互。
     使用通用卡片组件，保持统一风格。
 
 功能:
     1. 调用通用卡片组件
-    2. 显示主题预览效果
-    3. 点击切换主题
+    2. 在右侧放置主题色块
+    3. 支持主题切换
 
 数据来源:
     所有配置数据从配置目录获取。
@@ -32,27 +32,23 @@ from 新思路.组件层.通用卡片 import UniversalCard
 from 新思路.零件层.主题色块 import ThemeColorBlock
 
 
-# *** 用户指定变量 - AI不得修改 ***
-# (用户指定的变量放在这里，用户没有指定之前就空着)
-# *********************************
-
-
 class ThemeSettingsCard:
     """主题设置卡片 - 组件层"""
     
-    # 默认主题
     默认主题 = "深色"
     
     @staticmethod
     def create(
         config: 界面配置,
-        page: ft.Page = None,
-        on_refresh: Callable[[], None] = None,
         title: str = "主题设置",
         icon: str = "PALETTE",
         enabled: bool = True,
         on_state_change: Callable[[bool], None] = None,
         help_text: str = None,
+        themes: List[str] = None,
+        selected: str = None,
+        on_theme_change: Callable[[str], None] = None,
+        subtitle: str = None,
         **kwargs
     ) -> ft.Container:
         """
@@ -60,55 +56,36 @@ class ThemeSettingsCard:
         
         参数:
             config: 界面配置对象
-            page: 页面对象（可选，用于更新页面显示）
-            on_refresh: 刷新回调（主题切换后调用）
             title: 卡片标题
             icon: 图标名称
-            enabled: 初始启用状态（True=使用当前主题，False=使用默认主题）
+            enabled: 初始启用状态
             on_state_change: 状态变化回调
             help_text: 帮助提示文字
+            themes: 主题列表
+            selected: 当前选中的主题
+            on_theme_change: 主题变化回调
+            subtitle: 副标题
         
         返回:
             ft.Container: 主题设置卡片容器
         """
-        theme_colors = config.当前主题颜色
-        current_theme = config.主题名称
+        # 默认主题列表
+        default_themes = ["浅色", "深色", "日出", "捕捉", "聚焦", "流畅"]
+        current_themes = themes if themes else default_themes
+        current_selected = selected if selected else ThemeSettingsCard.默认主题
         
-        # 从配置文件获取所有主题颜色
-        from 配置.主题配置 import 主题配置
-        all_themes = 主题配置.主题颜色
+        # 主题颜色映射
+        theme_colors = {
+            "浅色": "#FFFFFF",
+            "深色": "#1A1A2E",
+            "日出": "#FFE4B5",
+            "捕捉": "#98FB98",
+            "聚焦": "#87CEEB",
+            "流畅": "#E6E6FA",
+        }
         
-        # 构建预览用的简化主题数据
-        themes = {}
-        for theme_name, theme_data in all_themes.items():
-            themes[theme_name] = {
-                "bg": theme_data.get("bg_primary", "#FFFFFF"),
-                "panel": theme_data.get("bg_secondary", "#F3F3F3"),
-                "text": theme_data.get("text_primary", "#1A1A1A"),
-                "accent": theme_data.get("accent", "#0078D4"),
-            }
-        
-        # 存储主题卡片引用
-        theme_cards_refs = {}
-        
-        def create_theme_preview(theme_name: str, is_selected: bool) -> ft.Container:
-            """创建单个主题预览卡片"""
-            theme = themes.get(theme_name, themes["浅色"])
-            
-            # 使用主题色块零件
-            block = ThemeColorBlock.create(
-                config=config,
-                theme_name=theme_name,
-                bg_color=theme["bg"],
-                accent_color=theme["accent"],
-                is_selected=is_selected,
-                on_click=lambda tn=theme_name: handle_theme_click(tn),
-            )
-            
-            # 存储引用
-            theme_cards_refs[theme_name] = block
-            
-            return block
+        # 创建主题色块容器
+        theme_blocks_refs = {}
         
         def handle_theme_click(theme_name: str):
             """处理主题点击"""
@@ -116,54 +93,33 @@ class ThemeSettingsCard:
             if not card.get_state():
                 return
             
+            # 更新选中状态
+            for name, block in theme_blocks_refs.items():
+                if hasattr(block, 'set_selected'):
+                    block.set_selected(name == theme_name)
+            
             # 切换主题
             config.切换主题(theme_name)
-            print(f"主题切换: {theme_name}")
-            
-            # 更新选中状态
-            update_selection(theme_name)
-            
-            # 调用刷新回调
-            if on_refresh:
-                on_refresh()
-        
-        def handle_state_change(new_enabled: bool):
-            """处理状态变化"""
-            if not new_enabled:
-                # 禁用时，切换到默认主题
-                config.切换主题(ThemeSettingsCard.默认主题)
-                update_selection(ThemeSettingsCard.默认主题)
-                if on_refresh:
-                    on_refresh()
-            
-            # 更新主题选择器的启用状态
-            for name, block in theme_cards_refs.items():
-                block.opacity = 1.0 if new_enabled else 0.4
             
             # 调用外部回调
-            if on_state_change:
-                on_state_change(new_enabled)
+            if on_theme_change:
+                on_theme_change(theme_name)
         
-        def update_selection(selected_theme: str):
-            """更新选中状态"""
-            for name, block in theme_cards_refs.items():
-                is_selected = (name == selected_theme)
-                block.set_selected(is_selected)
-        
-        # 创建主题卡片列表
-        theme_names = ["浅色", "深色", "日出", "捕捉", "聚焦", "流畅"]
-        theme_cards = [
-            create_theme_preview(name, name == current_theme)
-            for name in theme_names
-        ]
-        
-        # 创建主题选择器行
-        content = ft.Row(
-            theme_cards,
-            alignment=ft.MainAxisAlignment.START,
-            spacing=20,
-            wrap=True,
-        )
+        # 创建主题色块列表
+        controls = []
+        for theme_name in current_themes:
+            bg_color = theme_colors.get(theme_name, "#FFFFFF")
+            is_selected = theme_name == current_selected
+            
+            block = ThemeColorBlock.create(
+                config=config,
+                theme_name=theme_name,
+                bg_color=bg_color,
+                is_selected=is_selected,
+                on_click=handle_theme_click,
+            )
+            theme_blocks_refs[theme_name] = block
+            controls.append(block)
         
         # 调用通用卡片组件
         card = UniversalCard.create(
@@ -171,23 +127,15 @@ class ThemeSettingsCard:
             title=title,
             icon=icon,
             enabled=enabled,
-            on_state_change=handle_state_change,
+            on_state_change=on_state_change,
             help_text=help_text,
-            controls=[content],
+            controls=controls,
+            subtitle=subtitle if subtitle else "主题配置描述",
+            controls_per_row=6,  # 主题色块每行6个
         )
         
         # 暴露控制接口
-        card.update_selection = update_selection
-        
-        # 添加获取有效主题的方法
-        def get_effective_theme() -> str:
-            """获取有效主题（启用时返回当前主题，禁用时返回默认主题）"""
-            if card.get_state():
-                return config.主题名称
-            else:
-                return ThemeSettingsCard.默认主题
-        
-        card.get_effective_theme = get_effective_theme
+        card.theme_blocks_refs = theme_blocks_refs
         
         return card
 
@@ -207,6 +155,6 @@ if __name__ == "__main__":
     def main(page: ft.Page):
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(ThemeSettingsCard.create(配置))  # 只能更改此处**被测调用模块名称**
+        page.add(ThemeSettingsCard.create(配置))
     
     ft.run(main)

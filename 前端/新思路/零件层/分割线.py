@@ -4,11 +4,11 @@
 
 设计思路:
     最小模块化的垂直分割线组件，用于分隔左右区域。
+    分割线在容器中居中。
 
 功能:
-    1. 垂直线：固定宽度
-    2. 阴影：发光效果
-    3. 状态切换：启用/禁用透明度变化
+    1. 垂直线：在容器中居中
+    2. 状态切换：启用/禁用透明度变化
 
 数据来源:
     所有配置数据从配置目录获取。
@@ -29,12 +29,28 @@ from 配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改 ***
-# (用户指定的变量放在这里，用户没有指定之前就空着)
+# 容器尺寸
+CONTAINER_WIDTH = 10
+CONTAINER_HEIGHT = 100
+# 线型宽度
+LINE_WIDTH = 2
 # *********************************
 
 
 class Divider:
-    """分割线 - 垂直分割线+发光效果"""
+    """分割线 - 垂直分割线，在容器中居中"""
+    
+    def __init__(self, config):
+        """初始化分割线（支持调试逻辑）"""
+        self.config = config
+    
+    def render(self):
+        """渲染分割线（支持调试逻辑）"""
+        return Divider.create(
+            config=self.config,
+            height=CONTAINER_HEIGHT,
+            enabled=True,
+        )
     
     @staticmethod
     def create(
@@ -43,25 +59,37 @@ class Divider:
         enabled: bool = True,
         **kwargs
     ) -> ft.Container:
+        """
+        创建分割线
+        
+        参数:
+            config: 界面配置对象
+            height: 容器高度（可选，默认60）
+            enabled: 启用状态
+        
+        返回:
+            ft.Container: 包含分割线的容器
+        """
         theme_colors = config.当前主题颜色
         
-        multirow_config = config.定义尺寸.get("多行卡片", {})
+        container_width = CONTAINER_WIDTH
+        container_height = height if height is not None else CONTAINER_HEIGHT
+        line_width = LINE_WIDTH
         
-        divider_width = multirow_config.get("divider_width", 2)
-        divider_height = height or multirow_config.get("divider_height", 60)
-        divider_opacity = multirow_config.get("divider_opacity", 0.7)
-        divider_blur = multirow_config.get("divider_blur", 6)
-        
-        return ft.Container(
-            width=divider_width,
-            height=divider_height,
+        # 分割线（垂直居中）
+        line = ft.Container(
+            width=line_width,
+            height=container_height,
             bgcolor=theme_colors.get("accent"),
-            opacity=divider_opacity if enabled else 0.2,
-            shadow=ft.BoxShadow(
-                blur_radius=divider_blur,
-                color=theme_colors.get("accent"),
-                spread_radius=0,
-            ) if enabled else None,
+            opacity=0.7 if enabled else 0.2,
+        )
+        
+        # 容器（分割线居中）
+        return ft.Container(
+            width=container_width,
+            height=container_height,
+            content=line,
+            alignment=ft.Alignment(0, 0),  # 分割线居中
         )
 
 
@@ -80,6 +108,6 @@ if __name__ == "__main__":
     def main(page: ft.Page):
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(Divider.create(配置, height=60, enabled=True))  # 只能更改此处**被测调用模块名称**
+        page.add(Divider(配置).render())  # 只能更改此处**被测调用模块名称**
     
     ft.run(main)

@@ -62,6 +62,7 @@ class SystemSettingsPage:
             config=config,
             title="基础设置",
             settings=settings,
+            controls_per_row=2,  # 每行2个下拉框
         )
         
         # ========== 个性化卡片 ==========
@@ -78,7 +79,7 @@ class SystemSettingsPage:
             config=config,
             page=page,
             on_refresh=on_refresh,
-            title="高对比度调色板",
+            title="调色板",
         )
         
         # ========== 页面容器 ==========

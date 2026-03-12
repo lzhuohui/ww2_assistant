@@ -28,6 +28,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from typing import Callable, Optional
 from 配置.界面配置 import 界面配置
+from 新思路.零件层.标签文本 import LabelText
 
 
 # *** 用户指定变量 - AI不得修改 ***
@@ -78,15 +79,16 @@ class HelpTag:
             color=theme_colors.get("text_secondary"),
         )
         
-        # 创建提示文字（右上角显示，简洁现代风格）
+        # 创建提示文字（调用标签文本模块）
+        tip_label = LabelText.create(
+            config=config,
+            text=help_text,
+            role="help",
+            enabled=enabled,
+        )
+        
         tip_text = ft.Container(
-            content=ft.Text(
-                help_text,
-                size=11,
-                color=theme_colors.get("text_primary"),
-                no_wrap=True,
-                overflow=ft.TextOverflow.ELLIPSIS,
-            ),
+            content=tip_label,
             padding=ft.Padding(left=8, top=4, right=8, bottom=4),
             bgcolor=theme_colors.get("bg_card"),
             border_radius=4,

@@ -9,7 +9,7 @@
 
 功能:
     1. 调用通用卡片组件
-    2. 在右侧放置标签下拉框/标签输入框
+    2. 在右侧放置标签下拉框
     3. 支持动态添加设置项
 
 数据来源:
@@ -28,21 +28,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from typing import Callable, List, Dict, Any
 from 配置.界面配置 import 界面配置
-from 新思路.组件层.通用卡片 import UniversalCard
+from 新思路.组件层.通用卡片 import UniversalCard, DEFAULT_CONTROLS_PER_ROW
 from 新思路.零件层.标签下拉框 import LabelDropdown
-from 新思路.零件层.标签输入框 import LabelInput
 
 
 class BasicSettingsCard:
     """基础设置卡片 - 组件层"""
-    
-    # 默认值定义
-    默认值 = {
-        "挂机模式": "自动挂机",
-        "指令速度": "正常",
-        "尝试次数": "15",
-        "清换限量": "1.0",
-    }
     
     @staticmethod
     def create(
@@ -53,6 +44,8 @@ class BasicSettingsCard:
         on_state_change: Callable[[bool], None] = None,
         help_text: str = None,
         settings: List[Dict[str, Any]] = None,
+        subtitle: str = None,
+        controls_per_row: int = 2,
         **kwargs
     ) -> ft.Container:
         """
@@ -68,102 +61,55 @@ class BasicSettingsCard:
             settings: 设置项列表
                 [
                     {"type": "dropdown", "label": "挂机模式", "options": [...], "value": "...", "on_change": ...},
-                    {"type": "input", "label": "尝试次数", "value": "3", "on_change": ...},
                 ]
+            subtitle: 副标题（显示在分割线右侧下方）
+            controls_per_row: 每行控件数量
         
         返回:
             ft.Container: 基础设置卡片容器
         """
-        # 默认设置项
-        default_settings = []
+        # 默认设置项（从按键精灵脚本转换）
+        default_settings = [
+            {"type": "dropdown", "label": "卦机模式:", "options": ["自动", "手动"], "value": "自动"},
+            {"type": "dropdown", "label": "指令限速:", "options": ["100", "150", "200", "250", "300", "350", "400", "450", "500"], "value": "100"},
+            {"type": "dropdown", "label": "尝试次数:", "options": ["10", "15", "20", "25", "30"], "value": "15"},
+            {"type": "dropdown", "label": "清缓限量:", "options": ["1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "4.5", "5.0"], "value": "1.0"},
+            {"type": "dropdown", "label": "备用平台:", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "value": "Tap"},
+        ]
         current_settings = settings if settings else default_settings
         
-        # 创建设置项列表
+        # 创建控件列表
         controls = []
-        settings_refs = {}  # 存储控件引用，便于后续访问
-        
-        for i, setting in enumerate(current_settings):
-            setting_type = setting.get("type", "input")
-            label = setting.get("label", f"设置项{i+1}")
+        for setting in current_settings:
+            setting_type = setting.get("type", "dropdown")
+            label = setting.get("label", "")
             value = setting.get("value", "")
-            width = setting.get("width", 150)
+            options = setting.get("options", [])
             on_change = setting.get("on_change", None)
             
-            if setting_type == "dropdown":
-                options = setting.get("options", [])
+            if setting_type == "dropdown" and label:
                 control = LabelDropdown.create(
                     config=config,
                     label=label,
                     options=options,
                     value=value or (options[0] if options else ""),
-                    width=width,
                     on_change=on_change,
                     enabled=enabled,
                 )
-            else:  # input
-                control = LabelInput.create(
-                    config=config,
-                    label=label,
-                    value=value,
-                    width=width,
-                    on_change=on_change,
-                    enabled=enabled,
-                )
-            
-            controls.append(control)
-            settings_refs[label] = control
+                controls.append(control)
         
-        # 处理状态变化
-        def handle_state_change(new_enabled: bool):
-            """处理状态变化"""
-            # 更新所有设置项的启用状态（通过透明度模拟禁用效果）
-            for label, control in settings_refs.items():
-                control.opacity = 1.0 if new_enabled else 0.4
-                control.disabled = not new_enabled
-                control.update()
-            
-            # 调用外部回调
-            if on_state_change:
-                on_state_change(new_enabled)
-        
-        # 调用通用卡片组件（高度自动计算）
+        # 调用通用卡片组件（只传递数据，不覆盖布局参数）
         card = UniversalCard.create(
             config=config,
             title=title,
             icon=icon,
             enabled=enabled,
-            on_state_change=handle_state_change,
+            on_state_change=on_state_change,
             help_text=help_text,
             controls=controls,
+            subtitle=subtitle if subtitle else "通用配置描述",
+            controls_per_row=controls_per_row,
         )
-        
-        # 暴露控制接口
-        def get_value(label: str) -> str:
-            """获取指定设置项的值"""
-            if label in settings_refs:
-                return settings_refs[label].get_value()
-            return None
-        
-        def set_value(label: str, value: str):
-            """设置指定设置项的值"""
-            if label in settings_refs:
-                settings_refs[label].set_value(value)
-        
-        def get_all_values() -> Dict[str, str]:
-            """获取所有设置项的值"""
-            return {label: control.get_value() for label, control in settings_refs.items()}
-        
-        def get_effective_values() -> Dict[str, Any]:
-            """获取有效值（启用时返回当前值，禁用时返回默认值）"""
-            if card.get_state():
-                return get_all_values()
-            else:
-                return BasicSettingsCard.默认值.copy()
-        
-        card.get_value = get_value
-        card.set_value = set_value
-        card.get_all_values = get_all_values
-        card.get_effective_values = get_effective_values
         
         return card
 
@@ -181,16 +127,8 @@ if __name__ == "__main__":
     
     # 3. 正常启动被测模块
     def main(page: ft.Page):
-        page.padding = 20
+        page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        
-        # 创建基础设置卡片
-        settings = [
-            {"type": "dropdown", "label": "挂机模式", "options": ["自动挂机", "手动挂机", "半自动挂机"], "value": "自动挂机"},
-            {"type": "dropdown", "label": "指令速度", "options": ["快速", "正常", "慢速"], "value": "正常"},
-            {"type": "input", "label": "尝试次数", "value": "3"},
-            {"type": "input", "label": "清换限量", "value": "100"},
-        ]
-        page.add(BasicSettingsCard.create(配置, title="基础设置", settings=settings))  # 只能更改此处**被测调用模块名称**
+        page.add(BasicSettingsCard.create(配置))  # 只能更改此处**被测调用模块名称**
     
     ft.run(main)

@@ -31,7 +31,9 @@ from 配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改 ***
-# (用户指定的变量放在这里，用户没有指定之前就空着)
+# 开关尺寸
+DEFAULT_WIDTH = 60
+DEFAULT_HEIGHT = 26
 # *********************************
 
 
@@ -61,13 +63,10 @@ class EllipseSwitch:
             ft.Container: 开关容器
         """
         theme_colors = config.当前主题颜色
-        ui_config = config.定义尺寸.get("组件", {})
         
-        # 从配置文件获取默认值
-        default_width = ui_config.get("switch_width", 60)
-        default_height = ui_config.get("switch_height", 26)
-        current_width = width if width is not None else default_width
-        current_height = height if height is not None else default_height
+        # 使用用户指定的默认值
+        current_width = width if width is not None else DEFAULT_WIDTH
+        current_height = height if height is not None else DEFAULT_HEIGHT
         
         accent_color = theme_colors.get("accent", "#0078D4")
         track_off_color = theme_colors.get("switch_track_off", "#333333")

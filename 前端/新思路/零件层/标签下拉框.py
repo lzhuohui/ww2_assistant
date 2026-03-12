@@ -47,6 +47,7 @@ class LabelDropdown:
         value: str = None,
         width: int = None,
         on_change: Callable[[str], None] = None,
+        enabled: bool = True,
         **kwargs
     ) -> ft.Row:
         """
@@ -59,16 +60,12 @@ class LabelDropdown:
             value: 初始值
             width: 下拉框宽度（可选，默认从配置中获取）
             on_change: 值变化回调
+            enabled: 启用状态（默认True）
         
         返回:
             ft.Row: 标签下拉框容器
         """
         theme_colors = config.当前主题颜色
-        ui_config = config.定义尺寸.get("组件", {})
-        
-        # 从配置文件获取默认值
-        default_width = ui_config.get("dropdown_width", 120)
-        current_width = width if width is not None else default_width
         
         # 创建标签文本（自适应宽度）
         label_control = ft.Text(
@@ -78,14 +75,18 @@ class LabelDropdown:
             no_wrap=True,
         )
         
-        # 创建下拉框
+        # 创建下拉框（宽度由调用者决定，或使用自定义下拉框的默认值）
         dropdown_control = CustomDropDown.create(
             config=config,
             options=options or [],
             value=value if value is not None else (options[0] if options else ""),
-            width=current_width,
+            width=width,
             on_change=on_change,
+            enabled=enabled,
         )
+        
+        # 获取下拉框高度
+        dropdown_height = getattr(dropdown_control, 'height', 32) or 32
         
         # 创建行容器（标签紧靠下拉框）
         row = ft.Row(
@@ -96,11 +97,15 @@ class LabelDropdown:
             alignment=ft.MainAxisAlignment.START,
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=4,
+            height=dropdown_height,  # 设置行高度等于下拉框高度
         )
         
         # 暴露控制接口
         row.get_value = dropdown_control.get_value
         row.set_value = dropdown_control.set_value
+        row.set_enabled = dropdown_control.set_enabled
+        row.get_enabled = dropdown_control.get_enabled
+        row.set_state = dropdown_control.set_state  # 兼容别名
         
         return row
 

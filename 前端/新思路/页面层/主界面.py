@@ -31,6 +31,11 @@ from 配置.界面配置 import 界面配置
 from 新思路.组件层.用户信息卡片 import UserInfoCard
 from 新思路.组件层.导航栏 import NavBar
 from 新思路.页面层.系统设置页面 import SystemSettingsPage
+from 新思路.页面层.策略设置页面 import StrategySettingsPage
+from 新思路.页面层.任务设置页面 import TaskSettingsPage
+from 新思路.页面层.集资设置页面 import FundraisingSettingsPage
+from 新思路.页面层.打扫战场页面 import BattlefieldSettingsPage
+from 新思路.页面层.打野设置页面 import WildSettingsPage
 
 
 class MainPage:
@@ -50,6 +55,12 @@ class MainPage:
         返回:
             ft.Container: 主界面容器
         """
+        # 设置窗口尺寸（从配置文件读取）
+        if self.page:
+            ui_config = self.config.定义尺寸.get("界面", {})
+            self.page.window.width = ui_config.get("window_width", 1200)
+            self.page.window.height = ui_config.get("window_height", 540)
+        
         # 创建用户信息卡片
         user_info_card = UserInfoCard.create(
             config=self.config,
@@ -130,26 +141,45 @@ class MainPage:
         """获取页面内容"""
         if nav_name == "系统":
             return SystemSettingsPage.create(self.config, self.page, self.refresh)
+        elif nav_name == "策略":
+            return StrategySettingsPage.create(self.config, self.page, self.refresh)
+        elif nav_name == "任务":
+            return TaskSettingsPage.create(self.config, self.page, self.refresh)
+        elif nav_name == "建筑":
+            return self.get_placeholder_page(nav_name)
+        elif nav_name == "集资":
+            return FundraisingSettingsPage.create(self.config, self.page, self.refresh)
+        elif nav_name == "打扫":
+            return BattlefieldSettingsPage.create(self.config, self.page, self.refresh)
+        elif nav_name == "打野":
+            return WildSettingsPage.create(self.config, self.page, self.refresh)
+        elif nav_name == "账号":
+            return self.get_placeholder_page(nav_name)
+        elif nav_name == "关于":
+            return self.get_placeholder_page(nav_name)
         else:
-            # 其他页面暂未实现
-            return ft.Column(
-                [
-                    ft.Text(
-                        nav_name,
-                        size=28,
-                        weight=ft.FontWeight.BOLD,
-                        color=self.theme_colors.get("text_primary"),
-                    ),
-                    ft.Container(height=24),
-                    ft.Text(
-                        f"{nav_name}页面开发中...",
-                        size=14,
-                        color=self.theme_colors.get("text_secondary"),
-                    ),
-                ],
-                spacing=0,
-                expand=True,
-            )
+            return self.get_placeholder_page(nav_name)
+    
+    def get_placeholder_page(self, nav_name: str) -> ft.Column:
+        """获取占位页面"""
+        return ft.Column(
+            [
+                ft.Text(
+                    nav_name,
+                    size=28,
+                    weight=ft.FontWeight.BOLD,
+                    color=self.theme_colors.get("text_primary"),
+                ),
+                ft.Container(height=24),
+                ft.Text(
+                    f"{nav_name}页面开发中...",
+                    size=14,
+                    color=self.theme_colors.get("text_secondary"),
+                ),
+            ],
+            spacing=0,
+            expand=True,
+        )
     
     def handle_nav_change(self, nav_name: str):
         """处理导航切换"""
