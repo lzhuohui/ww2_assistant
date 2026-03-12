@@ -310,7 +310,6 @@ class UniversalCard:
 
 # 兼容别名
 通用卡片 = UniversalCard
-MultiRowCard = UniversalCard
 多行卡片 = UniversalCard
 
 
