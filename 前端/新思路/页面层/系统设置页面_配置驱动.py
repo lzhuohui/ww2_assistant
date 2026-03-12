@@ -16,7 +16,7 @@
 使用场景:
     被主界面调用。
 
-可独立运行调试: python 系统设置页面.py
+可独立运行调试: python 系统设置页面_配置驱动.py
 """
 
 import sys
@@ -30,13 +30,13 @@ from 配置.配置管理器 import ConfigManager
 from 新思路.组件层.通用卡片配置驱动扩展 import UniversalCard
 
 
-class SystemSettingsPage:
+class SystemSettingsPageConfigDriven:
     """系统设置页面 - 页面层（配置驱动版本）"""
     
     @staticmethod
     def create(config: 界面配置, page: ft.Page = None, on_refresh: Callable[[], None] = None) -> ft.Container:
         """
-        创建系统设置页面
+        创建系统设置页面（配置驱动版本）
         
         参数:
             config: 界面配置对象
@@ -117,7 +117,7 @@ class SystemSettingsPage:
 
 
 # 兼容别名
-系统设置页面 = SystemSettingsPage
+系统设置页面_配置驱动 = SystemSettingsPageConfigDriven
 
 
 # ==================== 调试逻辑 ====================
@@ -131,6 +131,6 @@ if __name__ == "__main__":
     def main(page: ft.Page):
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(SystemSettingsPage.create(配置))
+        page.add(SystemSettingsPageConfigDriven.create(配置))
     
     ft.run(main)
