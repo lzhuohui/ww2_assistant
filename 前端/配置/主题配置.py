@@ -212,38 +212,7 @@ class 主题配置:
             "shadow": "rgba(0, 0, 0, 0.25)",
             "shadow_hover": "rgba(0, 0, 0, 0.35)",
         },
-        # 背景壁纸主题 - 流畅
-        "流畅": {
-            "bg_primary": "#F5F5F5",
-            "bg_secondary": "#FFFFFF",
-            "bg_card": "#FFFFFF",
-            "bg_input": "#FFFFFF",
-            "bg_selected": "#0078D4",
-            "bg_hover": "#E8E8E8",
-            "bg_pressed": "#D5D5D5",
-            "text_primary": "#1A1A1A",
-            "text_secondary": "#666666",
-            "text_hint": "#999999",
-            "text_disabled": "#CCCCCC",
-            "border": "#D0D0D0",
-            "border_light": "#E5E5E5",
-            "divider": "#E5E5E5",
-            "accent": "#0078D4",
-            "accent_hover": "#1A86D9",
-            "accent_pressed": "#006CBD",
-            "accent_light": "#CCE4F7",
-            "success": "#6CCB5F",
-            "warning": "#FCE100",
-            "error": "#FF6B6B",
-            "info": "#60CDFF",
-            "switch_thumb_on": "#FFFFFF",
-            "switch_thumb_off": "#666666",
-            "switch_track_on": "#0078D4",
-            "switch_track_off": "#CCCCCC",
-            "switch_border_off": "#999999",
-            "shadow": "rgba(0, 0, 0, 0.08)",
-            "shadow_hover": "rgba(0, 0, 0, 0.12)",
-        },
+
     }
     
     # ==================== 高对比度调色板定义 ====================
@@ -399,10 +368,19 @@ class 主题配置:
         return False
     
     def 切换调色板(self, 调色板名称: str):
-        """切换高对比度调色板"""
+        """切换高对比度调色板
+        
+        参数:
+            调色板名称: 调色板名称，传入None或空字符串可取消调色板效果
+        """
         if 调色板名称 in self.高对比度调色板:
             self._调色板名称 = 调色板名称
             self.当前主题颜色 = self.高对比度调色板[调色板名称]
+            return True
+        elif 调色板名称 is None or 调色板名称 == "":
+            # 取消调色板效果，恢复到当前主题
+            self._调色板名称 = None
+            self.当前主题颜色 = self.主题颜色[self._主题名称]
             return True
         return False
     

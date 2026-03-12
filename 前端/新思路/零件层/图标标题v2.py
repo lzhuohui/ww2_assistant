@@ -184,30 +184,36 @@ class IconTitleV2:
             )
             stack_children.append(divider_container)
         
-        # 2. 标题（右对齐，右边缘靠近分割线）
+        # 2. 标题（保持自适应宽度，水平中线到分割线的距离50）
         icon_title_items = [title_control]
         icon_title_column = ft.Column(
             icon_title_items,
             spacing=ICON_TITLE_SPACING,
-            horizontal_alignment=ft.CrossAxisAlignment.END,  # 右对齐，使标题右边缘靠近分割线
+            horizontal_alignment=ft.CrossAxisAlignment.END,  # 右对齐，保持自适应宽度
             alignment=ft.MainAxisAlignment.START,
             tight=True,
         )
         
+        # 主标题文字水平中线到分割线的距离50
+        title_center_to_divider = 50
+        # 计算标题容器的左边缘位置：分割线位置 - 标题文字宽度/2 - 距离
+        title_text_width = len(title) * DEFAULT_TITLE_SIZE
+        title_container_left = ICON_AREA_WIDTH - title_text_width / 2 - title_center_to_divider
+        
         icon_title_container = ft.Container(
             content=icon_title_column,
-            left=0,
+            left=title_container_left,
             top=title_top,  # 使用标题顶部位置
-            width=ICON_AREA_WIDTH - CONTAINER_WIDTH // 2,  # 宽度 = 图标区域宽度 - 半个分割线容器宽度
+            # 不设置宽度，保持自适应
         )
         stack_children.append(icon_title_container)
         
-        # 2.1 图标（单独放置，在标题文字的水平中心位置上方）
+        # 2.1 图标（单独放置，中线到分割线的距离50）
         if icon_control:
-            # 计算标题文字的宽度（估算：每个字14像素）
-            title_text_width = len(title) * DEFAULT_TITLE_SIZE
-            # 图标水平位置：标题容器右边缘 - 标题文字宽度/2 - 图标宽度/2
-            icon_left = (ICON_AREA_WIDTH - CONTAINER_WIDTH // 2) - title_text_width / 2 - DEFAULT_ICON_SIZE / 2
+            # 图标的中线到分割线的距离50
+            icon_center_to_divider = 50
+            # 计算图标左边缘位置：分割线位置 - 图标宽度/2 - 距离
+            icon_left = ICON_AREA_WIDTH - DEFAULT_ICON_SIZE / 2 - icon_center_to_divider
             # 图标垂直位置：标题顶部位置 - 图标高度 - 间距
             icon_top = title_top - DEFAULT_ICON_SIZE - ICON_TITLE_SPACING
             icon_container = ft.Container(
@@ -230,6 +236,14 @@ class IconTitleV2:
         # 宽度 = 图标区域 + 分割线 + 副标题区域
         subtitle_width = 100 if subtitle else 0  # 副标题预留宽度
         overall_width = ICON_AREA_WIDTH + divider_width + divider_width + subtitle_width
+        
+        # 4. 透明点击区域（只在分割线左侧）
+        click_area = ft.Container(
+            width=ICON_AREA_WIDTH,
+            height=line_height,
+            # 透明背景，只用于捕获点击事件
+        )
+        stack_children.append(click_area)
         
         # ========== 构建Stack ==========
         content_stack = ft.Stack(
@@ -277,7 +291,8 @@ class IconTitleV2:
             if on_click:
                 on_click(e)
         
-        container.on_click = handle_click
+        # 只在透明点击区域添加点击事件，副标题区域不会触发
+        click_area.on_click = handle_click
         container.set_state = set_state
         container.toggle_state = toggle_state
         container.get_state = lambda: container._enabled

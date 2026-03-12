@@ -192,9 +192,15 @@ class MainPage:
         # 更新主题颜色
         self.theme_colors = self.config.当前主题颜色
         
-        # 刷新页面显示（只更新背景色，不重新创建界面）
+        # 重新创建整个界面以应用新主题
         if self.page:
-            self.page.bgcolor = self.theme_colors.get("bg_primary")
+            # 清空页面
+            self.page.controls.clear()
+            # 重新创建主界面
+            main_page = MainPage(self.config)
+            main_page.page = self.page
+            self.page.add(main_page.create())
+            # 更新页面
             self.page.update()
 
 

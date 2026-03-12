@@ -129,6 +129,8 @@ class CircleSwitch:
         circle.get_value = lambda: current_value
         circle.set_enabled = set_enabled
         circle.get_enabled = lambda: current_enabled
+        # 添加 set_state 方法作为别名，保持接口一致性
+        circle.set_state = set_enabled
         
         return circle
 

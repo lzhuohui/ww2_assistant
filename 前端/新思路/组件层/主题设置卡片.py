@@ -70,7 +70,7 @@ class ThemeSettingsCard:
             ft.Container: 主题设置卡片容器
         """
         # 默认主题列表
-        default_themes = ["浅色", "深色", "日出", "捕捉", "聚焦", "流畅"]
+        default_themes = ["浅色", "深色", "日出", "捕捉", "聚焦"]
         current_themes = themes if themes else default_themes
         current_selected = selected if selected else ThemeSettingsCard.默认主题
         
@@ -81,7 +81,6 @@ class ThemeSettingsCard:
             "日出": "#FFE4B5",
             "捕捉": "#98FB98",
             "聚焦": "#87CEEB",
-            "流畅": "#E6E6FA",
         }
         
         # 创建主题色块容器
@@ -104,6 +103,11 @@ class ThemeSettingsCard:
             # 调用外部回调
             if on_theme_change:
                 on_theme_change(theme_name)
+            
+            # 调用刷新回调（主题切换后刷新界面）
+            on_refresh = kwargs.get('on_refresh')
+            if on_refresh:
+                on_refresh()
         
         # 创建主题色块列表
         controls = []

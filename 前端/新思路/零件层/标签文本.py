@@ -87,11 +87,11 @@ class LabelText:
         if role == "primary":
             default_size = DEFAULT_PRIMARY_SIZE
             default_color = theme_colors.get("text_primary")
-            default_weight = weight_config.get("font_weight_medium", ft.FontWeight.W_500)
+            default_weight = weight_config.get("font_weight_bold", ft.FontWeight.W_700)  # 主标题使用粗体
         elif role == "secondary":
             default_size = DEFAULT_SECONDARY_SIZE
             default_color = theme_colors.get("text_secondary", "#888888")
-            default_weight = None
+            default_weight = weight_config.get("font_weight_light", ft.FontWeight.W_300)  # 副标题使用细体
         elif role == "help":
             default_size = DEFAULT_HELP_SIZE
             default_color = theme_colors.get("text_secondary", "#888888")

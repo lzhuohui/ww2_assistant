@@ -91,17 +91,32 @@ class PaletteSettingsCard:
             if not card.get_state():
                 return
             
-            # 更新选中状态
-            for name, block in palette_blocks_refs.items():
-                if hasattr(block, 'set_selected'):
-                    block.set_selected(name == palette_name)
+            # 检查是否点击的是当前选中的调色板
+            if palette_name == current_selected:
+                # 取消调色板效果
+                config.切换调色板(None)
+                # 更新选中状态（所有色块都不选中）
+                for name, block in palette_blocks_refs.items():
+                    if hasattr(block, 'set_selected'):
+                        block.set_selected(False)
+                # 调用外部回调
+                if on_palette_change:
+                    on_palette_change(None)
+            else:
+                # 更新选中状态
+                for name, block in palette_blocks_refs.items():
+                    if hasattr(block, 'set_selected'):
+                        block.set_selected(name == palette_name)
+                # 切换调色板
+                config.切换调色板(palette_name)
+                # 调用外部回调
+                if on_palette_change:
+                    on_palette_change(palette_name)
             
-            # 切换调色板
-            config.切换调色板(palette_name)
-            
-            # 调用外部回调
-            if on_palette_change:
-                on_palette_change(palette_name)
+            # 调用刷新回调（调色板切换后刷新界面）
+            on_refresh = kwargs.get('on_refresh')
+            if on_refresh:
+                on_refresh()
         
         # 创建调色板色块列表
         controls = []
