@@ -162,27 +162,7 @@ def create_dropdown(config_key: str, label: str, value: str, options: list = Non
 
 # ==================== 调试逻辑 ====================
 if __name__ == "__main__":
-    import json
-    
-    print("=" * 50)
-    print("建筑配置调试")
-    print("=" * 50)
-    
-    print(f"\n用户指定变量:")
-    print(f"  DEFAULT_DROPDOWN_WIDTH = {DEFAULT_DROPDOWN_WIDTH}")
-    
-    print(f"\n等级选项:")
-    print(f"  LEVELS: {LEVELS[:5]} ... {LEVELS[-5:]}")
-    print(f"  LEVELS_0: {LEVELS_0[:5]} ... {LEVELS_0[-5:]}")
-    
-    print(f"\n建筑配置:")
-    for card_name, card_config in 建筑配置.items():
-        print(f"\n  {card_name}:")
-        print(f"    标题: {card_config['title']}")
-        print(f"    图标: {card_config['icon']}")
-        print(f"    副标题: {card_config['subtitle']}")
-        print(f"    每行控件数: {card_config['controls_per_row']}")
-        print(f"    控件数量: {len(card_config['controls'])}")
-    
-    print(f"\n完整配置（JSON格式）:")
-    print(json.dumps(建筑配置, ensure_ascii=False, indent=2))
+    print(f"下拉框默认宽度: {DEFAULT_DROPDOWN_WIDTH}")
+    print(f"建筑配置数量: {len(建筑配置)}")
+    for card_name in 建筑配置:
+        print(f"  - {card_name}: {len(建筑配置[card_name]['controls'])}个控件")
