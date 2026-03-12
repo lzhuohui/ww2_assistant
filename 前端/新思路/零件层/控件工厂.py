@@ -35,9 +35,6 @@ from 新思路.零件层.主题色块 import ThemeColorBlock
 class ControlFactory:
     """控件工厂 - 根据配置创建控件"""
     
-    # 控件模板缓存
-    _template_cache = {}
-    
     @staticmethod
     def create_controls(
         config: 界面配置,

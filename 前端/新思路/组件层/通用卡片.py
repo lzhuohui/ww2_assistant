@@ -113,8 +113,6 @@ class UniversalCard:
         返回:
             ft.Container: 完整的卡片容器
         """
-        theme_colors = config.当前主题颜色
-        
         ui_config = config.定义尺寸.get("界面", {})
         card_config = config.定义尺寸.get("卡片", {})
         
