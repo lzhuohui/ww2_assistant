@@ -18,6 +18,10 @@
     被 ConfigManager 调用。
 """
 
+# *** 用户指定变量 - AI不得修改 ***
+DEFAULT_DROPDOWN_WIDTH = 60  # 下拉框默认宽度
+# *********************************
+
 # 等级选项 (01-20)
 LEVELS = [f"{i:02d}" for i in range(1, 21)]
 LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
@@ -28,7 +32,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
         "card_type": "standard",
         "title": "主帅主城",
         "icon": "HOME",
-        "subtitle": "设置主帅主城的建筑等级",
+        "subtitle": "",
         "enabled": True,
         "controls_per_row": 6,
         "controls": [
@@ -38,7 +42,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "城市",
                 "options": LEVELS,
                 "value": "17",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -46,7 +50,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "兵工",
                 "options": LEVELS,
                 "value": "17",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -54,7 +58,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "陆军",
                 "options": LEVELS,
                 "value": "14",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -62,7 +66,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "空军",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -70,7 +74,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "商业",
                 "options": LEVELS,
                 "value": "04",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -78,7 +82,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "补给",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -86,7 +90,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "内塔",
                 "options": LEVELS,
                 "value": "04",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -94,7 +98,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "村庄",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -102,7 +106,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "资源",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -110,7 +114,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "军工",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -118,7 +122,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "港口",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -126,7 +130,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "外塔",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
         ],
     },
@@ -134,7 +138,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
         "card_type": "standard",
         "title": "主帅分城",
         "icon": "LOCATION_CITY",
-        "subtitle": "设置主帅分城的建筑等级",
+        "subtitle": "",
         "enabled": True,
         "controls_per_row": 6,
         "controls": [
@@ -144,7 +148,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "城市",
                 "options": LEVELS,
                 "value": "15",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -152,7 +156,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "兵工",
                 "options": LEVELS,
                 "value": "10",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -160,7 +164,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "陆军",
                 "options": LEVELS,
                 "value": "10",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -168,7 +172,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "空军",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -176,7 +180,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "商业",
                 "options": LEVELS,
                 "value": "04",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -184,7 +188,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "补给",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -192,7 +196,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "内塔",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -200,7 +204,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "村庄",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -208,7 +212,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "资源",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -216,7 +220,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "军工",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -224,7 +228,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "港口",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -232,7 +236,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "外塔",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
         ],
     },
@@ -240,7 +244,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
         "card_type": "standard",
         "title": "付帅主城",
         "icon": "APARTMENT",
-        "subtitle": "设置付帅主城的建筑等级",
+        "subtitle": "",
         "enabled": True,
         "controls_per_row": 6,
         "controls": [
@@ -250,7 +254,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "城市",
                 "options": LEVELS,
                 "value": "15",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -258,7 +262,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "兵工",
                 "options": LEVELS,
                 "value": "10",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -266,7 +270,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "陆军",
                 "options": LEVELS,
                 "value": "10",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -274,7 +278,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "空军",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -282,7 +286,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "商业",
                 "options": LEVELS,
                 "value": "04",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -290,7 +294,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "补给",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -298,7 +302,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "内塔",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -306,7 +310,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "村庄",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -314,7 +318,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "资源",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -322,7 +326,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "军工",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -330,7 +334,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "港口",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -338,7 +342,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "外塔",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
         ],
     },
@@ -346,7 +350,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
         "card_type": "standard",
         "title": "付帅分城",
         "icon": "BUSINESS",
-        "subtitle": "设置付帅分城的建筑等级",
+        "subtitle": "",
         "enabled": True,
         "controls_per_row": 6,
         "controls": [
@@ -356,7 +360,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "城市",
                 "options": LEVELS,
                 "value": "15",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -364,7 +368,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "兵工",
                 "options": LEVELS,
                 "value": "10",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -372,7 +376,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "陆军",
                 "options": LEVELS,
                 "value": "10",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -380,7 +384,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "空军",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -388,7 +392,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "商业",
                 "options": LEVELS,
                 "value": "04",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -396,7 +400,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "补给",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -404,7 +408,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "内塔",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -412,7 +416,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "村庄",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -420,7 +424,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "资源",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -428,7 +432,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "军工",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -436,7 +440,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "港口",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -444,7 +448,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "外塔",
                 "options": LEVELS,
                 "value": "03",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
         ],
     },
@@ -452,7 +456,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
         "card_type": "standard",
         "title": "军团城市",
         "icon": "FORT",
-        "subtitle": "设置军团城市的建筑等级",
+        "subtitle": "",
         "enabled": True,
         "controls_per_row": 4,
         "controls": [
@@ -462,7 +466,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "城市",
                 "options": LEVELS,
                 "value": "05",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -470,7 +474,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "兵工",
                 "options": LEVELS,
                 "value": "05",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -478,7 +482,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "军需",
                 "options": LEVELS,
                 "value": "05",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -486,7 +490,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "编号",
                 "options": LEVELS,
                 "value": "01",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -494,7 +498,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "陆军",
                 "options": LEVELS_0,
                 "value": "00",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -502,7 +506,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "空军",
                 "options": LEVELS_0,
                 "value": "00",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
             {
                 "type": "dropdown",
@@ -510,7 +514,7 @@ LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
                 "label": "炮塔",
                 "options": LEVELS_0,
                 "value": "00",
-                "width": 50,
+                "width": DEFAULT_DROPDOWN_WIDTH,
             },
         ],
     },
