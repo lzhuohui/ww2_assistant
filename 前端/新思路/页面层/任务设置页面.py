@@ -6,7 +6,8 @@
     组装组件，构建任务设置页面。
 
 功能:
-    1. 任务设置卡片
+    1. 主线任务卡片
+    2. 支线任务卡片
 
 数据来源:
     所有配置数据从配置目录获取。
@@ -24,7 +25,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from typing import Callable
 from 配置.界面配置 import 界面配置
-from 新思路.组件层.任务设置卡片 import TaskSettingsCard
+from 新思路.组件层.通用卡片 import UniversalCard
+from 新思路.零件层.标签下拉框 import LabelDropdown
 
 
 class TaskSettingsPage:
@@ -45,16 +47,43 @@ class TaskSettingsPage:
         """
         theme_colors = config.当前主题颜色
         
-        # ========== 任务设置卡片 ==========
-        task_card = TaskSettingsCard.create(
+        # 主城等级选项 (01-15)
+        main_level_options = [f"{i:02d}" for i in range(1, 16)]
+        # 支线主城等级选项 (05-15)
+        side_level_options = [f"{i:02d}" for i in range(5, 16)]
+        
+        # ========== 主线任务卡片 ==========
+        main_dropdown = LabelDropdown.create(
             config=config,
-            title="任务设置",
+            label="主线限级",
+            options=main_level_options,
+            value="05",
+        )
+        
+        main_card = UniversalCard.create(
+            config=config,
+            title="主线任务",
             icon="TASK",
             enabled=True,
-            main_task_enabled=True,
-            main_city_level="05",
-            side_task_enabled=True,
-            side_city_level="10",
+            subtitle="达到设置主城等级后,允许执行主线任务",
+            controls=[main_dropdown],
+        )
+        
+        # ========== 支线任务卡片 ==========
+        side_dropdown = LabelDropdown.create(
+            config=config,
+            label="支线限级",
+            options=side_level_options,
+            value="10",
+        )
+        
+        side_card = UniversalCard.create(
+            config=config,
+            title="支线任务",
+            icon="TASK_ALT",
+            enabled=True,
+            subtitle="达到设置主城等级后,允许执行支线任务",
+            controls=[side_dropdown],
         )
         
         # ========== 页面容器 ==========
@@ -68,8 +97,11 @@ class TaskSettingsPage:
                     color=theme_colors.get("text_primary"),
                 ),
                 ft.Container(height=20),
-                # 任务设置卡片
-                task_card,
+                # 主线任务卡片
+                main_card,
+                ft.Container(height=15),
+                # 支线任务卡片
+                side_card,
             ],
             spacing=0,
             scroll=ft.ScrollMode.AUTO,
@@ -84,7 +116,8 @@ class TaskSettingsPage:
         )
         
         # 暴露卡片引用
-        page_container.task_card = task_card
+        page_container.main_card = main_card
+        page_container.side_card = side_card
         
         return page_container
 
