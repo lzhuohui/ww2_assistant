@@ -90,7 +90,7 @@ class SwitchDropdownCard:
             setting_type = setting.get("type", "input")
             label = setting.get("label", f"设置项{i+1}")
             value = setting.get("value", "")
-            width = setting.get("width", 150)
+            width = setting.get("width")  # 不设置默认值，让被调模块使用自己的默认值
             on_change = setting.get("on_change", None)
             
             if setting_type == "dropdown":

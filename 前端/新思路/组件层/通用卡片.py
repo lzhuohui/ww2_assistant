@@ -282,6 +282,8 @@ class UniversalCard:
         if not card_config:
             raise ValueError(f"未找到卡片配置: {card_name}")
         
+        card_type = card_config.get("card_type", "standard")
+        
         # 使用控件工厂创建控件
         controls = ControlFactory.create_controls(
             config=config,
@@ -290,7 +292,11 @@ class UniversalCard:
             on_value_change=on_value_change,
         )
         
-        # 调用原有的create方法
+        # 对于switch_dropdown类型，控件工厂已经返回了完整的卡片，直接返回
+        if card_type == "switch_dropdown":
+            return controls[0] if controls else None
+        
+        # 对于其他类型，调用原有的create方法包装控件
         return UniversalCard.create(
             config=config,
             title=card_config.get("title"),

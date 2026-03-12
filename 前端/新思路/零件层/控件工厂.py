@@ -182,6 +182,7 @@ class ControlFactory:
             label=control_config.get("label", ""),
             options=control_config.get("options", []),
             value=current_value or control_config.get("value"),
+            width=control_config.get("width"),
             on_change=on_change,
         )
     
@@ -197,6 +198,7 @@ class ControlFactory:
             config=config,
             label=control_config.get("label", ""),
             value=current_value or control_config.get("value", ""),
+            width=control_config.get("width"),
             on_change=on_change,
         )
     
@@ -248,6 +250,7 @@ class ControlFactory:
                 "label": dropdown_config.get("label", ""),
                 "options": dropdown_config.get("options", []),
                 "value": dropdown_value,
+                "width": dropdown_config.get("width"),  # 不设置默认值，让被调模块使用自己的默认值
                 "on_change": lambda value, key=dropdown_key: ControlFactory._handle_value_change(
                     card_name, key, value, config_manager, on_value_change
                 ),
