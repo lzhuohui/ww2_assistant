@@ -1,0 +1,95 @@
+# -*- coding: utf-8 -*-
+"""
+策略配置 - 配置层
+
+设计思路:
+    定义所有策略设置的配置格式，实现配置驱动架构。
+    统一配置格式，便于管理和扩展。
+
+功能:
+    1. 定义策略配置格式
+    2. 提供策略配置数据
+    3. 支持配置扩展
+
+数据来源:
+    静态配置数据。
+
+使用场景:
+    被 ConfigManager 调用。
+"""
+
+# 策略配置字典
+策略配置 = {
+    "建筑速建": {
+        "card_type": "switch_dropdown",  # 卡片类型：switch_dropdown
+        "title": "建筑速建",
+        "icon": "ROCKET_LAUNCH",
+        "subtitle": "速建限级",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "速建开关",
+            "default_value": True,
+        },
+        "dropdown_config": {
+            "config_key": "速建限级",
+            "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"],
+            "default_value": "08",
+        },
+    },
+    "建筑类型": {
+        "card_type": "dropdown",  # 卡片类型：dropdown
+        "title": "建筑类型",
+        "icon": "APARTMENT",
+        "subtitle": "设置加速建筑类型",
+        "enabled": True,
+        "dropdown_config": {
+            "config_key": "速建类型",
+            "options": ["城资建筑", "城市建筑", "资源建筑"],
+            "default_value": "城资建筑",
+        },
+    },
+    "资源速产": {
+        "card_type": "switch_dropdown",
+        "title": "资源速产",
+        "icon": "BOLT",
+        "subtitle": "速产限级",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "速产开关",
+            "default_value": True,
+        },
+        "dropdown_config": {
+            "config_key": "速产限级",
+            "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"],
+            "default_value": "07",
+        },
+    },
+    "策略类型": {
+        "card_type": "dropdown",
+        "title": "策略类型",
+        "icon": "SETTINGS_SUGGEST",
+        "subtitle": "设置加速策略类型",
+        "enabled": True,
+        "dropdown_config": {
+            "config_key": "速产类型",
+            "options": ["平衡资源", "战时经济", "钢铁熔炉", "橡胶采集", "石油开采"],
+            "default_value": "平衡资源",
+        },
+    },
+    "策点保留": {
+        "card_type": "switch_dropdown",
+        "title": "策点保留",
+        "icon": "SAVINGS",
+        "subtitle": "保留点数",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "保留开关",
+            "default_value": True,
+        },
+        "dropdown_config": {
+            "config_key": "保留点数",
+            "options": ["30", "60", "90", "120", "150", "180", "210", "240"],
+            "default_value": "60",
+        },
+    },
+}

@@ -24,6 +24,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 from 前端.配置.卡片配置 import 卡片配置
+from 前端.配置.策略配置 import 策略配置
 
 
 class ConfigManager:
@@ -41,6 +42,12 @@ class ConfigManager:
         
         # 加载卡片配置
         self.card_configs = 卡片配置.copy()
+        
+        # 加载策略配置
+        self.strategy_configs = 策略配置.copy()
+        
+        # 合并所有配置
+        self.all_configs = {**self.card_configs, **self.strategy_configs}
         
         # 加载用户配置
         self.user_config = self._load_user_config()
@@ -74,11 +81,11 @@ class ConfigManager:
         返回:
             卡片配置字典，如果不存在则返回 None
         """
-        return self.card_configs.get(card_name)
+        return self.all_configs.get(card_name)
     
     def get_all_card_configs(self) -> Dict[str, Any]:
         """获取所有卡片配置"""
-        return self.card_configs
+        return self.all_configs
     
     def get_value(self, card_name: str, config_key: str, default: Any = None) -> Any:
         """
