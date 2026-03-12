@@ -24,7 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
-from typing import Callable, List, Dict, Any, Optional
+from typing import Callable, List, Dict, Any
 from 配置.界面配置 import 界面配置
 from 新思路.零件层.标签下拉框 import LabelDropdown
 from 新思路.零件层.标签输入框 import LabelInput
@@ -138,6 +138,9 @@ class ControlFactory:
         # 获取当前选中的值
         current_selected = config_manager.get_value(card_name, config_key)
         
+        # 创建色块引用字典（用于更新选中状态）
+        blocks_refs = {}
+        
         # 创建色块列表
         blocks = []
         for item in blocks_config.get("items", []):
@@ -156,8 +159,10 @@ class ControlFactory:
                     blocks_config=blocks_config,
                     config_manager=config_manager,
                     on_value_change=on_value_change,
+                    blocks_refs=blocks_refs,
                 ),
             )
+            blocks_refs[name] = block
             blocks.append(block)
         
         return blocks
@@ -231,6 +236,7 @@ class ControlFactory:
         blocks_config: Dict[str, Any],
         config_manager: Any,
         on_value_change: Callable[[str, Any], None] = None,
+        blocks_refs: Dict[str, Any] = None,
     ):
         """处理色块点击"""
         config_key = blocks_config.get("config_key")
@@ -245,6 +251,12 @@ class ControlFactory:
         
         # 保存到配置管理器
         config_manager.set_value(card_name, config_key, new_value)
+        
+        # 更新所有色块的选中状态
+        if blocks_refs:
+            for name, block in blocks_refs.items():
+                if hasattr(block, 'set_selected'):
+                    block.set_selected(name == new_value)
         
         # 调用外部回调
         if on_value_change:
