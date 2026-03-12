@@ -153,6 +153,7 @@ class ControlFactory:
                 theme_name=name,
                 bg_color=color,
                 is_selected=is_selected,
+                accent_color=config.当前主题颜色.get("accent"),  # 添加accent_color参数，使用主题的强调色
                 on_click=lambda clicked_name: ControlFactory._handle_block_click(
                     clicked_name=clicked_name,
                     card_name=card_name,
