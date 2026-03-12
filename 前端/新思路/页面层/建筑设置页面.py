@@ -31,6 +31,10 @@ from 配置.界面配置 import 界面配置
 from 配置.配置管理器 import ConfigManager
 from 新思路.组件层.通用卡片 import UniversalCard
 
+# *** 用户指定变量 - AI不得修改 ***
+DEFAULT_DROPDOWN_WIDTH = 60  # 下拉框默认宽度（建筑设置页面专用）
+# *********************************
+
 
 class BuildingSettingsPage:
     """建筑设置页面 - 页面层"""
@@ -52,6 +56,13 @@ class BuildingSettingsPage:
         
         # 创建配置管理器
         config_manager = ConfigManager()
+        
+        # 为建筑配置中的所有下拉框添加width参数
+        for card_name, card_config in config_manager.building_configs.items():
+            if "controls" in card_config:
+                for control in card_config["controls"]:
+                    if control.get("type") == "dropdown" and "width" not in control:
+                        control["width"] = DEFAULT_DROPDOWN_WIDTH
         
         # 创建值变化回调
         def on_value_change(config_key: str, value: any):
