@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-策略设置页面 - 页面层（新思路）
+策略设置页面 - 页面层（新思路） - 配置驱动版本
 
 设计思路:
-    调用卡片组件，构建策略设置页面。
-    与系统设置页面保持一致的处理方式。
+    使用配置驱动方式创建卡片，与系统设置页面保持一致。
 
 功能:
-    1. 建筑速建卡片
-    2. 资源速产卡片
-    3. 策点保留卡片
+    1. 建筑速建卡片（配置驱动）
+    2. 资源速产卡片（配置驱动）
+    3. 策点保留卡片（配置驱动）
 
 数据来源:
     所有配置数据从配置目录获取。
@@ -27,13 +26,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from typing import Callable
 from 配置.界面配置 import 界面配置
-from 新思路.组件层.建筑速建卡片 import BuildingSpeedCard
-from 新思路.组件层.资源速产卡片 import ResourceSpeedCard
-from 新思路.组件层.策点保留卡片 import PointsKeepCard
+from 配置.配置管理器 import ConfigManager
+from 新思路.组件层.通用卡片配置驱动扩展 import UniversalCard
 
 
 class StrategySettingsPage:
-    """策略设置页面 - 页面层"""
+    """策略设置页面 - 页面层（配置驱动版本）"""
     
     @staticmethod
     def create(config: 界面配置, page: ft.Page = None, on_refresh: Callable[[], None] = None) -> ft.Container:
@@ -50,27 +48,34 @@ class StrategySettingsPage:
         """
         theme_colors = config.当前主题颜色
         
-        # ========== 建筑速建卡片 ==========
-        building_speed_card = BuildingSpeedCard.create(
+        # 创建配置管理器
+        config_manager = ConfigManager()
+        
+        # 创建值变化回调
+        def on_value_change(config_key: str, value: any):
+            """值变化回调"""
+            print(f"配置变化: {config_key} = {value}")
+        
+        # 使用配置驱动创建三个卡片
+        building_speed_card = UniversalCard.create_from_config(
             config=config,
-            enabled=True,
-            level_value="08",
-            type_value="城资建筑",
+            card_name="建筑速建",
+            config_manager=config_manager,
+            on_value_change=on_value_change,
         )
         
-        # ========== 资源速产卡片 ==========
-        resource_speed_card = ResourceSpeedCard.create(
+        resource_speed_card = UniversalCard.create_from_config(
             config=config,
-            enabled=True,
-            level_value="07",
-            type_value="平衡资源",
+            card_name="资源速产",
+            config_manager=config_manager,
+            on_value_change=on_value_change,
         )
         
-        # ========== 策点保留卡片 ==========
-        points_keep_card = PointsKeepCard.create(
+        points_keep_card = UniversalCard.create_from_config(
             config=config,
-            enabled=True,
-            points_value="60",
+            card_name="策点保留",
+            config_manager=config_manager,
+            on_value_change=on_value_change,
         )
         
         # ========== 页面容器 ==========

@@ -24,72 +24,69 @@
         "card_type": "switch_dropdown",  # 卡片类型：switch_dropdown
         "title": "建筑速建",
         "icon": "ROCKET_LAUNCH",
-        "subtitle": "速建限级",
+        "subtitle": "开启自动加速建设功能",
         "enabled": True,
         "switch_config": {
             "config_key": "速建开关",
             "default_value": True,
         },
-        "dropdown_config": {
-            "config_key": "速建限级",
-            "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"],
-            "default_value": "08",
-        },
-    },
-    "建筑类型": {
-        "card_type": "dropdown",  # 卡片类型：dropdown
-        "title": "建筑类型",
-        "icon": "APARTMENT",
-        "subtitle": "设置加速建筑类型",
-        "enabled": True,
-        "dropdown_config": {
-            "config_key": "速建类型",
-            "options": ["城资建筑", "城市建筑", "资源建筑"],
-            "default_value": "城资建筑",
-        },
+        "dropdown_configs": [
+            {
+                "config_key": "速建限级",
+                "label": "速建限级:",
+                "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"],
+                "default_value": "08",
+            },
+            {
+                "config_key": "速建类型",
+                "label": "建筑类型:",
+                "options": ["城资建筑", "城市建筑", "资源建筑"],
+                "default_value": "城资建筑",
+            },
+        ],
     },
     "资源速产": {
         "card_type": "switch_dropdown",
         "title": "资源速产",
         "icon": "BOLT",
-        "subtitle": "速产限级",
+        "subtitle": "开启自动加速生产功能",
         "enabled": True,
         "switch_config": {
             "config_key": "速产开关",
             "default_value": True,
         },
-        "dropdown_config": {
-            "config_key": "速产限级",
-            "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"],
-            "default_value": "07",
-        },
-    },
-    "策略类型": {
-        "card_type": "dropdown",
-        "title": "策略类型",
-        "icon": "SETTINGS_SUGGEST",
-        "subtitle": "设置加速策略类型",
-        "enabled": True,
-        "dropdown_config": {
-            "config_key": "速产类型",
-            "options": ["平衡资源", "战时经济", "钢铁熔炉", "橡胶采集", "石油开采"],
-            "default_value": "平衡资源",
-        },
+        "dropdown_configs": [
+            {
+                "config_key": "速产限级",
+                "label": "速产限级:",
+                "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"],
+                "default_value": "07",
+            },
+            {
+                "config_key": "速产类型",
+                "label": "策略类型:",
+                "options": ["平衡资源", "战时经济", "钢铁熔炉", "橡胶采集", "石油开采"],
+                "default_value": "平衡资源",
+            },
+        ],
     },
     "策点保留": {
         "card_type": "switch_dropdown",
         "title": "策点保留",
         "icon": "SAVINGS",
-        "subtitle": "保留点数",
+        "subtitle": "达到设置保留的策略点数后允许使用策略",
         "enabled": True,
         "switch_config": {
             "config_key": "保留开关",
             "default_value": True,
         },
-        "dropdown_config": {
-            "config_key": "保留点数",
-            "options": ["30", "60", "90", "120", "150", "180", "210", "240"],
-            "default_value": "60",
-        },
+        "dropdown_configs": [
+            {
+                "config_key": "保留点数",
+                "label": "保留点数:",
+                "options": ["30", "60", "90", "120", "150", "180", "210", "240"],
+                "default_value": "60",
+            },
+        ],
     },
 }

@@ -67,6 +67,10 @@ class ControlFactory:
             return ControlFactory._create_color_blocks(
                 config, card_config, config_manager, on_value_change
             )
+        elif card_type == "switch_dropdown":
+            return ControlFactory._create_switch_dropdown_controls(
+                config, card_config, config_manager, on_value_change
+            )
         else:
             return []
     
@@ -213,6 +217,59 @@ class ControlFactory:
             value=current_value if current_value is not None else control_config.get("value", False),
             on_change=on_change,
         )
+    
+    @staticmethod
+    def _create_switch_dropdown_controls(
+        config: 界面配置,
+        card_config: Dict[str, Any],
+        config_manager: Any,
+        on_value_change: Callable[[str, Any], None] = None,
+    ) -> List[ft.Control]:
+        """创建开关下拉控件"""
+        from 新思路.组件层.开关下拉卡片 import SwitchDropdownCard
+        
+        card_name = card_config.get("title", "")
+        enabled = card_config.get("enabled", True)
+        
+        # 获取开关配置
+        switch_config = card_config.get("switch_config", {})
+        switch_key = switch_config.get("config_key")
+        switch_value = config_manager.get_value(card_name, switch_key)
+        if switch_value is None:
+            switch_value = switch_config.get("default_value", True)
+        
+        # 创建设置项列表
+        settings = []
+        for dropdown_config in card_config.get("dropdown_configs", []):
+            dropdown_key = dropdown_config.get("config_key")
+            dropdown_value = config_manager.get_value(card_name, dropdown_key)
+            if dropdown_value is None:
+                dropdown_value = dropdown_config.get("default_value", "")
+            
+            settings.append({
+                "type": "dropdown",
+                "label": dropdown_config.get("label", ""),
+                "options": dropdown_config.get("options", []),
+                "value": dropdown_value,
+                "on_change": lambda value, key=dropdown_key: ControlFactory._handle_value_change(
+                    card_name, key, value, config_manager, on_value_change
+                ),
+            })
+        
+        # 创建开关下拉卡片
+        card = SwitchDropdownCard.create(
+            config=config,
+            title=card_config.get("title", ""),
+            icon=card_config.get("icon", "TOGGLE_ON"),
+            subtitle=card_config.get("subtitle", ""),
+            enabled=switch_value if isinstance(switch_value, bool) else enabled,
+            on_state_change=lambda new_enabled: ControlFactory._handle_value_change(
+                card_name, switch_key, new_enabled, config_manager, on_value_change
+            ),
+            settings=settings,
+        )
+        
+        return [card]
     
     @staticmethod
     def _handle_value_change(
