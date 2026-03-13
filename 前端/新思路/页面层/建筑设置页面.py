@@ -132,7 +132,7 @@ class BuildingSettingsPage:
                 legion_card,
             ],
             spacing=0,
-            scroll=ft.ScrollMode.AUTO,
+            scroll=ft.ScrollMode.HIDDEN,
             expand=True,
         )
         

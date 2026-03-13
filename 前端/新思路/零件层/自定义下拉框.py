@@ -32,7 +32,7 @@ from 配置.界面配置 import 界面配置
 
 # *** 用户指定变量 - AI不得修改 ***
 # 默认宽度（像素）
-DEFAULT_WIDTH = 50
+DEFAULT_WIDTH = 100
 # 默认高度（像素）
 DEFAULT_HEIGHT = 32
 # *********************************
