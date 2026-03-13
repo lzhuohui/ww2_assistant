@@ -93,6 +93,7 @@ class SwitchDropdownCard:
             value = setting.get("value", "")
             width = setting.get("width")  # 不设置默认值，让被调模块使用自己的默认值
             on_change = setting.get("on_change", None)
+            hint_text = setting.get("hint_text", None)
             
             if setting_type == "dropdown":
                 options = setting.get("options", [])
@@ -112,7 +113,7 @@ class SwitchDropdownCard:
                     value=value,
                     width=width,
                     on_change=on_change,
-                    enabled=enabled,
+                    hint_text=hint_text,
                 )
             
             controls.append(control)

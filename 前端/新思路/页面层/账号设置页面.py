@@ -157,7 +157,8 @@ class AccountSettingsPage:
                 "type": "input",
                 "label": "",
                 "value": config_manager.get_value(f"{index:02d}账号_输入框", ""),
-                "width": 100,
+                "width": 150,
+                "hint_text": "账号名称",
                 "on_change": lambda v, idx=index: on_value_change(f"{idx:02d}账号_输入框", v),
             },
             {

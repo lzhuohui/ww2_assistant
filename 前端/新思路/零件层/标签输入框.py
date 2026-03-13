@@ -45,6 +45,7 @@ class LabelInput:
         value: str = "",
         width: int = None,
         on_change: Callable[[str], None] = None,
+        hint_text: str = None,
         **kwargs
     ) -> ft.Row:
         """
@@ -56,6 +57,7 @@ class LabelInput:
             value: 初始值
             width: 输入框宽度（可选，默认从配置中获取）
             on_change: 值变化回调
+            hint_text: 提示文本（可选）
         
         返回:
             ft.Row: 标签输入框容器
@@ -83,6 +85,7 @@ class LabelInput:
             content_padding=ft.Padding(left=8, right=8, top=8, bottom=8),
             width=width if width is not None else 120,
             on_change=lambda e: on_change(e.control.value) if on_change else None,
+            hint_text=hint_text,
         )
         
         # 创建行容器（标签紧靠输入框）
