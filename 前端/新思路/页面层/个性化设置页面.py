@@ -3,7 +3,7 @@
 个性化设置页面 - 页面层
 
 设计思路:
-    使用主题色块组件创建个性化设置页面。
+    使用通用卡片创建个性化设置页面，统一风格。
 
 功能:
     1. 主题设置卡片
@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from typing import Callable
 from 配置.界面配置 import 界面配置
+from 新思路.组件层.通用卡片 import UniversalCard
 from 新思路.零件层.主题色块 import ThemeColorBlock
 
 
@@ -61,79 +62,91 @@ class PersonalizationSettingsPage:
                 if on_refresh:
                     on_refresh()
         
-        theme_blocks = ft.Row(
-            [
-                ThemeColorBlock.create(
-                    config=config,
-                    theme_name="浅色",
-                    bg_color="#FFFFFF",
-                    is_selected=(current_theme == "浅色"),
-                    on_click=lambda: on_theme_click("浅色"),
-                ),
-                ThemeColorBlock.create(
-                    config=config,
-                    theme_name="深色",
-                    bg_color="#1A1A2E",
-                    is_selected=(current_theme == "深色"),
-                    on_click=lambda: on_theme_click("深色"),
-                ),
-                ThemeColorBlock.create(
-                    config=config,
-                    theme_name="日出",
-                    bg_color="#FFE4B5",
-                    is_selected=(current_theme == "日出"),
-                    on_click=lambda: on_theme_click("日出"),
-                ),
-                ThemeColorBlock.create(
-                    config=config,
-                    theme_name="捕捉",
-                    bg_color="#98FB98",
-                    is_selected=(current_theme == "捕捉"),
-                    on_click=lambda: on_theme_click("捕捉"),
-                ),
-                ThemeColorBlock.create(
-                    config=config,
-                    theme_name="聚焦",
-                    bg_color="#87CEEB",
-                    is_selected=(current_theme == "聚焦"),
-                    on_click=lambda: on_theme_click("聚焦"),
-                ),
-            ],
-            spacing=15,
+        theme_block_controls = [
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="浅色",
+                bg_color="#FFFFFF",
+                is_selected=(current_theme == "浅色"),
+                on_click=lambda: on_theme_click("浅色"),
+            ),
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="深色",
+                bg_color="#1A1A2E",
+                is_selected=(current_theme == "深色"),
+                on_click=lambda: on_theme_click("深色"),
+            ),
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="日出",
+                bg_color="#FFE4B5",
+                is_selected=(current_theme == "日出"),
+                on_click=lambda: on_theme_click("日出"),
+            ),
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="捕捉",
+                bg_color="#98FB98",
+                is_selected=(current_theme == "捕捉"),
+                on_click=lambda: on_theme_click("捕捉"),
+            ),
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="聚焦",
+                bg_color="#87CEEB",
+                is_selected=(current_theme == "聚焦"),
+                on_click=lambda: on_theme_click("聚焦"),
+            ),
+        ]
+        
+        palette_block_controls = [
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="水生",
+                bg_color="#006994",
+                is_selected=(current_palette == "水生"),
+                on_click=lambda: on_palette_click("水生"),
+            ),
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="沙漠",
+                bg_color="#C19A6B",
+                is_selected=(current_palette == "沙漠"),
+                on_click=lambda: on_palette_click("沙漠"),
+            ),
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="黄昏",
+                bg_color="#FF6B6B",
+                is_selected=(current_palette == "黄昏"),
+                on_click=lambda: on_palette_click("黄昏"),
+            ),
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="夜空",
+                bg_color="#2C3E50",
+                is_selected=(current_palette == "夜空"),
+                on_click=lambda: on_palette_click("夜空"),
+            ),
+        ]
+        
+        theme_card = UniversalCard.create(
+            config=config,
+            title="主题设置",
+            icon="PALETTE",
+            enabled=True,
+            controls=theme_block_controls,
+            controls_per_row=5,
         )
         
-        palette_blocks = ft.Row(
-            [
-                ThemeColorBlock.create(
-                    config=config,
-                    theme_name="水生",
-                    bg_color="#006994",
-                    is_selected=(current_palette == "水生"),
-                    on_click=lambda: on_palette_click("水生"),
-                ),
-                ThemeColorBlock.create(
-                    config=config,
-                    theme_name="沙漠",
-                    bg_color="#C19A6B",
-                    is_selected=(current_palette == "沙漠"),
-                    on_click=lambda: on_palette_click("沙漠"),
-                ),
-                ThemeColorBlock.create(
-                    config=config,
-                    theme_name="黄昏",
-                    bg_color="#FF6B6B",
-                    is_selected=(current_palette == "黄昏"),
-                    on_click=lambda: on_palette_click("黄昏"),
-                ),
-                ThemeColorBlock.create(
-                    config=config,
-                    theme_name="夜空",
-                    bg_color="#2C3E50",
-                    is_selected=(current_palette == "夜空"),
-                    on_click=lambda: on_palette_click("夜空"),
-                ),
-            ],
-            spacing=15,
+        palette_card = UniversalCard.create(
+            config=config,
+            title="调色板设置",
+            icon="CONTRAST",
+            enabled=True,
+            controls=palette_block_controls,
+            controls_per_row=4,
         )
         
         page_content = ft.Column(
@@ -145,23 +158,9 @@ class PersonalizationSettingsPage:
                     color=theme_colors.get("text_primary"),
                 ),
                 ft.Container(height=20),
-                ft.Text(
-                    "主题设置",
-                    size=16,
-                    weight=ft.FontWeight.BOLD,
-                    color=theme_colors.get("text_primary"),
-                ),
-                ft.Container(height=10),
-                theme_blocks,
-                ft.Container(height=20),
-                ft.Text(
-                    "调色板设置",
-                    size=16,
-                    weight=ft.FontWeight.BOLD,
-                    color=theme_colors.get("text_primary"),
-                ),
-                ft.Container(height=10),
-                palette_blocks,
+                theme_card,
+                ft.Container(height=15),
+                palette_card,
             ],
             spacing=0,
             scroll=ft.ScrollMode.HIDDEN,
