@@ -31,6 +31,7 @@ from 配置.策略配置 import 策略配置
 from 配置.建筑配置 import 建筑配置
 from 配置.集资配置 import 集资卡片配置
 from 配置.其他设置配置 import 其他卡片配置
+from 配置.账号配置 import 账号卡片配置
 
 
 class ConfigManager:
@@ -55,7 +56,8 @@ class ConfigManager:
         self.building_configs = 建筑配置.copy()
         self.fundraising_configs = 集资卡片配置.copy()
         self.other_configs = 其他卡片配置.copy()
-        self.all_configs = {**self.card_configs, **self.strategy_configs, **self.building_configs, **self.fundraising_configs, **self.other_configs}
+        self.account_configs = 账号卡片配置.copy()
+        self.all_configs = {**self.card_configs, **self.strategy_configs, **self.building_configs, **self.fundraising_configs, **self.other_configs, **self.account_configs}
         
         self.user_config = self._load_user_config()
         
