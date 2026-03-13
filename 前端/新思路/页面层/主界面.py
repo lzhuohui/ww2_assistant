@@ -147,8 +147,7 @@ class MainPage:
         elif nav_name == "任务":
             return TaskSettingsPage.create(self.config, self.page, self.refresh)
         elif nav_name == "建筑":
-            from 新思路.页面层.建筑设置页面懒加载 import BuildingSettingsPageLazy
-            return BuildingSettingsPageLazy.create(self.config, self.page, self.refresh)
+            return BuildingSettingsPage.create(self.config, self.page, self.refresh)
         elif nav_name == "集资":
             return FundraisingSettingsPage.create(self.config, self.page, self.refresh)
         elif nav_name == "打扫":
