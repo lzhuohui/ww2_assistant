@@ -127,7 +127,12 @@ class UniversalCard:
         # ========== 第一步：计算所有布局参数 ==========
         num_rows = 0
         total_controls_height = 0
-        card_height = 40  # 卡片高度默认值（无控件时）
+        
+        # 计算最小卡片高度（一个控件的高度 + padding）
+        min_control_height = 35  # 单个控件默认高度
+        min_card_height = min_control_height + card_padding * 2  # 最小卡片高度 = 控件高度 + 上下padding
+        
+        card_height = min_card_height  # 卡片高度默认值（最小高度）
         
         if controls:
             control_v_spacing = DEFAULT_CONTROL_V_SPACING
@@ -143,7 +148,8 @@ class UniversalCard:
                 if i % current_controls_per_row == 0:
                     total_controls_height += control_height
             
-            card_height = total_controls_height + card_padding * (num_rows + 1)  # 卡片高度 = 控件高度 + 标准卡片边距 * (控件行数+1)
+            calculated_height = total_controls_height + card_padding * (num_rows + 1)
+            card_height = max(calculated_height, min_card_height)  # 确保不小于最小高度
         
         def on_icon_title_state_change(new_enabled: bool):
             nonlocal current_enabled

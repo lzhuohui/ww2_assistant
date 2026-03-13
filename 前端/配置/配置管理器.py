@@ -29,6 +29,8 @@ from typing import Any, Dict, Optional
 from 配置.卡片配置 import 卡片配置
 from 配置.策略配置 import 策略配置
 from 配置.建筑配置 import 建筑配置
+from 配置.集资配置 import 集资卡片配置
+from 配置.其他设置配置 import 其他卡片配置
 
 
 class ConfigManager:
@@ -51,7 +53,9 @@ class ConfigManager:
         self.card_configs = 卡片配置.copy()
         self.strategy_configs = 策略配置.copy()
         self.building_configs = 建筑配置.copy()
-        self.all_configs = {**self.card_configs, **self.strategy_configs, **self.building_configs}
+        self.fundraising_configs = 集资卡片配置.copy()
+        self.other_configs = 其他卡片配置.copy()
+        self.all_configs = {**self.card_configs, **self.strategy_configs, **self.building_configs, **self.fundraising_configs, **self.other_configs}
         
         self.user_config = self._load_user_config()
         

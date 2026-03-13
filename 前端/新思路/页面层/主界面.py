@@ -35,8 +35,7 @@ from 新思路.页面层.策略设置页面 import StrategySettingsPage
 from 新思路.页面层.任务设置页面 import TaskSettingsPage
 from 新思路.页面层.建筑设置页面 import BuildingSettingsPage
 from 新思路.页面层.集资设置页面 import FundraisingSettingsPage
-from 新思路.页面层.打扫战场页面 import BattlefieldSettingsPage
-from 新思路.页面层.打野设置页面 import WildSettingsPage
+from 新思路.页面层.其他设置页面 import OtherSettingsPage
 
 
 class MainPage:
@@ -150,10 +149,8 @@ class MainPage:
             return BuildingSettingsPage.create(self.config, self.page, self.refresh)
         elif nav_name == "集资":
             return FundraisingSettingsPage.create(self.config, self.page, self.refresh)
-        elif nav_name == "打扫":
-            return BattlefieldSettingsPage.create(self.config, self.page, self.refresh)
-        elif nav_name == "打野":
-            return WildSettingsPage.create(self.config, self.page, self.refresh)
+        elif nav_name == "其他":
+            return OtherSettingsPage.create(self.config, self.page, self.refresh)
         elif nav_name == "账号":
             return self.get_placeholder_page(nav_name)
         elif nav_name == "关于":
