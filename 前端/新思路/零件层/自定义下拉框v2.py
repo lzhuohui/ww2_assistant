@@ -30,7 +30,7 @@ DEFAULT_WIDTH = 100
 DEFAULT_HEIGHT = 32
 
 
-class LazyDropDown:
+class CustomDropDown:
     """自定义下拉框（PopupMenuButton实现，自动定位）"""
     
     def __init__(
@@ -180,7 +180,7 @@ class LazyDropDown:
         返回:
             ft.Container: 下拉框控件
         """
-        dropdown = LazyDropDown(
+        dropdown = CustomDropDown(
             config=config,
             options=options,
             value=value,
@@ -200,7 +200,7 @@ class LazyDropDown:
         return dropdown.control
 
 
-自定义下拉框v2 = LazyDropDown
+自定义下拉框v2 = CustomDropDown
 
 
 if __name__ == "__main__":
@@ -216,31 +216,31 @@ if __name__ == "__main__":
         print("菜单自动跟随按钮位置")
         print("="*60 + "\n")
         
-        dropdown1 = LazyDropDown.create(
+        dropdown1 = CustomDropDown.create(
             config=配置,
             options=["01", "02", "03", "04", "05"],
             value="03",
             on_change=lambda v: print(f"下拉框#1选择: {v}"),
         )
-        dropdown2 = LazyDropDown.create(
+        dropdown2 = CustomDropDown.create(
             config=配置,
             options=["选项A", "选项B", "选项C", "选项D", "选项E"],
             value="选项A",
             on_change=lambda v: print(f"下拉框#2选择: {v}"),
         )
-        dropdown3 = LazyDropDown.create(
+        dropdown3 = CustomDropDown.create(
             config=配置,
             options=[f"{i:02d}" for i in range(1, 21)],
             value="10",
             on_change=lambda v: print(f"下拉框#3选择: {v}"),
         )
-        dropdown4 = LazyDropDown.create(
+        dropdown4 = CustomDropDown.create(
             config=配置,
             options=["测试X", "测试Y", "测试Z"],
             value="测试Y",
             on_change=lambda v: print(f"下拉框#4选择: {v}"),
         )
-        dropdown5 = LazyDropDown.create(
+        dropdown5 = CustomDropDown.create(
             config=配置,
             options=["红", "绿", "蓝", "黄"],
             value="蓝",

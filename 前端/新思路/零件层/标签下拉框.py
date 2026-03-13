@@ -28,7 +28,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from typing import Callable, List, Optional
 from 配置.界面配置 import 界面配置
-from 新思路.零件层.自定义下拉框v2 import LazyDropDown as CustomDropDown
+from 新思路.零件层.自定义下拉框v2 import CustomDropDown
 
 
 # *** 用户指定变量 - AI不得修改 ***
