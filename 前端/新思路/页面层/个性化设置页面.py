@@ -138,6 +138,7 @@ class PersonalizationSettingsPage:
             enabled=True,
             controls=theme_block_controls,
             controls_per_row=5,
+            subtitle="选择界面主题风格",
         )
         
         palette_card = UniversalCard.create(
@@ -147,6 +148,7 @@ class PersonalizationSettingsPage:
             enabled=True,
             controls=palette_block_controls,
             controls_per_row=4,
+            subtitle="选择高对比度调色板",
         )
         
         page_content = ft.Column(
