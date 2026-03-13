@@ -37,6 +37,7 @@ from 新思路.页面层.建筑设置页面 import BuildingSettingsPage
 from 新思路.页面层.集资设置页面 import FundraisingSettingsPage
 from 新思路.页面层.其他设置页面 import OtherSettingsPage
 from 新思路.页面层.账号设置页面 import AccountSettingsPage
+from 新思路.页面层.个性化设置页面 import PersonalizationSettingsPage
 
 
 class MainPage:
@@ -154,6 +155,8 @@ class MainPage:
             return OtherSettingsPage.create(self.config, self.page, self.refresh)
         elif nav_name == "账号":
             return AccountSettingsPage.create(self.config, self.page, self.refresh)
+        elif nav_name == "个性化":
+            return PersonalizationSettingsPage.create(self.config, self.page, self.refresh)
         elif nav_name == "关于":
             return self.get_placeholder_page(nav_name)
         else:
