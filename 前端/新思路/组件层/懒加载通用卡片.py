@@ -28,7 +28,6 @@ DEFAULT_CONTROL_MARGIN_RIGHT = 20
 DEFAULT_CONTROL_H_SPACING = 16
 DEFAULT_CONTROL_V_SPACING = 8
 DEFAULT_CONTROLS_PER_ROW = 1
-DEFAULT_CONTROL_MARGIN_RIGHT = 20
 
 
 class LazyCardManager:
@@ -94,6 +93,7 @@ class LazyUniversalCard:
         
         self.is_loaded = False
         self.container: Optional[ft.Container] = None
+        self.current_enabled = True
         
         manager = LazyCardManager()
         manager.register_card(card_name, self)
@@ -112,9 +112,6 @@ class LazyUniversalCard:
         title = self.card_config.get("title", self.card_name)
         icon = self.card_config.get("icon", "DOMAIN")
         subtitle = self.card_config.get("subtitle")
-        controls_per_row = self.card_config.get("controls_per_row", DEFAULT_CONTROLS_PER_ROW)
-        
-        self.current_enabled = True
         
         if self.is_default:
             self.container = self._create_loaded_container()
