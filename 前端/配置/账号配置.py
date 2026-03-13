@@ -32,11 +32,11 @@ def create_account_config(index: int) -> dict:
         "icon": "ACCOUNT_CIRCLE",
         "card_type": "switch_dropdown",
         "enabled": False,
-        "settings": [
+        "controls": [
             {
                 "type": "dropdown",
                 "label": "统帅种类",
-                "config_key": f"账号{index:02d}_统帅种类",
+                "config_key": "统帅种类",
                 "options": ["主帅", "副帅"],
                 "default": "主帅",
                 "width": 80,
@@ -44,14 +44,14 @@ def create_account_config(index: int) -> dict:
             {
                 "type": "textfield",
                 "label": "输入框",
-                "config_key": f"账号{index:02d}_输入框",
+                "config_key": "输入框",
                 "default": "",
                 "width": 100,
             },
             {
                 "type": "dropdown",
                 "label": "平台",
-                "config_key": f"账号{index:02d}_平台",
+                "config_key": "平台",
                 "options": ["平台1", "平台2", "平台3", "平台4", "平台5"],
                 "default": "平台1",
                 "width": 80,

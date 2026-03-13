@@ -21,7 +21,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from typing import Callable
 from 配置.界面配置 import 界面配置
-from 配置.配置管理器 import ConfigManager
 from 新思路.组件层.开关下拉卡片 import SwitchDropdownCard
 
 
@@ -42,8 +41,6 @@ class OtherSettingsPage:
             ft.Container: 其他设置页面容器
         """
         theme_colors = config.当前主题颜色
-        
-        config_manager = ConfigManager()
         
         def on_state_change_district(enabled: bool):
             """打扫城区开关状态变化"""

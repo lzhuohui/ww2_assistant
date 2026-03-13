@@ -22,7 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
-from typing import Callable, List, Dict, Any
+from typing import Callable
 from 配置.界面配置 import 界面配置
 from 配置.配置管理器 import ConfigManager
 from 新思路.组件层.开关下拉卡片 import SwitchDropdownCard
@@ -58,8 +58,7 @@ class AccountSettingsPage:
         AccountSettingsPage.账号开关状态 = {}
         
         for i in range(1, MAX_ACCOUNTS + 1):
-            config_key = f"{i:02d}账号_enabled"
-            enabled = config_manager.get_value(config_key, False)
+            enabled = config_manager.get_value(f"{i:02d}账号", "enabled", False)
             AccountSettingsPage.账号开关状态[i] = enabled
             if enabled:
                 AccountSettingsPage.当前参与数量 += 1
@@ -154,14 +153,14 @@ class AccountSettingsPage:
                 "type": "dropdown",
                 "label": "",
                 "options": ["主帅", "副帅"],
-                "value": config_manager.get_value(f"{index:02d}账号_统帅种类", "主帅"),
+                "value": config_manager.get_value(f"{index:02d}账号", "统帅种类", "主帅"),
                 "width": 80,
                 "on_change": lambda v, idx=index: on_value_change(f"{idx:02d}账号_统帅种类", v),
             },
             {
                 "type": "input",
                 "label": "",
-                "value": config_manager.get_value(f"{index:02d}账号_输入框", ""),
+                "value": config_manager.get_value(f"{index:02d}账号", "输入框", ""),
                 "width": 300,
                 "hint_text": "输入格式:名称/账号/密码",
                 "on_change": lambda v, idx=index: on_value_change(f"{idx:02d}账号_输入框", v),
@@ -170,7 +169,7 @@ class AccountSettingsPage:
                 "type": "dropdown",
                 "label": "",
                 "options": ["平台1", "平台2", "平台3", "平台4", "平台5"],
-                "value": config_manager.get_value(f"{index:02d}账号_平台", "平台1"),
+                "value": config_manager.get_value(f"{index:02d}账号", "平台", "平台1"),
                 "width": 80,
                 "on_change": lambda v, idx=index: on_value_change(f"{idx:02d}账号_平台", v),
             },
