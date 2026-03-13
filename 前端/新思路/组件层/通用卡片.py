@@ -260,6 +260,12 @@ class UniversalCard:
         container.toggle_state = toggle_state
         container.get_state = get_state
         
+        def set_subtitle(new_text: str):
+            if hasattr(icon_title, 'set_subtitle'):
+                icon_title.set_subtitle(new_text)
+        
+        container.set_subtitle = set_subtitle
+        
         return container
     
     @staticmethod

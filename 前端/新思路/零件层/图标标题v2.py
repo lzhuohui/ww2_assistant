@@ -297,6 +297,12 @@ class IconTitleV2:
         container.toggle_state = toggle_state
         container.get_state = lambda: container._enabled
         
+        def set_subtitle(new_text: str):
+            if subtitle_control:
+                subtitle_control.set_text(new_text)
+        
+        container.set_subtitle = set_subtitle
+        
         return container
 
 

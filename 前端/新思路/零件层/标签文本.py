@@ -119,7 +119,16 @@ class LabelText:
             label.opacity = 1.0 if new_enabled else 0.4
             label.update()
         
+        def set_text(new_text: str):
+            label.value = new_text
+            try:
+                if label.page:
+                    label.update()
+            except RuntimeError:
+                pass
+        
         label.set_state = set_state
+        label.set_text = set_text
         label.get_state = lambda: enabled
         
         return label
