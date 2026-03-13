@@ -63,8 +63,8 @@ class NavBar:
             {"name": "任务", "icon": "ASSIGNMENT"},
             {"name": "建筑", "icon": "DOMAIN"},
             {"name": "集资", "icon": "SHOPPING_CART"},
-            {"name": "其他", "icon": "MORE_HORIZ"},
             {"name": "账号", "icon": "ACCOUNT_CIRCLE"},
+            {"name": "其他", "icon": "MORE_HORIZ"},
             {"name": "关于", "icon": "INFO"},
         ]
         
