@@ -37,8 +37,8 @@ def create_account_config(index: int) -> dict:
                 "type": "dropdown",
                 "label": "统帅种类",
                 "config_key": f"账号{index:02d}_统帅种类",
-                "options": ["统帅A", "统帅B", "统帅C", "统帅D", "统帅E"],
-                "default": "统帅A",
+                "options": ["主帅", "副帅"],
+                "default": "主帅",
                 "width": 80,
             },
             {

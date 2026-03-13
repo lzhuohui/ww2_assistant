@@ -148,8 +148,8 @@ class AccountSettingsPage:
             {
                 "type": "dropdown",
                 "label": "",
-                "options": ["统帅A", "统帅B", "统帅C", "统帅D", "统帅E"],
-                "value": config_manager.get_value(f"{index:02d}账号_统帅种类", "统帅A"),
+                "options": ["主帅", "副帅"],
+                "value": config_manager.get_value(f"{index:02d}账号_统帅种类", "主帅"),
                 "width": 80,
                 "on_change": lambda v, idx=index: on_value_change(f"{idx:02d}账号_统帅种类", v),
             },
