@@ -56,6 +56,7 @@ class SwitchDropdownCard:
         help_text: str = None,
         settings: List[Dict[str, Any]] = None,
         subtitle: str = None,
+        controls_per_row: int = None,
         **kwargs
     ) -> ft.Container:
         """
@@ -140,6 +141,7 @@ class SwitchDropdownCard:
             help_text=help_text,
             controls=controls,
             subtitle=subtitle,
+            controls_per_row=controls_per_row,
         )
         
         # 暴露控制接口

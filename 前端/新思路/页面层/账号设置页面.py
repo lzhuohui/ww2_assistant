@@ -147,7 +147,7 @@ class AccountSettingsPage:
         settings = [
             {
                 "type": "dropdown",
-                "label": "统帅种类",
+                "label": "",
                 "options": ["统帅A", "统帅B", "统帅C", "统帅D", "统帅E"],
                 "value": config_manager.get_value(f"{index:02d}账号_统帅种类", "统帅A"),
                 "width": 80,
@@ -155,14 +155,14 @@ class AccountSettingsPage:
             },
             {
                 "type": "input",
-                "label": "输入框",
+                "label": "",
                 "value": config_manager.get_value(f"{index:02d}账号_输入框", ""),
                 "width": 100,
                 "on_change": lambda v, idx=index: on_value_change(f"{idx:02d}账号_输入框", v),
             },
             {
                 "type": "dropdown",
-                "label": "平台",
+                "label": "",
                 "options": ["平台1", "平台2", "平台3", "平台4", "平台5"],
                 "value": config_manager.get_value(f"{index:02d}账号_平台", "平台1"),
                 "width": 80,
@@ -177,6 +177,7 @@ class AccountSettingsPage:
             enabled=AccountSettingsPage.账号开关状态.get(index, False),
             on_state_change=on_state_change,
             settings=settings,
+            controls_per_row=3,
         )
         
         return card
