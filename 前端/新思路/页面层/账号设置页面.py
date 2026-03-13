@@ -122,20 +122,35 @@ class AccountSettingsPage:
     ) -> ft.Container:
         """创建单个账号卡片"""
         
+        theme_colors = config.当前主题颜色
+        
+        initial_enabled = AccountSettingsPage.账号开关状态.get(index, False)
+        subtitle_text = "参与挂机" if initial_enabled else "禁止挂机"
+        
+        subtitle_control = ft.Text(
+            subtitle_text,
+            size=12,
+            color=theme_colors.get("text_secondary"),
+        )
+        
         def on_state_change(enabled: bool):
             if enabled:
                 if AccountSettingsPage.当前参与数量 >= AccountSettingsPage.授权数量:
                     return False
                 AccountSettingsPage.当前参与数量 += 1
                 AccountSettingsPage.账号开关状态[index] = True
+                subtitle_control.value = "参与挂机"
             else:
                 AccountSettingsPage.当前参与数量 -= 1
                 AccountSettingsPage.账号开关状态[index] = False
+                subtitle_control.value = "禁止挂机"
             
             count_text.value = f"已启用: {AccountSettingsPage.当前参与数量}/{AccountSettingsPage.授权数量}"
             try:
                 if count_text.page:
                     count_text.update()
+                if subtitle_control.page:
+                    subtitle_control.update()
             except RuntimeError:
                 pass
             
@@ -157,8 +172,8 @@ class AccountSettingsPage:
                 "type": "input",
                 "label": "",
                 "value": config_manager.get_value(f"{index:02d}账号_输入框", ""),
-                "width": 150,
-                "hint_text": "账号名称",
+                "width": 300,
+                "hint_text": "输入格式:名称/账号/密码",
                 "on_change": lambda v, idx=index: on_value_change(f"{idx:02d}账号_输入框", v),
             },
             {
@@ -181,7 +196,18 @@ class AccountSettingsPage:
             controls_per_row=3,
         )
         
-        return card
+        account_container = ft.Column(
+            [
+                ft.Container(
+                    content=subtitle_control,
+                    padding=ft.Padding(left=16, top=4, bottom=4),
+                ),
+                card,
+            ],
+            spacing=0,
+        )
+        
+        return account_container
 
 
 账号设置页面 = AccountSettingsPage
