@@ -213,6 +213,11 @@ class MainPage:
                 license_dialog.open = False
                 self.page.update()
         
+        def go_to_about(e):
+            license_dialog.open = False
+            self.page.update()
+            self.handle_nav_change("关于")
+        
         license_input = ft.TextField(
             label="请输入授权码",
             width=300,
@@ -229,7 +234,13 @@ class MainPage:
                     ft.Container(height=10),
                     license_input,
                     ft.Container(height=10),
-                    ft.Text("获取授权码：请查看\"关于\"页面联系方式", size=12, color=self.theme_colors.get("text_secondary")),
+                    ft.TextButton(
+                        "获取授权码 → 查看联系方式",
+                        on_click=go_to_about,
+                        style=ft.ButtonStyle(
+                            color=self.theme_colors.get("accent"),
+                        ),
+                    ),
                 ],
                 tight=True,
                 spacing=5,
