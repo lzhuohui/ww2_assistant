@@ -58,7 +58,9 @@ class AccountSettingsPage:
         AccountSettingsPage.账号开关状态 = {}
         
         for i in range(1, MAX_ACCOUNTS + 1):
-            enabled = config_manager.get_value(f"{i:02d}账号", "enabled", False)
+            card_config = config_manager.get_card_config(f"{i:02d}账号")
+            default_enabled = card_config.get("enabled", False) if card_config else False
+            enabled = config_manager.get_value(f"{i:02d}账号", "enabled", default_enabled)
             AccountSettingsPage.账号开关状态[i] = enabled
             if enabled:
                 AccountSettingsPage.当前参与数量 += 1
@@ -148,12 +150,20 @@ class AccountSettingsPage:
         def on_value_change(config_key: str, value: any):
             pass
         
+        card_config = config_manager.get_card_config(f"{index:02d}账号")
+        default_role = "主帅" if index == 1 else "副帅"
+        if card_config:
+            for control in card_config.get("controls", []):
+                if control.get("config_key") == "统帅种类":
+                    default_role = control.get("default", "主帅" if index == 1 else "副帅")
+                    break
+        
         settings = [
             {
                 "type": "dropdown",
                 "label": "",
                 "options": ["主帅", "副帅"],
-                "value": config_manager.get_value(f"{index:02d}账号", "统帅种类", "主帅"),
+                "value": config_manager.get_value(f"{index:02d}账号", "统帅种类", default_role),
                 "width": 80,
                 "on_change": lambda v, idx=index: on_value_change(f"{idx:02d}账号_统帅种类", v),
             },

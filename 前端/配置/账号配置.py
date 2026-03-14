@@ -26,19 +26,22 @@ DEFAULT_AUTHORIZED_COUNT = 3
 
 def create_account_config(index: int) -> dict:
     """创建单个账号配置"""
+    is_first = (index == 1)
+    default_role = "主帅" if is_first else "副帅"
+    
     return {
         "card_name": f"{index:02d}账号",
         "title": f"{index:02d}账号",
         "icon": "ACCOUNT_CIRCLE",
         "card_type": "switch_dropdown",
-        "enabled": False,
+        "enabled": True,
         "controls": [
             {
                 "type": "dropdown",
                 "label": "统帅种类",
                 "config_key": "统帅种类",
                 "options": ["主帅", "副帅"],
-                "default": "主帅",
+                "default": default_role,
                 "width": 80,
             },
             {
