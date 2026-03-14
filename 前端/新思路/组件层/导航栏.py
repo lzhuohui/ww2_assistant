@@ -116,6 +116,7 @@ class NavBar:
             spacing=4,
             expand=True,
             alignment=ft.MainAxisAlignment.SPACE_AROUND,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         )
         
         # 导航栏容器（带内边距）

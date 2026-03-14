@@ -32,7 +32,7 @@ from 配置.界面配置 import 界面配置
 from 新思路.零件层.卡片容器 import CardContainer
 
 
-DEFAULT_WIDTH = 200
+DEFAULT_WIDTH = 240
 
 
 class NavButton:
