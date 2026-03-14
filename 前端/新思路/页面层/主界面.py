@@ -108,6 +108,7 @@ class MainPage:
                 expand=True,
             ),
             width=ui_config.get("left_panel_width", 280),
+            on_hover_enabled=False,
         )
         
         # 右侧内容区域（Win11风格）
