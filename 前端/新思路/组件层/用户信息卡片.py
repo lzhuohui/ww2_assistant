@@ -5,6 +5,7 @@
 设计思路:
     组装零件，构建用户信息卡片。
     采用装配模式，协调各零件交互。
+    使用卡片容器统一风格。
 
 功能:
     1. 组装头像
@@ -28,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from 配置.界面配置 import 界面配置
 from 新思路.零件层.头像 import Avatar
+from 新思路.零件层.卡片容器 import CardContainer
 
 
 class UserInfoCard:
@@ -78,23 +80,23 @@ class UserInfoCard:
         if expire_days <= 0:
             # 已过期
             status_text = "已过期"
-            status_color = "#D13438"  # 红色
+            status_color = "#D13438"
         elif not is_registered:
             # 试用用户
             status_text = f"试用剩余：{expire_days}天"
-            status_color = "#0078D4"  # 蓝色
+            status_color = "#0078D4"
         elif expire_days > 30:
             # 正常
             status_text = f"授权剩余：{expire_days}天"
-            status_color = "#107C10"  # 绿色
+            status_color = "#107C10"
         elif expire_days > 7:
             # 提醒
             status_text = f"授权剩余：{expire_days}天"
-            status_color = "#FFB900"  # 黄色
+            status_color = "#FFB900"
         else:
             # 警告
             status_text = "授权即将到期"
-            status_color = "#FF8C00"  # 橙色
+            status_color = "#FF8C00"
         
         # 状态文本
         status_text_control = ft.Text(
@@ -115,67 +117,39 @@ class UserInfoCard:
         )
         
         # 用户信息容器（水平排列，居中）
-        user_info = ft.Container(
-            content=ft.Row(
-                [
-                    avatar,
-                    ft.Container(width=12),
-                    user_info_right,
-                ],
-                alignment=ft.MainAxisAlignment.CENTER,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            ),
-            padding=ft.Padding(left=12, right=12, top=12, bottom=12),
+        user_info_content = ft.Row(
+            [
+                avatar,
+                ft.Container(width=12),
+                user_info_right,
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
         )
         
-        # 卡片容器
-        风格配置 = config.获取风格配置()
-        border_radius = 风格配置.get("border_radius", 8)
-        shadow_blur = 风格配置.get("shadow_blur", 8)
-        shadow_offset_y = 风格配置.get("shadow_offset_y", 2)
-        
-        container = ft.Container(
-            content=user_info,
-            bgcolor=theme_colors.get("bg_secondary"),
-            width=280,
-            border_radius=border_radius,
-            shadow=ft.BoxShadow(
-                spread_radius=1,
-                blur_radius=shadow_blur,
-                color="#00000020",
-                offset=ft.Offset(0, shadow_offset_y),
-            ) if shadow_blur > 0 else None,
-            on_click=lambda e: on_click() if on_click else None,
-            on_hover=lambda e: UserInfoCard._on_hover(e, container, theme_colors),
+        # 使用卡片容器统一风格
+        container = CardContainer.create(
+            config=config,
+            content=user_info_content,
+            on_hover_enabled=True,
         )
+        
+        # 添加点击事件
+        if on_click:
+            container.on_click = lambda e: on_click()
         
         return container
-    
-    @staticmethod
-    def _on_hover(e, container, theme_colors):
-        """鼠标悬停效果"""
-        if e.data == "true":
-            container.bgcolor = theme_colors.get("bg_tertiary", theme_colors.get("bg_secondary"))
-        else:
-            container.bgcolor = theme_colors.get("bg_secondary")
-        container.update()
 
 
-# 兼容别名
 用户信息卡片 = UserInfoCard
 
 
-# ==================== 调试逻辑 ====================
 if __name__ == "__main__":
-    # 1. 界面配置初始化
     配置 = 界面配置()
     
-    # 2. 自动加载用户数据覆盖默认值（在界面配置.__init__中自动完成）
-    
-    # 3. 正常启动被测模块
     def main(page: ft.Page):
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(UserInfoCard.create(配置))  # 只能更改此处**被测调用模块名称**
+        page.add(UserInfoCard.create(配置))
     
     ft.run(main)

@@ -5,6 +5,7 @@
 设计思路:
     独立功能模块，轻量级设计。
     导航按钮，支持选中状态和悬停效果。
+    使用卡片容器统一风格。
 
 功能:
     1. 图标+文字水平排列
@@ -28,12 +29,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from typing import Callable, Optional
 from 配置.界面配置 import 界面配置
+from 新思路.零件层.卡片容器 import CardContainer
 
 
-# *** 用户指定变量 - AI不得修改 ***
-# 导航按钮参数
 DEFAULT_WIDTH = 200
-# *********************************
 
 
 class NavButton:
@@ -63,21 +62,16 @@ class NavButton:
         """
         theme_colors = config.当前主题颜色
         
-        # 使用用户指定的默认值
         current_width = width if width is not None else DEFAULT_WIDTH
         
-        # 内部状态
         is_selected = False
         is_hovering = False
         
-        # 获取图标
         icon_upper = icon.upper() if isinstance(icon, str) else "SETTINGS"
         actual_icon = getattr(ft.Icons, icon_upper, ft.Icons.SETTINGS)
         
-        # 创建图标控件
         icon_control = ft.Icon(actual_icon, size=20, color=theme_colors["accent"])
         
-        # 创建文字控件
         text_control = ft.Text(
             name,
             size=14,
@@ -85,7 +79,6 @@ class NavButton:
             color=theme_colors["text_secondary"]
         )
         
-        # 创建内容
         content = ft.Row(
             [
                 icon_control,
@@ -96,7 +89,6 @@ class NavButton:
             vertical_alignment=ft.CrossAxisAlignment.CENTER
         )
         
-        # 创建背景容器
         bg_container = ft.Container(
             bgcolor="transparent",
             border_radius=8,
@@ -105,11 +97,15 @@ class NavButton:
             height=36,
         )
         
-        # 创建内容容器
         content_container = ft.Container(
             content=content,
             padding=4,
             width=current_width,
+        )
+        
+        stack_content = ft.Stack(
+            [bg_container, content_container],
+            alignment=ft.Alignment(0, 0)
         )
         
         def update_appearance():
@@ -132,12 +128,11 @@ class NavButton:
                 icon_control.color = theme_colors["accent"]
                 text_control.color = theme_colors["text_secondary"]
             
-            # 只有在控件已添加到页面时才更新
             try:
                 if container.page:
                     container.update()
             except RuntimeError:
-                pass  # 控件尚未添加到页面，跳过更新
+                pass
         
         def set_selected(selected: bool):
             """设置选中状态"""
@@ -156,30 +151,18 @@ class NavButton:
             is_hovering = (e.data == "true")
             update_appearance()
         
-        风格配置 = config.获取风格配置()
-        border_radius = 风格配置.get("border_radius", 8)
-        shadow_blur = 风格配置.get("shadow_blur", 8)
-        shadow_offset_y = 风格配置.get("shadow_offset_y", 2)
-        
-        container = ft.Container(
-            content=ft.Stack(
-                [bg_container, content_container],
-                alignment=ft.Alignment(0, 0)
-            ),
-            border_radius=border_radius,
-            ink=True,
-            bgcolor="transparent",
-            on_click=handle_click,
-            on_hover=handle_hover,
+        # 使用卡片容器统一风格（禁用悬停效果，使用自定义悬停）
+        container = CardContainer.create(
+            config=config,
+            content=stack_content,
             width=current_width,
-            height=36,
-            shadow=ft.BoxShadow(
-                spread_radius=1,
-                blur_radius=shadow_blur,
-                color="#00000015",
-                offset=ft.Offset(0, shadow_offset_y),
-            ) if shadow_blur > 0 else None,
+            on_hover_enabled=False,
         )
+        
+        # 添加自定义悬停和点击事件
+        container.on_click = handle_click
+        container.on_hover = handle_hover
+        container.ink = True
         
         # 暴露控制接口
         container.set_selected = set_selected
@@ -188,21 +171,15 @@ class NavButton:
         return container
 
 
-# 兼容别名
 导航按钮 = NavButton
 
 
-# ==================== 调试逻辑 ====================
 if __name__ == "__main__":
-    # 1. 界面配置初始化
     配置 = 界面配置()
     
-    # 2. 自动加载用户数据覆盖默认值（在界面配置.__init__中自动完成）
-    
-    # 3. 正常启动被测模块
     def main(page: ft.Page):
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(NavButton.create(配置, name="通用设置", icon="SETTINGS"))  # 只能更改此处**被测调用模块名称**
+        page.add(NavButton.create(配置, name="通用设置", icon="SETTINGS"))
     
     ft.run(main)
