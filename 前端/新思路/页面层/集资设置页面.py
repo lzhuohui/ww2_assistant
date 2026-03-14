@@ -7,7 +7,7 @@
 
 功能:
     1. 小号上贡卡片（4个下拉框）
-    2. 分成纳租卡片（2个下拉框）
+    2. 分城纳租卡片（2个下拉框）
 
 数据来源:
     部分数据来自按键精灵脚本。
@@ -59,7 +59,7 @@ class FundraisingSettingsPage:
         
         rent_card = UniversalCard.create_from_config(
             config=config,
-            card_name="分成纳租",
+            card_name="分城纳租",
             config_manager=config_manager,
             on_value_change=on_value_change,
         )
