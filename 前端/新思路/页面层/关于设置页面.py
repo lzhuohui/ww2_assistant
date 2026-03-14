@@ -64,7 +64,6 @@ class AboutSettingsPage:
                 f"当前版本：{AboutSettingsPage.VERSION}",
                 f"更新时间：{AboutSettingsPage.UPDATE_DATE}",
             ],
-            height=90,
         )
         
         contact_card = AboutCard.create(
@@ -76,7 +75,6 @@ class AboutSettingsPage:
                 f"微信：{AboutSettingsPage.WECHAT}",
                 f"邮箱：{AboutSettingsPage.EMAIL}",
             ],
-            height=90,
         )
         
         payment_card = AboutCard.create(
@@ -93,7 +91,6 @@ class AboutSettingsPage:
                 f"  2. 选择授权时长并付款",
                 f"  3. 获取授权码并激活",
             ],
-            height=170,
         )
         
         disclaimer_card = AboutCard.create(
@@ -105,7 +102,6 @@ class AboutSettingsPage:
                 "使用本软件产生的任何后果由用户自行承担，与开发者无关。",
                 "请遵守游戏服务条款，合理使用。",
             ],
-            height=100,
         )
         
         page_content = ft.Column(

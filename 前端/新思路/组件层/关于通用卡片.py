@@ -5,6 +5,7 @@
 设计思路:
     复刻通用卡片风格，左侧图标+标题+分割线，右侧文本内容。
     无开关功能，适合展示信息类卡片。
+    高度自适应内容。
 
 布局规则（复刻自图标标题）:
     0. 全部控件边距为0
@@ -15,6 +16,7 @@
 功能:
     1. 左侧：图标+标题+分割线（只复刻布局，不复刻功能）
     2. 右侧：文本内容
+    3. 高度：自适应内容
 
 使用场景:
     被关于设置页面调用。
@@ -35,6 +37,9 @@ DEFAULT_TITLE_SIZE = 14
 ICON_TITLE_SPACING = 4
 ICON_AREA_WIDTH = DEFAULT_ICON_SIZE + ICON_TITLE_SPACING + 5 * DEFAULT_TITLE_SIZE
 
+CONTENT_LINE_HEIGHT = 20
+CONTENT_LINE_SPACING = 4
+
 
 class AboutCard:
     """关于通用卡片"""
@@ -45,17 +50,15 @@ class AboutCard:
         title: str,
         icon: str,
         content_lines: List[str],
-        height: int = 80,
     ) -> ft.Container:
         """
-        创建关于卡片
+        创建关于卡片（高度自适应内容）
         
         参数:
             config: 界面配置对象
             title: 卡片标题
             icon: 图标名称
             content_lines: 右侧文本行列表
-            height: 卡片高度
         
         返回:
             ft.Container: 卡片容器
@@ -71,11 +74,19 @@ class AboutCard:
         
         icon_name = getattr(ft.Icons, icon.upper(), ft.Icons.INFO)
         
+        # ========== 高度计算（自适应内容）==========
+        min_card_height = 60
+        if content_lines:
+            content_height = len(content_lines) * CONTENT_LINE_HEIGHT + (len(content_lines) - 1) * CONTENT_LINE_SPACING
+            card_height = max(content_height + card_padding * 2, min_card_height)
+        else:
+            card_height = min_card_height
+        
         # ========== 布局计算（复刻自图标标题）==========
         icon_height = DEFAULT_ICON_SIZE
         title_height = DEFAULT_TITLE_SIZE
         icon_title_total_height = icon_height + ICON_TITLE_SPACING + title_height
-        icon_title_center_y = height / 2
+        icon_title_center_y = card_height / 2
         icon_title_top = icon_title_center_y - icon_title_total_height / 2
         title_top = icon_title_top + icon_height + ICON_TITLE_SPACING
         
@@ -83,7 +94,7 @@ class AboutCard:
         stack_children = []
         
         # 1. 分割线
-        divider = Divider.create(config, height, enabled=True)
+        divider = Divider.create(config, card_height, enabled=True)
         divider_container = ft.Container(
             content=divider,
             left=ICON_AREA_WIDTH,
@@ -144,7 +155,7 @@ class AboutCard:
         
         content_column = ft.Column(
             content_controls,
-            spacing=4,
+            spacing=CONTENT_LINE_SPACING,
         )
         
         right_container = ft.Container(
@@ -157,7 +168,7 @@ class AboutCard:
         # ========== 构建Stack ==========
         main_stack = ft.Stack(
             stack_children,
-            height=height,
+            height=card_height,
             width=card_width,
             clip_behavior=ft.ClipBehavior.NONE,
         )
@@ -165,7 +176,7 @@ class AboutCard:
         container = CardContainer.create(
             config=config,
             content=main_stack,
-            height=height,
+            height=card_height,
             width=card_width,
         )
         
