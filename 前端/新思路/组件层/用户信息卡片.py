@@ -29,7 +29,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from 配置.界面配置 import 界面配置
 from 新思路.零件层.头像 import Avatar
-from 新思路.零件层.卡片容器 import CardContainer
 
 
 class UserInfoCard:
@@ -130,11 +129,9 @@ class UserInfoCard:
             padding=12,
         )
         
-        # 使用卡片容器统一风格
-        container = CardContainer.create(
-            config=config,
+        # 使用普通Container，无底色（左侧面板提供底色）
+        container = ft.Container(
             content=user_info_content,
-            on_hover_enabled=True,
         )
         
         # 添加点击事件
