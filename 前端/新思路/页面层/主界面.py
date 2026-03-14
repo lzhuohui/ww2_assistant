@@ -82,6 +82,10 @@ class MainPage:
         
         # 左侧导航面板（Win11风格）
         ui_config = self.config.定义尺寸.get("界面", {})
+        风格配置 = self.config.获取风格配置()
+        border_radius = 风格配置.get("border_radius", 8)
+        shadow_blur = 风格配置.get("shadow_blur", 8)
+        shadow_offset_y = 风格配置.get("shadow_offset_y", 2)
         
         left_panel = ft.Container(
             content=ft.Column(
@@ -107,6 +111,13 @@ class MainPage:
             ),
             width=ui_config.get("left_panel_width", 280),
             bgcolor=self.theme_colors.get("bg_secondary"),
+            border_radius=border_radius,
+            shadow=ft.BoxShadow(
+                spread_radius=1,
+                blur_radius=shadow_blur,
+                color="#00000020",
+                offset=ft.Offset(0, shadow_offset_y),
+            ) if shadow_blur > 0 else None,
         )
         
         # 右侧内容区域（Win11风格）
