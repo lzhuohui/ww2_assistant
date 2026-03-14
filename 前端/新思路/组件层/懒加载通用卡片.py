@@ -20,12 +20,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
-from typing import Callable, Dict, Any, Optional, List
+from typing import Callable, Dict, Any, Optional
 from 新思路.零件层.卡片容器 import CardContainer
 from 新思路.零件层.图标标题 import IconTitle
 from 新思路.组件层.通用卡片 import UniversalCard
 
 DEFAULT_CONTROL_MARGIN_RIGHT = 20
+LAZY_HEIGHT = 60
 
 
 class LazyCardManager:
@@ -92,105 +93,116 @@ class LazyUniversalCard:
         self.is_loaded = False
         self.container: Optional[ft.Container] = None
         self.current_enabled = True
+        self.lazy_hint_icon: Optional[ft.Icon] = None
+        self.lazy_hint_text: Optional[ft.Text] = None
+        self.icon_title = None
         
         manager = LazyCardManager()
         manager.register_card(card_name, self)
         if is_default:
             manager.config_manager = config_manager
     
-    def create(self) -> ft.Container:
-        """创建卡片容器"""
-        theme_colors = self.config.当前主题颜色
+    def _get_card_width(self) -> int:
+        """计算卡片宽度"""
         ui_config = self.config.定义尺寸.get("界面", {})
-        card_padding = ui_config.get("card_padding", 16)
-        
         window_width = ui_config.get("window_width", 1200)
         left_panel_width = ui_config.get("left_panel_width", 280)
         page_padding = ui_config.get("page_padding", 10)
-        card_width = window_width - left_panel_width - page_padding * 3
+        return window_width - left_panel_width - page_padding * 3
+    
+    def _create_lazy_container(self, enabled: bool = True, on_state_change: Callable = None) -> ft.Container:
+        """创建未加载状态的容器"""
+        theme_colors = self.config.当前主题颜色
+        ui_config = self.config.定义尺寸.get("界面", {})
+        card_padding = ui_config.get("card_padding", 16)
+        card_width = self._get_card_width()
         
         title = self.card_config.get("title", self.card_name)
         icon = self.card_config.get("icon", "DOMAIN")
         subtitle = self.card_config.get("subtitle")
         
+        icon_title = IconTitle.create(
+            config=self.config,
+            title=title,
+            icon=icon,
+            enabled=enabled,
+            on_state_change=on_state_change,
+            subtitle=subtitle,
+            divider_height=LAZY_HEIGHT,
+        )
+        
+        left_container = ft.Container(content=icon_title)
+        
+        lazy_hint_icon = ft.Icon(ft.Icons.FOLDER_OPEN, size=18, color=theme_colors.get("text_secondary"))
+        lazy_hint_text = ft.Text("点击加载数据", size=14, color=theme_colors.get("text_secondary"))
+        
+        if not enabled:
+            lazy_hint_icon.opacity = 0.4
+            lazy_hint_text.opacity = 0.4
+        
+        lazy_hint = ft.Row(
+            [lazy_hint_icon, ft.Container(width=8), lazy_hint_text],
+            alignment=ft.MainAxisAlignment.END,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        )
+        
+        right_container = ft.Container(
+            content=lazy_hint,
+            right=DEFAULT_CONTROL_MARGIN_RIGHT,
+            top=card_padding,
+        )
+        
+        main_stack = ft.Stack(
+            [left_container, right_container],
+            height=LAZY_HEIGHT,
+            width=card_width,
+            clip_behavior=ft.ClipBehavior.NONE,
+        )
+        
+        container = CardContainer.create(
+            config=self.config,
+            content=main_stack,
+            height=LAZY_HEIGHT,
+            width=card_width,
+        )
+        
+        self.lazy_hint_icon = lazy_hint_icon
+        self.lazy_hint_text = lazy_hint_text
+        self.icon_title = icon_title
+        
+        return container
+    
+    def create(self) -> ft.Container:
+        """创建卡片容器"""
         if self.is_default:
             self.container = self._create_loaded_container()
             self.is_loaded = True
             manager = LazyCardManager()
             manager.current_card_name = self.card_name
         else:
-            lazy_height = 60
-            
             def on_state_change(new_enabled: bool):
                 self.current_enabled = new_enabled
                 self._sync_lazy_hint_state(new_enabled)
             
-            icon_title = IconTitle.create(
-                config=self.config,
-                title=title,
-                icon=icon,
+            self.container = self._create_lazy_container(
                 enabled=self.current_enabled,
                 on_state_change=on_state_change,
-                subtitle=subtitle,
-                divider_height=lazy_height,
-            )
-            
-            left_container = ft.Container(content=icon_title)
-            
-            self.lazy_hint_icon = ft.Icon(ft.Icons.FOLDER_OPEN, size=18, color=theme_colors.get("text_secondary"))
-            self.lazy_hint_text = ft.Text("点击加载数据", size=14, color=theme_colors.get("text_secondary"))
-            
-            lazy_hint = ft.Row(
-                [
-                    self.lazy_hint_icon,
-                    ft.Container(width=8),
-                    self.lazy_hint_text,
-                ],
-                alignment=ft.MainAxisAlignment.END,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            )
-            
-            right_container = ft.Container(
-                content=lazy_hint,
-                right=DEFAULT_CONTROL_MARGIN_RIGHT,
-                top=card_padding,
-            )
-            
-            main_stack = ft.Stack(
-                [left_container, right_container],
-                height=lazy_height,
-                width=card_width,
-                clip_behavior=ft.ClipBehavior.NONE,
-            )
-            
-            self.container = CardContainer.create(
-                config=self.config,
-                content=main_stack,
-                height=lazy_height,
-                width=card_width,
             )
             self.container.on_click = self._on_click
-            self.icon_title = icon_title
         
         return self.container
     
     def _sync_lazy_hint_state(self, enabled: bool):
         """同步懒加载提示的状态"""
-        if hasattr(self, 'lazy_hint_icon') and self.lazy_hint_icon:
-            self.lazy_hint_icon.opacity = 1.0 if enabled else 0.4
-            try:
-                if self.lazy_hint_icon.page:
-                    self.lazy_hint_icon.update()
-            except RuntimeError:
-                pass
-        
-        if hasattr(self, 'lazy_hint_text') and self.lazy_hint_text:
-            self.lazy_hint_text.opacity = 1.0 if enabled else 0.4
-            try:
-                if self.lazy_hint_text.page:
-                    self.lazy_hint_text.update()
-            except RuntimeError:
-                pass
+        opacity = 1.0 if enabled else 0.4
+        for control in [self.lazy_hint_icon, self.lazy_hint_text]:
+            if control:
+                control.opacity = opacity
+                try:
+                    if control.page:
+                        control.update()
+                except RuntimeError:
+                    pass
     
     def _create_loaded_container(self) -> ft.Container:
         """创建已加载状态的容器 - 直接调用通用卡片"""
@@ -200,21 +212,15 @@ class LazyUniversalCard:
             config_manager=self.config_manager,
             on_value_change=self.on_value_change,
         )
-        
         self.icon_title = container
-        
         return container
     
     def _on_click(self, e):
         """点击卡片时"""
-        if self.is_loaded:
+        if self.is_loaded or not self.current_enabled:
             return
         
-        if not self.current_enabled:
-            return
-        
-        manager = LazyCardManager()
-        manager.switch_to(self.card_name)
+        LazyCardManager().switch_to(self.card_name)
     
     def load(self):
         """加载卡片内容"""
@@ -226,7 +232,6 @@ class LazyUniversalCard:
         self.container.content = new_container.content
         self.container.on_click = None
         self.container.height = new_container.height
-        
         self.is_loaded = True
         
         manager = LazyCardManager()
@@ -243,60 +248,9 @@ class LazyUniversalCard:
         if not self.is_loaded:
             return
         
-        theme_colors = self.config.当前主题颜色
-        ui_config = self.config.定义尺寸.get("界面", {})
-        card_padding = ui_config.get("card_padding", 16)
-        
-        window_width = ui_config.get("window_width", 1200)
-        left_panel_width = ui_config.get("left_panel_width", 280)
-        page_padding = ui_config.get("page_padding", 10)
-        card_width = window_width - left_panel_width - page_padding * 3
-        
-        title = self.card_config.get("title", self.card_name)
-        icon = self.card_config.get("icon", "DOMAIN")
-        subtitle = self.card_config.get("subtitle")
-        
-        lazy_height = 60
-        
-        icon_title = IconTitle.create(
-            config=self.config,
-            title=title,
-            icon=icon,
-            enabled=True,
-            on_state_change=None,
-            subtitle=subtitle,
-            divider_height=lazy_height,
-        )
-        
-        left_container = ft.Container(content=icon_title)
-        
-        lazy_hint = ft.Row(
-            [
-                ft.Icon(ft.Icons.FOLDER_OPEN, size=18, color=theme_colors.get("text_secondary")),
-                ft.Container(width=8),
-                ft.Text("点击加载数据", size=14, color=theme_colors.get("text_secondary")),
-            ],
-            alignment=ft.MainAxisAlignment.END,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
-        )
-        
-        right_container = ft.Container(
-            content=lazy_hint,
-            right=DEFAULT_CONTROL_MARGIN_RIGHT,
-            top=card_padding,
-        )
-        
-        main_stack = ft.Stack(
-            [left_container, right_container],
-            height=lazy_height,
-            width=card_width,
-            clip_behavior=ft.ClipBehavior.NONE,
-        )
-        
-        self.container.content = main_stack
+        self.container.content = self._create_lazy_container(enabled=True).content
         self.container.on_click = self._on_click
-        self.container.height = lazy_height
-        
+        self.container.height = LAZY_HEIGHT
         self.is_loaded = False
         
         try:
