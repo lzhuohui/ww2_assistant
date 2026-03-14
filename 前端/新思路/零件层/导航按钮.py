@@ -36,7 +36,11 @@ DEFAULT_WIDTH = 240
 
 
 class NavButton:
-    """导航按钮 - 独立功能模块"""
+    """导航按钮 - 独立功能模块
+    
+    职责：图标+文字、悬停效果、选中状态
+    宽度由导航栏模块控制
+    """
     
     @staticmethod
     def create(
@@ -54,15 +58,13 @@ class NavButton:
             config: 界面配置对象
             name: 按钮名称
             icon: 图标名称
-            width: 按钮宽度（可选，默认从配置中获取）
+            width: 按钮宽度（由导航栏传入）
             on_click: 点击回调
         
         返回:
             ft.Container: 导航按钮容器
         """
         theme_colors = config.当前主题颜色
-        
-        current_width = width if width is not None else DEFAULT_WIDTH
         
         is_selected = False
         is_hovering = False
@@ -100,7 +102,7 @@ class NavButton:
         content_container = ft.Container(
             content=content,
             padding=4,
-            width=current_width,
+            width=width,
         )
         
         stack_content = ft.Stack(
@@ -113,12 +115,12 @@ class NavButton:
             nonlocal is_selected, is_hovering
             
             if is_selected:
-                bg_container.width = current_width
+                bg_container.width = width
                 bg_container.bgcolor = theme_colors["bg_selected"]
                 icon_control.color = "#FFFFFF"
                 text_control.color = "#FFFFFF"
             elif is_hovering:
-                bg_container.width = current_width
+                bg_container.width = width
                 bg_container.bgcolor = theme_colors["bg_hover"]
                 icon_control.color = theme_colors["accent"]
                 text_control.color = theme_colors["text_primary"]
@@ -155,7 +157,7 @@ class NavButton:
         container = CardContainer.create(
             config=config,
             content=stack_content,
-            width=current_width,
+            width=width,
             on_hover_enabled=False,
         )
         

@@ -31,7 +31,10 @@ from 新思路.零件层.导航按钮 import NavButton
 
 
 class NavBar:
-    """导航栏 - 组件层"""
+    """导航栏 - 组件层
+    
+    职责：按钮宽度、排列方式、对齐方式
+    """
     
     @staticmethod
     def create(
@@ -39,6 +42,7 @@ class NavBar:
         nav_items: List[Dict] = None,
         on_nav_change: Callable[[str], None] = None,
         padding: ft.Padding = None,
+        button_width: float = None,
         **kwargs
     ) -> ft.Column:
         """
@@ -49,6 +53,7 @@ class NavBar:
             nav_items: 导航项列表 [{"name": "系统设置", "icon": "SETTINGS"}, ...]
             on_nav_change: 导航切换回调
             padding: 内边距（可选，默认从配置中获取）
+            button_width: 按钮宽度（可选，默认自动计算）
         
         返回:
             ft.Column: 导航栏容器
@@ -56,7 +61,7 @@ class NavBar:
         theme_colors = config.当前主题颜色
         ui_config = config.定义尺寸.get("界面", {})
         
-        # 默认导航项（8个，不需要滚动）
+        # 默认导航项（10个，不需要滚动）
         default_nav_items = [
             {"name": "系统", "icon": "SETTINGS"},
             {"name": "策略", "icon": "ROCKET_LAUNCH"},
@@ -81,6 +86,10 @@ class NavBar:
                 bottom=ui_config.get("nav_padding_bottom", 8),
             )
         
+        # 计算按钮宽度（面板宽度 - 左右padding - 左右margin）
+        panel_width = ui_config.get("left_panel_width", 280)
+        nav_button_width = button_width if button_width else (panel_width - padding.left - padding.right - 16)
+        
         # 内部状态
         current_selected = 0
         nav_buttons = []
@@ -97,12 +106,13 @@ class NavBar:
             if on_nav_change:
                 on_nav_change(name)
         
-        # 创建导航按钮
+        # 创建导航按钮（传入宽度）
         for i, item in enumerate(current_nav_items):
             btn = NavButton.create(
                 config=config,
                 name=item["name"],
                 icon=item["icon"],
+                width=nav_button_width,
                 on_click=lambda e, idx=i, name=item["name"]: handle_nav_click(idx, name),
             )
             # 默认选中第一个（通过暴露的接口设置）
