@@ -35,17 +35,19 @@ def get_active_commanders(config_manager: ConfigManager) -> List[str]:
         config_manager: 配置管理器
     
     返回:
-        List[str]: 参与挂机的主帅名称列表
+        List[str]: 参与挂机的主帅名称列表（从输入框中提取第一个"/"前的数据段）
     """
     commanders = []
     for i in range(1, 16):
         card_name = f"{i:02d}账号"
         account_type = config_manager.get_value(card_name, "统帅种类", "")
         is_enabled = config_manager.get_value(card_name, "开关", False)
-        account_name = config_manager.get_value(card_name, "输入框", "")
+        input_text = config_manager.get_value(card_name, "输入框", "")
         
-        if account_type == "主帅" and is_enabled and account_name:
-            commanders.append(account_name)
+        if account_type == "主帅" and is_enabled and input_text:
+            parts = input_text.split("/")
+            if parts and parts[0].strip():
+                commanders.append(parts[0].strip())
     
     return commanders
 

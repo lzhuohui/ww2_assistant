@@ -206,7 +206,7 @@ class AccountSettingsPage:
                 "type": "input",
                 "label": "",
                 "value": input_value,
-                "width": 300,
+                "width": 350,
                 "hint_text": "输入格式:名称/账号/密码",
                 "on_change": lambda v, idx=index: on_value_change("输入框", v),
             },

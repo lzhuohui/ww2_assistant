@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-任务设置页面 - 页面层（新思路）
+任务设置页面 - 页面层
 
 设计思路:
-    组装组件，构建任务设置页面。
+    使用配置驱动方式创建卡片，支持数据保存/加载。
 
 功能:
     1. 主线任务卡片
@@ -25,39 +25,62 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from typing import Callable
 from 配置.界面配置 import 界面配置
+from 配置.配置管理器 import ConfigManager
 from 新思路.组件层.通用卡片 import UniversalCard
 from 新思路.零件层.标签下拉框 import LabelDropdown
 
 
 class TaskSettingsPage:
-    """任务设置页面 - 页面层"""
+    """任务设置页面"""
     
     @staticmethod
-    def create(config: 界面配置, page: ft.Page = None, on_refresh: Callable[[], None] = None) -> ft.Column:
+    def create(config: 界面配置, page: ft.Page = None, on_refresh: Callable[[], None] = None) -> ft.Container:
         """
         创建任务设置页面
         
         参数:
             config: 界面配置对象
-            page: 页面对象（可选，用于更新页面显示）
-            on_refresh: 刷新回调（主题/调色板切换后调用）
+            page: 页面对象
+            on_refresh: 刷新回调
         
         返回:
-            ft.Column: 任务设置页面容器
+            ft.Container: 任务设置页面容器
         """
         theme_colors = config.当前主题颜色
+        config_manager = ConfigManager()
         
         # 主城等级选项 (01-15级)
         main_level_options = [f"{i:02d}级" for i in range(1, 16)]
         # 支线主城等级选项 (05-15级)
         side_level_options = [f"{i:02d}级" for i in range(5, 16)]
         
+        # 获取保存的值
+        main_level_value = config_manager.get_value("主线任务", "主线限级", "05")
+        side_level_value = config_manager.get_value("支线任务", "支线限级", "10")
+        
+        # 保存默认值到配置
+        config_manager.set_value("主线任务", "主线限级", main_level_value)
+        config_manager.set_value("支线任务", "支线限级", side_level_value)
+        
+        # 显示值添加单位
+        main_display_value = f"{main_level_value}级" if not main_level_value.endswith("级") else main_level_value
+        side_display_value = f"{side_level_value}级" if not side_level_value.endswith("级") else side_level_value
+        
+        def on_main_level_change(value: str):
+            save_value = value.replace("级", "")
+            config_manager.set_value("主线任务", "主线限级", save_value)
+        
+        def on_side_level_change(value: str):
+            save_value = value.replace("级", "")
+            config_manager.set_value("支线任务", "支线限级", save_value)
+        
         # ========== 主线任务卡片 ==========
         main_dropdown = LabelDropdown.create(
             config=config,
             label="主线限级",
             options=main_level_options,
-            value="05",
+            value=main_display_value,
+            on_change=on_main_level_change,
         )
         
         main_card = UniversalCard.create(
@@ -74,7 +97,8 @@ class TaskSettingsPage:
             config=config,
             label="支线限级",
             options=side_level_options,
-            value="10",
+            value=side_display_value,
+            on_change=on_side_level_change,
         )
         
         side_card = UniversalCard.create(
@@ -89,7 +113,6 @@ class TaskSettingsPage:
         # ========== 页面容器 ==========
         page_content = ft.Column(
             [
-                # 页面标题
                 ft.Text(
                     "任务设置",
                     size=24,
@@ -97,10 +120,8 @@ class TaskSettingsPage:
                     color=theme_colors.get("text_primary"),
                 ),
                 ft.Container(height=20),
-                # 主线任务卡片
                 main_card,
                 ft.Container(height=15),
-                # 支线任务卡片
                 side_card,
             ],
             spacing=0,
@@ -108,32 +129,24 @@ class TaskSettingsPage:
             expand=True,
         )
         
-        # 页面容器
         page_container = ft.Container(
             content=page_content,
             padding=ft.Padding.all(20),
             expand=True,
         )
         
-        # 暴露卡片引用
         page_container.main_card = main_card
         page_container.side_card = side_card
         
         return page_container
 
 
-# 兼容别名
 任务设置页面 = TaskSettingsPage
 
 
-# ==================== 调试逻辑 ====================
 if __name__ == "__main__":
-    # 1. 界面配置初始化
     配置 = 界面配置()
     
-    # 2. 自动加载用户数据覆盖默认值（在界面配置.__init__中自动完成）
-    
-    # 3. 正常启动被测模块
     def main(page: ft.Page):
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
