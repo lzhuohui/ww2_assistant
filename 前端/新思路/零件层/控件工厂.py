@@ -28,7 +28,6 @@ from typing import Callable, List, Dict, Any
 from 配置.界面配置 import 界面配置
 from 新思路.零件层.标签下拉框 import LabelDropdown
 from 新思路.零件层.标签输入框 import LabelInput
-from 新思路.零件层.圆形开关 import CircleSwitch
 from 新思路.零件层.主题色块 import ThemeColorBlock
 
 
@@ -101,15 +100,6 @@ class ControlFactory:
                 )
             elif control_type == "input":
                 control = ControlFactory._create_input(
-                    config=config,
-                    control_config=control_config,
-                    current_value=current_value,
-                    on_change=lambda value, key=config_key: ControlFactory._handle_value_change(
-                        card_name, key, value, config_manager, on_value_change
-                    ),
-                )
-            elif control_type == "switch":
-                control = ControlFactory._create_switch(
                     config=config,
                     control_config=control_config,
                     current_value=current_value,
@@ -199,21 +189,6 @@ class ControlFactory:
             label=control_config.get("label", ""),
             value=current_value or control_config.get("value", ""),
             width=control_config.get("width"),
-            on_change=on_change,
-        )
-    
-    @staticmethod
-    def _create_switch(
-        config: 界面配置,
-        control_config: Dict[str, Any],
-        current_value: Any,
-        on_change: Callable[[Any], None] = None,
-    ) -> ft.Control:
-        """创建开关控件"""
-        return CircleSwitch.create(
-            config=config,
-            label=control_config.get("label", ""),
-            value=current_value if current_value is not None else control_config.get("value", False),
             on_change=on_change,
         )
     
