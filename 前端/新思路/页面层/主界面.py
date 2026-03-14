@@ -115,7 +115,12 @@ class MainPage:
         # 右侧内容区域（Win11风格）
         self.content_area = ft.Container(
             content=self.get_page_content(self.current_nav),
-            padding=ft.Padding.all(page_padding),
+            padding=ft.Padding(
+                left=20,
+                right=page_padding,
+                top=page_padding,
+                bottom=page_padding,
+            ),
             expand=True,
             bgcolor=self.theme_colors.get("bg_primary"),
         )

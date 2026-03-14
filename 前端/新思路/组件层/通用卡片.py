@@ -121,7 +121,7 @@ class UniversalCard:
         window_width = ui_config.get("window_width", 1200)
         left_panel_width = ui_config.get("left_panel_width", 280)
         page_padding = ui_config.get("page_padding", 10)
-        card_width = window_width - left_panel_width - page_padding * 3
+        card_width = window_width - left_panel_width - 20 - page_padding * 2
         
         current_enabled = enabled
         current_controls_per_row = controls_per_row if controls_per_row is not None else DEFAULT_CONTROLS_PER_ROW

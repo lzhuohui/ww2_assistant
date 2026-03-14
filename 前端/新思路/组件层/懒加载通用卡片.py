@@ -108,7 +108,7 @@ class LazyUniversalCard:
         window_width = ui_config.get("window_width", 1200)
         left_panel_width = ui_config.get("left_panel_width", 280)
         page_padding = ui_config.get("page_padding", 10)
-        return window_width - left_panel_width - page_padding * 3
+        return window_width - left_panel_width - 20 - page_padding * 2
     
     def _create_lazy_container(self, enabled: bool = True, on_state_change: Callable = None) -> ft.Container:
         """创建未加载状态的容器"""
