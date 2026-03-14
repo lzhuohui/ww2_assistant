@@ -52,9 +52,30 @@ class SystemSettingsPage:
             """值变化回调"""
             print(f"配置变化: {config_key} = {value}")
         
-        basic_card = UniversalCard.create_from_config(
+        auto_mode_card = UniversalCard.create_from_config(
             config=config,
-            card_name="基础设置",
+            card_name="挂机模式",
+            config_manager=config_manager,
+            on_value_change=on_value_change,
+        )
+        
+        speed_card = UniversalCard.create_from_config(
+            config=config,
+            card_name="指令速度",
+            config_manager=config_manager,
+            on_value_change=on_value_change,
+        )
+        
+        retry_card = UniversalCard.create_from_config(
+            config=config,
+            card_name="尝试次数",
+            config_manager=config_manager,
+            on_value_change=on_value_change,
+        )
+        
+        cache_card = UniversalCard.create_from_config(
+            config=config,
+            card_name="清缓限量",
             config_manager=config_manager,
             on_value_change=on_value_change,
         )
@@ -68,7 +89,13 @@ class SystemSettingsPage:
                     color=theme_colors.get("text_primary"),
                 ),
                 ft.Container(height=20),
-                basic_card,
+                auto_mode_card,
+                ft.Container(height=15),
+                speed_card,
+                ft.Container(height=15),
+                retry_card,
+                ft.Container(height=15),
+                cache_card,
             ],
             spacing=0,
             scroll=ft.ScrollMode.AUTO,

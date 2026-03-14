@@ -20,42 +20,81 @@
 
 # 卡片配置字典
 卡片配置 = {
-    "基础设置": {
-        "card_type": "standard",
-        "title": "基础设置",
-        "icon": "SETTINGS",
-        "subtitle": "通用配置描述",
-        "controls_per_row": 2,
-        "controls": [
+    "挂机模式": {
+        "card_type": "switch_dropdown",
+        "title": "挂机模式",
+        "icon": "POWER_SETTINGS_NEW",
+        "subtitle": "全自动:自动挂机,无需人为干预 | 半自动:点击头像,自动切换账号",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "挂机模式_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [
             {
-                "type": "dropdown",
-                "label": "挂机模式:",
+                "config_key": "挂机模式",
+                "label": "模式选择:",
                 "options": ["自动", "手动"],
-                "value": "自动",
-                "config_key": "挂机模式"
+                "default_value": "自动",
             },
+        ],
+    },
+    "指令速度": {
+        "card_type": "switch_dropdown",
+        "title": "指令速度",
+        "icon": "SPEED",
+        "subtitle": "运行指令间隔频率(毫秒)，数值越小速度越快",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "指令速度_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [
             {
-                "type": "dropdown",
-                "label": "指令速度:",
+                "config_key": "指令速度",
+                "label": "速度选择:",
                 "options": ["100毫秒", "150毫秒", "200毫秒", "250毫秒", "300毫秒", "350毫秒", "400毫秒", "450毫秒", "500毫秒"],
-                "value": "100毫秒",
-                "config_key": "指令速度"
+                "default_value": "100毫秒",
             },
+        ],
+    },
+    "尝试次数": {
+        "card_type": "switch_dropdown",
+        "title": "尝试次数",
+        "icon": "REFRESH",
+        "subtitle": "连续操作失败达到最大尝试次数后,触发自动纠错系统",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "尝试次数_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [
             {
-                "type": "dropdown",
-                "label": "尝试次数:",
+                "config_key": "尝试次数",
+                "label": "次数选择:",
                 "options": ["10次", "15次", "20次", "25次", "30次"],
-                "value": "10次",
-                "config_key": "尝试次数"
+                "default_value": "10次",
             },
+        ],
+    },
+    "清缓限量": {
+        "card_type": "switch_dropdown",
+        "title": "清缓限量",
+        "icon": "DELETE_SWEEP",
+        "subtitle": "达到设置系统缓存清理阈值(M)后,自动清理缓存",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "清缓限量_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [
             {
-                "type": "dropdown",
-                "label": "清缓限量:",
+                "config_key": "清缓限量",
+                "label": "限量选择:",
                 "options": ["1.0M", "1.5M", "2.0M", "2.5M", "3.0M", "3.5M", "4.0M", "4.5M", "5.0M"],
-                "value": "1.0M",
-                "config_key": "清缓限量"
-            }
-        ]
+                "default_value": "1.0M",
+            },
+        ],
     },
     "主题设置": {
         "card_type": "color_blocks",  # 色块类型卡片
