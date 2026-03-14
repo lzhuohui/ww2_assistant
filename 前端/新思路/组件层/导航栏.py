@@ -28,6 +28,7 @@ import flet as ft
 from typing import Callable, List, Dict
 from 配置.界面配置 import 界面配置
 from 新思路.零件层.导航按钮 import NavButton
+from 新思路.零件层.卡片容器 import CardContainer
 
 
 class NavBar:
@@ -129,11 +130,11 @@ class NavBar:
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         )
         
-        # 导航栏容器（带内边距）
-        nav_container = ft.Container(
+        # 导航栏容器（使用卡片容器，风格统一）
+        nav_container = CardContainer.create(
+            config=config,
             content=nav_column,
-            padding=padding,
-            expand=True,
+            on_hover_enabled=False,
         )
         
         return nav_container
