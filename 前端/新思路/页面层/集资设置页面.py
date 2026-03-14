@@ -171,7 +171,7 @@ class FundraisingSettingsPage:
             icon="ACCOUNT_BALANCE",
             enabled=True,
             subtitle="设置小号上贡的统帅和限制",
-            controls=[primary_dropdown, secondary_dropdown, limit_level_dropdown, limit_amount_dropdown],
+            controls=[limit_level_dropdown, limit_amount_dropdown, primary_dropdown, secondary_dropdown],
             controls_per_row=2,
         )
         
