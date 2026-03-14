@@ -42,6 +42,7 @@ ICON_AREA_WIDTH = DEFAULT_ICON_SIZE + ICON_TITLE_SPACING + 5 * DEFAULT_TITLE_SIZ
 CONTENT_LINE_HEIGHT = 22
 CONTENT_LINE_SPACING = 6
 GROUP_TITLE_HEIGHT = 24
+LINK_LINE_HEIGHT = 32
 
 
 class AboutCard:
@@ -82,9 +83,11 @@ class AboutCard:
         # ========== 高度计算（自适应内容）==========
         min_card_height = 60
         content_height = 0
-        for label, value, _ in content_items:
+        for label, value, on_click in content_items:
             if not label:
                 content_height += GROUP_TITLE_HEIGHT
+            elif on_click:
+                content_height += LINK_LINE_HEIGHT
             else:
                 content_height += CONTENT_LINE_HEIGHT
         content_height += (len(content_items) - 1) * CONTENT_LINE_SPACING
