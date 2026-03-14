@@ -100,6 +100,7 @@ class MainPage:
                     ),
                     ft.Container(
                         content=nav_bar,
+                        width=ui_config.get("left_panel_width", 280),
                         expand=True,
                     ),
                 ],
