@@ -47,17 +47,17 @@ class TaskSettingsPage:
         """
         theme_colors = config.当前主题颜色
         
-        # 主城等级选项 (01-15)
-        main_level_options = [f"{i:02d}" for i in range(1, 16)]
-        # 支线主城等级选项 (05-15)
-        side_level_options = [f"{i:02d}" for i in range(5, 16)]
+        # 主城等级选项 (01-15级)
+        main_level_options = [f"{i:02d}级" for i in range(1, 16)]
+        # 支线主城等级选项 (05-15级)
+        side_level_options = [f"{i:02d}级" for i in range(5, 16)]
         
         # ========== 主线任务卡片 ==========
         main_dropdown = LabelDropdown.create(
             config=config,
             label="主线限级",
             options=main_level_options,
-            value="05",
+            value="05级",
         )
         
         main_card = UniversalCard.create(
@@ -74,7 +74,7 @@ class TaskSettingsPage:
             config=config,
             label="支线限级",
             options=side_level_options,
-            value="10",
+            value="10级",
         )
         
         side_card = UniversalCard.create(

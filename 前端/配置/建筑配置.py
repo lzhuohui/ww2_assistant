@@ -18,9 +18,9 @@
     被 ConfigManager 调用。
 """
 
-# 等级选项 (01-20)
-LEVELS = [f"{i:02d}" for i in range(1, 21)]
-LEVELS_0 = [f"{i:02d}" for i in range(0, 21)]
+# 等级选项 (01-20级)
+LEVELS = [f"{i:02d}级" for i in range(1, 21)]
+LEVELS_0 = [f"{i:02d}级" for i in range(0, 21)]
 
 
 def create_dropdown(config_key: str, label: str, value: str, options: list = None, width: int = None):
