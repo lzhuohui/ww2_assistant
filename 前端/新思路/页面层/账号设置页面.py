@@ -163,7 +163,9 @@ class AccountSettingsPage:
         role_value = config_manager.get_value(f"{index:02d}账号", "统帅种类", default_role)
         input_value = config_manager.get_value(f"{index:02d}账号", "输入框", "")
         platform_value = config_manager.get_value(f"{index:02d}账号", "平台", "Tap")
+        switch_value = config_manager.get_value(f"{index:02d}账号", "开关", False)
         
+        config_manager.set_value(f"{index:02d}账号", "开关", switch_value)
         config_manager.set_value(f"{index:02d}账号", "统帅种类", role_value)
         config_manager.set_value(f"{index:02d}账号", "输入框", input_value)
         config_manager.set_value(f"{index:02d}账号", "平台", platform_value)
