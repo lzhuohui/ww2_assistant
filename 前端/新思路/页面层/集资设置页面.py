@@ -109,7 +109,7 @@ class FundraisingSettingsPage:
         
         primary_dropdown = LabelDropdown.create(
             config=config,
-            label="主要统帅",
+            label="主要统帅:",
             options=primary_options,
             value=primary_display,
             on_change=on_primary_change,
@@ -120,7 +120,7 @@ class FundraisingSettingsPage:
         
         secondary_dropdown = LabelDropdown.create(
             config=config,
-            label="次要统帅",
+            label="次要统帅:",
             options=secondary_initial_options,
             value=secondary_display,
             on_change=on_secondary_change,
@@ -151,7 +151,7 @@ class FundraisingSettingsPage:
         
         limit_level_dropdown = LabelDropdown.create(
             config=config,
-            label="上贡限级",
+            label="上贡限级:",
             options=limit_level_options,
             value=limit_level_display,
             on_change=on_limit_level_change,
@@ -159,7 +159,7 @@ class FundraisingSettingsPage:
         
         limit_amount_dropdown = LabelDropdown.create(
             config=config,
-            label="上贡限量",
+            label="上贡限量:",
             options=limit_amount_options,
             value=limit_amount_display,
             on_change=on_limit_amount_change,
@@ -204,14 +204,14 @@ class FundraisingSettingsPage:
             controls=[
                 LabelDropdown.create(
                     config=config,
-                    label="纳租限级",
+                    label="纳租限级:",
                     options=rent_level_options,
                     value=rent_level_display,
                     on_change=on_rent_level_change,
                 ),
                 LabelDropdown.create(
                     config=config,
-                    label="纳租限量",
+                    label="纳租限量:",
                     options=rent_amount_options,
                     value=rent_amount_display,
                     on_change=on_rent_amount_change,
