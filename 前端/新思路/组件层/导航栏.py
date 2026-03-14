@@ -130,10 +130,17 @@ class NavBar:
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         )
         
+        # 导航栏内容（带内边距）
+        nav_content = ft.Container(
+            content=nav_column,
+            padding=padding,
+            expand=True,
+        )
+        
         # 导航栏容器（使用卡片容器，风格统一）
         nav_container = CardContainer.create(
             config=config,
-            content=nav_column,
+            content=nav_content,
             on_hover_enabled=False,
         )
         
