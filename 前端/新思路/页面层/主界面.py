@@ -135,15 +135,17 @@ class MainPage:
             vertical_alignment=ft.CrossAxisAlignment.START,
         )
         
+        page_padding = ui_config.get("page_padding", 10)
+        
         # 页面容器
         page_container = ft.Container(
             content=main_layout,
             bgcolor=self.theme_colors.get("bg_primary"),
             padding=ft.Padding(
-                left=ui_config.get("page_padding_left", 10),
-                top=ui_config.get("page_padding_top", 10),
-                right=ui_config.get("page_padding_right", 0),
-                bottom=ui_config.get("page_padding_bottom", 10),
+                left=page_padding,
+                top=page_padding,
+                right=0,
+                bottom=page_padding,
             ),
             expand=True,
         )
