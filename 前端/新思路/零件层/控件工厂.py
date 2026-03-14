@@ -40,6 +40,7 @@ class ControlFactory:
         card_config: Dict[str, Any],
         config_manager: Any,
         on_value_change: Callable[[str, Any], None] = None,
+        dynamic_options: Dict[str, List[str]] = None,
     ) -> List[ft.Control]:
         """
         根据配置创建控件列表
@@ -49,6 +50,7 @@ class ControlFactory:
             card_config: 卡片配置字典
             config_manager: 配置管理器
             on_value_change: 值变化回调函数
+            dynamic_options: 动态选项字典 {config_key: [options]}
         
         返回:
             控件列表
@@ -57,7 +59,7 @@ class ControlFactory:
         
         if card_type == "standard":
             return ControlFactory._create_standard_controls(
-                config, card_config, config_manager, on_value_change
+                config, card_config, config_manager, on_value_change, dynamic_options
             )
         elif card_type == "color_blocks":
             return ControlFactory._create_color_blocks(
@@ -65,7 +67,7 @@ class ControlFactory:
             )
         elif card_type == "switch_dropdown":
             return ControlFactory._create_switch_dropdown_controls(
-                config, card_config, config_manager, on_value_change
+                config, card_config, config_manager, on_value_change, dynamic_options
             )
         else:
             return []
@@ -76,6 +78,7 @@ class ControlFactory:
         card_config: Dict[str, Any],
         config_manager: Any,
         on_value_change: Callable[[str, Any], None] = None,
+        dynamic_options: Dict[str, List[str]] = None,
     ) -> List[ft.Control]:
         """创建标准控件（下拉框、输入框、开关等）"""
         controls = []
@@ -85,11 +88,13 @@ class ControlFactory:
             control_type = control_config.get("type")
             config_key = control_config.get("config_key")
             
-            # 获取当前值
             current_value = config_manager.get_value(card_name, config_key)
             
-            # 根据类型创建控件
             if control_type == "dropdown":
+                options = control_config.get("options", [])
+                if dynamic_options and config_key in dynamic_options:
+                    options = dynamic_options[config_key]
+                
                 control = ControlFactory._create_dropdown(
                     config=config,
                     control_config=control_config,
@@ -97,6 +102,7 @@ class ControlFactory:
                     on_change=lambda value, key=config_key: ControlFactory._handle_value_change(
                         card_name, key, value, config_manager, on_value_change
                     ),
+                    dynamic_options=options,
                 )
             elif control_type == "input":
                 control = ControlFactory._create_input(
@@ -165,12 +171,14 @@ class ControlFactory:
         control_config: Dict[str, Any],
         current_value: Any,
         on_change: Callable[[Any], None] = None,
+        dynamic_options: List[str] = None,
     ) -> ft.Control:
         """创建下拉框控件"""
+        options = dynamic_options if dynamic_options is not None else control_config.get("options", [])
         return LabelDropdown.create(
             config=config,
             label=control_config.get("label", ""),
-            options=control_config.get("options", []),
+            options=options,
             value=current_value or control_config.get("value"),
             width=control_config.get("width"),
             on_change=on_change,

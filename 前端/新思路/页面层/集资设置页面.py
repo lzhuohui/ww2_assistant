@@ -21,10 +21,64 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
-from typing import Callable
+from typing import Callable, List, Tuple
 from 配置.界面配置 import 界面配置
 from 配置.配置管理器 import ConfigManager
 from 新思路.组件层.通用卡片 import UniversalCard
+
+
+def get_active_commanders(config_manager: ConfigManager) -> List[str]:
+    """
+    从账号配置中获取参与挂机的主帅列表
+    
+    参数:
+        config_manager: 配置管理器
+    
+    返回:
+        List[str]: 参与挂机的主帅名称列表
+    """
+    commanders = []
+    for i in range(1, 16):
+        card_name = f"{i:02d}账号"
+        account_type = config_manager.get_value(card_name, "统帅种类", "")
+        is_enabled = config_manager.get_value(card_name, "开关", False)
+        account_name = config_manager.get_value(card_name, "输入框", "")
+        
+        if account_type == "主帅" and is_enabled and account_name:
+            commanders.append(account_name)
+    
+    return commanders
+
+
+def create_dynamic_card_config(
+    config_manager: ConfigManager,
+    card_name: str,
+    base_config: dict,
+    commander_options: List[str]
+) -> dict:
+    """
+    创建动态卡片配置，更新统帅下拉框选项
+    
+    参数:
+        config_manager: 配置管理器
+        card_name: 卡片名称
+        base_config: 基础配置
+        commander_options: 统帅选项列表
+    
+    返回:
+        dict: 更新后的配置
+    """
+    import copy
+    config = copy.deepcopy(base_config)
+    
+    if card_name == "小号上贡":
+        for control in config.get("controls", []):
+            if control.get("config_key") in ["小号上贡_主要统帅", "小号上贡_备用统帅"]:
+                control["options"] = commander_options
+                if commander_options:
+                    control["default"] = commander_options[0]
+    
+    return config
 
 
 class FundraisingSettingsPage:
@@ -47,6 +101,8 @@ class FundraisingSettingsPage:
         
         config_manager = ConfigManager()
         
+        commander_options = get_active_commanders(config_manager)
+        
         def on_value_change(config_key: str, value: any):
             print(f"配置变化: {config_key} = {value}")
         
@@ -55,6 +111,7 @@ class FundraisingSettingsPage:
             card_name="小号上贡",
             config_manager=config_manager,
             on_value_change=on_value_change,
+            dynamic_options={"小号上贡_主要统帅": commander_options, "小号上贡_备用统帅": commander_options},
         )
         
         rent_card = UniversalCard.create_from_config(

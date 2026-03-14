@@ -274,6 +274,7 @@ class UniversalCard:
         card_name: str,
         config_manager: Any,
         on_value_change: Callable[[str, Any], None] = None,
+        dynamic_options: Dict[str, List[str]] = None,
         **kwargs
     ) -> ft.Container:
         """
@@ -284,11 +285,11 @@ class UniversalCard:
             card_name: 卡片名称
             config_manager: 配置管理器
             on_value_change: 值变化回调函数
+            dynamic_options: 动态选项字典 {config_key: [options]}
         
         返回:
             ft.Container: 完整的卡片容器
         """
-        # 获取卡片配置
         card_config = config_manager.get_card_config(card_name)
         
         if not card_config:
@@ -296,19 +297,17 @@ class UniversalCard:
         
         card_type = card_config.get("card_type", "standard")
         
-        # 使用控件工厂创建控件
         controls = ControlFactory.create_controls(
             config=config,
             card_config=card_config,
             config_manager=config_manager,
             on_value_change=on_value_change,
+            dynamic_options=dynamic_options,
         )
         
-        # 对于switch_dropdown类型，控件工厂已经返回了完整的卡片，直接返回
         if card_type == "switch_dropdown":
             return controls[0] if controls else None
         
-        # 对于其他类型，调用原有的create方法包装控件
         return UniversalCard.create(
             config=config,
             title=card_config.get("title"),
