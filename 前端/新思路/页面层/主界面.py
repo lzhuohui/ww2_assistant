@@ -90,7 +90,7 @@ class MainPage:
                 [
                     ft.Container(
                         content=user_info_card,
-                        height=80,
+                        height=70,
                     ),
                     ft.Container(
                         content=ft.Divider(height=1, color=self.theme_colors.get("border")),

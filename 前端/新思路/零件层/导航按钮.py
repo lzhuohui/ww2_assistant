@@ -94,7 +94,7 @@ class NavButton:
             border_radius=8,
             animate=ft.Animation(300, ft.AnimationCurve.EASE_IN_OUT),
             width=0,
-            height=36,
+            height=32,
         )
         
         content_container = ft.Container(
