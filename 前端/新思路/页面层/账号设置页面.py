@@ -111,7 +111,7 @@ class AccountSettingsPage:
         
         page_container = ft.Container(
             content=page_content,
-            padding=ft.Padding.all(20),
+            padding=ft.Padding.all(0),
             expand=True,
         )
         

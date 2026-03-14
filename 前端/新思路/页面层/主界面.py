@@ -83,6 +83,7 @@ class MainPage:
         
         # 左侧导航面板（Win11风格）
         ui_config = self.config.定义尺寸.get("界面", {})
+        page_padding = ui_config.get("page_padding", 10)
         
         left_panel = CardContainer.create(
             config=self.config,
@@ -114,12 +115,7 @@ class MainPage:
         # 右侧内容区域（Win11风格）
         self.content_area = ft.Container(
             content=self.get_page_content(self.current_nav),
-            padding=ft.Padding(
-                left=ui_config.get("content_padding_left", 40),
-                right=ui_config.get("content_padding_right", 40),
-                top=ui_config.get("content_padding_top", 32),
-                bottom=ui_config.get("content_padding_bottom", 32),
-            ),
+            padding=ft.Padding.all(page_padding),
             expand=True,
             bgcolor=self.theme_colors.get("bg_primary"),
         )
@@ -136,18 +132,11 @@ class MainPage:
             vertical_alignment=ft.CrossAxisAlignment.START,
         )
         
-        page_padding = ui_config.get("page_padding", 10)
-        
         # 页面容器
         page_container = ft.Container(
             content=main_layout,
             bgcolor=self.theme_colors.get("bg_primary"),
-            padding=ft.Padding(
-                left=page_padding,
-                top=page_padding,
-                right=0,
-                bottom=page_padding,
-            ),
+            padding=ft.Padding.all(page_padding),
             expand=True,
         )
         
