@@ -58,9 +58,7 @@ class AccountSettingsPage:
         AccountSettingsPage.账号开关状态 = {}
         
         for i in range(1, MAX_ACCOUNTS + 1):
-            card_config = config_manager.get_card_config(f"{i:02d}账号")
-            default_enabled = card_config.get("enabled", False) if card_config else False
-            enabled = config_manager.get_value(f"{i:02d}账号", "enabled", default_enabled)
+            enabled = config_manager.get_value(f"{i:02d}账号", "开关", False)
             AccountSettingsPage.账号开关状态[i] = enabled
             if enabled:
                 AccountSettingsPage.当前参与数量 += 1
