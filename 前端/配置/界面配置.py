@@ -118,8 +118,8 @@ class 界面配置:
             "vertical_center": True,
         },
         "阴影": {
-            "blur_default": 4,
-            "blur_hover": 12,
+            "blur_default": 8,
+            "blur_hover": 16,
             "spread": 1,
             "spread_hover": 2,
             "offset_y": 2,
@@ -130,15 +130,15 @@ class 界面配置:
             "current_style": "3D立体",
             "styles": {
                 "普通平铺": {
-                    "border_radius": 0,
+                    "border_radius": 8,
                     "shadow_blur": 0,
                     "shadow_spread": 0,
                     "shadow_offset_y": 0,
-                    "border_width": 0,
+                    "border_width": 1,
                 },
                 "3D立体": {
                     "border_radius": 8,
-                    "shadow_blur": 8,
+                    "shadow_blur": 12,
                     "shadow_spread": 1,
                     "shadow_offset_y": 2,
                     "border_width": 1,
