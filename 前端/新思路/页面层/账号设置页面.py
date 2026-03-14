@@ -10,8 +10,9 @@
     1. 显示15个账号卡片
     2. 开关控制参与挂机状态
     3. 开关状态不影响控件操作
-    4. 计数机制：开关打开时计数+1
+    4. 计数机制：开关打开且输入有效时计数+1
     5. 授权限制：超过授权数量禁止打开开关
+    6. 输入格式验证：格式错误时副标题显示提示
 
 使用场景:
     被主界面调用。
@@ -27,6 +28,7 @@ from 配置.界面配置 import 界面配置
 from 配置.配置管理器 import ConfigManager
 from 新思路.组件层.开关下拉卡片 import SwitchDropdownCard
 from 配置.账号配置 import MAX_ACCOUNTS, DEFAULT_AUTHORIZED_COUNT
+from 新思路.工具层.输入验证 import validate_account_input, get_subtitle_by_state, can_participate
 
 
 class AccountSettingsPage:
@@ -59,8 +61,9 @@ class AccountSettingsPage:
         
         for i in range(1, MAX_ACCOUNTS + 1):
             enabled = config_manager.get_value(f"{i:02d}账号", "开关", False)
+            input_value = config_manager.get_value(f"{i:02d}账号", "输入框", "")
             AccountSettingsPage.账号开关状态[i] = enabled
-            if enabled:
+            if can_participate(enabled, input_value):
                 AccountSettingsPage.当前参与数量 += 1
         
         count_text = ft.Text(
@@ -122,21 +125,34 @@ class AccountSettingsPage:
         """创建单个账号卡片"""
         
         initial_enabled = AccountSettingsPage.账号开关状态.get(index, False)
-        subtitle_text = "参与挂机" if initial_enabled else "禁止挂机"
+        input_value = config_manager.get_value(f"{index:02d}账号", "输入框", "")
+        subtitle_text = get_subtitle_by_state(initial_enabled, input_value)
         
-        def on_state_change(enabled: bool):
-            config_manager.set_value(f"{index:02d}账号", "开关", enabled)
+        card = None
+        
+        def update_subtitle_and_count(enabled: bool, input_text: str):
+            """更新副标题和计数"""
+            nonlocal card
             
-            if enabled:
+            old_can_participate = can_participate(
+                AccountSettingsPage.账号开关状态.get(index, False),
+                config_manager.get_value(f"{index:02d}账号", "输入框", "")
+            )
+            
+            new_can_participate = can_participate(enabled, input_text)
+            
+            if new_can_participate and not old_can_participate:
                 if AccountSettingsPage.当前参与数量 >= AccountSettingsPage.授权数量:
                     return False
                 AccountSettingsPage.当前参与数量 += 1
-                AccountSettingsPage.账号开关状态[index] = True
-                card.set_subtitle("参与挂机")
-            else:
+            elif not new_can_participate and old_can_participate:
                 AccountSettingsPage.当前参与数量 -= 1
-                AccountSettingsPage.账号开关状态[index] = False
-                card.set_subtitle("禁止挂机")
+            
+            AccountSettingsPage.账号开关状态[index] = enabled
+            
+            subtitle = get_subtitle_by_state(enabled, input_text)
+            if card:
+                card.set_subtitle(subtitle)
             
             count_text.value = f"已启用: {AccountSettingsPage.当前参与数量}/{AccountSettingsPage.授权数量}"
             try:
@@ -147,8 +163,17 @@ class AccountSettingsPage:
             
             return True
         
+        def on_state_change(enabled: bool):
+            config_manager.set_value(f"{index:02d}账号", "开关", enabled)
+            current_input = config_manager.get_value(f"{index:02d}账号", "输入框", "")
+            return update_subtitle_and_count(enabled, current_input)
+        
         def on_value_change(config_key: str, value: any):
             config_manager.set_value(f"{index:02d}账号", config_key, value)
+            
+            if config_key == "输入框":
+                current_enabled = config_manager.get_value(f"{index:02d}账号", "开关", False)
+                update_subtitle_and_count(current_enabled, value)
         
         card_config = config_manager.get_card_config(f"{index:02d}账号")
         default_role = "主帅" if index == 1 else "副帅"
