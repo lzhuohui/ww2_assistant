@@ -83,6 +83,7 @@ class IconTitle:
         subtitle: str = None,
         divider_height: int = None,
         divider_left: int = None,
+        show_switch: bool = True,
         **kwargs
     ) -> ft.Container:
         """
@@ -93,11 +94,12 @@ class IconTitle:
             title: 标题文字
             icon: 图标名称（字符串）
             enabled: 初始启用状态
-            on_state_change: 状态变化回调函数
-            on_click: 点击回调函数（可选）
-            subtitle: 副标题（可选）
-            divider_height: 分割线高度（可选，默认CONTAINER_HEIGHT）
-            divider_left: 分割线左侧位置（可选，默认CONTAINER_WIDTH）
+            on_state_change: 状态变化回调
+            on_click: 点击回调
+            subtitle: 副标题文字
+            divider_height: 分割线高度
+            divider_left: 分割线左侧位置
+            show_switch: 是否显示开关状态（False时开关不显示亮/暗）
         
         返回:
             ft.Container: 包含图标标题的容器
@@ -262,23 +264,25 @@ class IconTitle:
         )
         
         container._enabled = enabled
+        container._show_switch = show_switch
         
         def set_state(new_enabled: bool, notify: bool = True):
             container._enabled = new_enabled
             
-            if icon_control:
-                icon_control.opacity = 1.0 if new_enabled else 0.4
-                icon_control.update()
-            
-            if title_control:
-                title_control.set_state(new_enabled)
-            
-            if divider:
-                divider.opacity = 0.7 if new_enabled else 0.2
-                divider.update()
-            
-            if subtitle_control:
-                subtitle_control.set_state(new_enabled)
+            if container._show_switch:
+                if icon_control:
+                    icon_control.opacity = 1.0 if new_enabled else 0.4
+                    icon_control.update()
+                
+                if title_control:
+                    title_control.set_state(new_enabled)
+                
+                if divider:
+                    divider.opacity = 0.7 if new_enabled else 0.2
+                    divider.update()
+                
+                if subtitle_control:
+                    subtitle_control.set_state(new_enabled)
             
             if notify and on_state_change:
                 on_state_change(new_enabled)

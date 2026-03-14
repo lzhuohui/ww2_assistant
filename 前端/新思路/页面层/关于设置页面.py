@@ -4,7 +4,7 @@
 
 设计思路:
     展示软件版本信息、联系方式、免责声明和缴费说明。
-    使用信息卡片组件，保持与其他页面视觉一致。
+    使用通用卡片组件（show_switch=False），保持与其他页面视觉一致。
 
 功能:
     1. 版本信息卡片
@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from typing import Callable
 from 配置.界面配置 import 界面配置
-from 新思路.组件层.信息卡片 import InfoCard
+from 新思路.组件层.通用卡片 import UniversalCard
 
 
 class AboutSettingsPage:
@@ -74,11 +74,13 @@ class AboutSettingsPage:
             spacing=5,
         )
         
-        version_card = InfoCard.create(
+        version_card = UniversalCard.create(
             config=config,
             title="版本信息",
             icon="INFO",
-            content=version_content,
+            enabled=True,
+            show_switch=False,
+            controls=[version_content],
         )
         
         contact_content = ft.Column(
@@ -114,11 +116,13 @@ class AboutSettingsPage:
             spacing=5,
         )
         
-        contact_card = InfoCard.create(
+        contact_card = UniversalCard.create(
             config=config,
             title="联系方式",
             icon="CONTACTS",
-            content=contact_content,
+            enabled=True,
+            show_switch=False,
+            controls=[contact_content],
         )
         
         payment_content = ft.Column(
@@ -136,11 +140,13 @@ class AboutSettingsPage:
             spacing=5,
         )
         
-        payment_card = InfoCard.create(
+        payment_card = UniversalCard.create(
             config=config,
             title="缴费说明",
             icon="PAYMENT",
-            content=payment_content,
+            enabled=True,
+            show_switch=False,
+            controls=[payment_content],
         )
         
         disclaimer_content = ft.Column(
@@ -154,11 +160,13 @@ class AboutSettingsPage:
             spacing=5,
         )
         
-        disclaimer_card = InfoCard.create(
+        disclaimer_card = UniversalCard.create(
             config=config,
             title="免责声明",
             icon="WARNING_AMBER",
-            content=disclaimer_content,
+            enabled=True,
+            show_switch=False,
+            controls=[disclaimer_content],
         )
         
         page_content = ft.Column(
