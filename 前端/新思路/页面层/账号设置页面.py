@@ -101,7 +101,7 @@ class AccountSettingsPage:
                     alignment=ft.MainAxisAlignment.START,
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
-                ft.Container(height=20),
+                ft.Container(height=10),
                 *account_cards,
             ],
             spacing=0,

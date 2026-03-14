@@ -88,13 +88,13 @@ class StrategySettingsPage:
                     weight=ft.FontWeight.BOLD,
                     color=theme_colors.get("text_primary"),
                 ),
-                ft.Container(height=20),
+                ft.Container(height=10),
                 # 建筑速建卡片
                 building_speed_card,
-                ft.Container(height=15),
+                ft.Container(height=10),
                 # 资源速产卡片
                 resource_speed_card,
-                ft.Container(height=15),
+                ft.Container(height=10),
                 # 策点保留卡片
                 points_keep_card,
             ],

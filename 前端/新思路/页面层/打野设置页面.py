@@ -66,7 +66,7 @@ class WildSettingsPage:
                     weight=ft.FontWeight.BOLD,
                     color=theme_colors.get("text_primary"),
                 ),
-                ft.Container(height=20),
+                ft.Container(height=10),
                 wild_card,
             ],
             spacing=0,
