@@ -139,7 +139,12 @@ class MainPage:
         page_container = ft.Container(
             content=main_layout,
             bgcolor=self.theme_colors.get("bg_primary"),
-            padding=ft.Padding.all(0),
+            padding=ft.Padding(
+                left=ui_config.get("page_padding_left", 10),
+                top=ui_config.get("page_padding_top", 10),
+                right=ui_config.get("page_padding_right", 0),
+                bottom=ui_config.get("page_padding_bottom", 10),
+            ),
             expand=True,
         )
         
