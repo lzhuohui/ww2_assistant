@@ -21,6 +21,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
 from typing import Callable, Dict, Any, Optional, List
+from 新思路.零件层.卡片容器 import CardContainer
+from 新思路.零件层.图标标题 import IconTitle
+from 新思路.组件层.通用卡片 import UniversalCard
 
 DEFAULT_CONTROL_MARGIN_RIGHT = 20
 
@@ -97,9 +100,6 @@ class LazyUniversalCard:
     
     def create(self) -> ft.Container:
         """创建卡片容器"""
-        from 新思路.零件层.卡片容器 import CardContainer
-        from 新思路.零件层.图标标题 import IconTitle
-        
         theme_colors = self.config.当前主题颜色
         ui_config = self.config.定义尺寸.get("界面", {})
         card_padding = ui_config.get("card_padding", 16)
@@ -194,8 +194,6 @@ class LazyUniversalCard:
     
     def _create_loaded_container(self) -> ft.Container:
         """创建已加载状态的容器 - 直接调用通用卡片"""
-        from 新思路.组件层.通用卡片 import UniversalCard
-        
         container = UniversalCard.create_from_config(
             config=self.config,
             card_name=self.card_name,
@@ -244,8 +242,6 @@ class LazyUniversalCard:
         """销毁卡片内容"""
         if not self.is_loaded:
             return
-        
-        from 新思路.零件层.图标标题 import IconTitle
         
         theme_colors = self.config.当前主题颜色
         ui_config = self.config.定义尺寸.get("界面", {})
