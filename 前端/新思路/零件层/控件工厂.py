@@ -206,6 +206,7 @@ class ControlFactory:
         card_config: Dict[str, Any],
         config_manager: Any,
         on_value_change: Callable[[str, Any], None] = None,
+        dynamic_options: Dict[str, List[str]] = None,
     ) -> List[ft.Control]:
         """创建开关下拉控件"""
         from 新思路.组件层.开关下拉卡片 import SwitchDropdownCard
@@ -213,14 +214,12 @@ class ControlFactory:
         card_name = card_config.get("title", "")
         enabled = card_config.get("enabled", True)
         
-        # 获取开关配置
         switch_config = card_config.get("switch_config", {})
         switch_key = switch_config.get("config_key")
         switch_value = config_manager.get_value(card_name, switch_key)
         if switch_value is None:
             switch_value = switch_config.get("default_value", True)
         
-        # 创建设置项列表
         settings = []
         for dropdown_config in card_config.get("dropdown_configs", []):
             dropdown_key = dropdown_config.get("config_key")
@@ -228,12 +227,16 @@ class ControlFactory:
             if dropdown_value is None:
                 dropdown_value = dropdown_config.get("default_value", "")
             
+            options = dropdown_config.get("options", [])
+            if dynamic_options and dropdown_key in dynamic_options:
+                options = dynamic_options[dropdown_key]
+            
             settings.append({
                 "type": "dropdown",
                 "label": dropdown_config.get("label", ""),
-                "options": dropdown_config.get("options", []),
+                "options": options,
                 "value": dropdown_value,
-                "width": dropdown_config.get("width"),  # 不设置默认值，让被调模块使用自己的默认值
+                "width": dropdown_config.get("width"),
                 "on_change": lambda value, key=dropdown_key: ControlFactory._handle_value_change(
                     card_name, key, value, config_manager, on_value_change
                 ),

@@ -5,13 +5,13 @@
 设计思路:
     统一管理所有配置，提供加载、保存、获取、设置功能。
     支持配置的持久化存储。
-    
+
 优化:
-    延迟保存机制，减少I/O操作。
+    即时保存机制，每次修改立即保存。
 
 功能:
     1. 加载配置
-    2. 延迟保存配置
+    2. 即时保存配置
     3. 获取配置
     4. 设置配置
     5. 配置持久化
@@ -35,7 +35,7 @@ from 配置.账号配置 import 账号卡片配置
 
 
 class ConfigManager:
-    """配置管理器 - 统一管理所有配置（延迟保存优化）"""
+    """配置管理器 - 统一管理所有配置（即时保存）"""
     
     _instance = None
     
@@ -60,8 +60,6 @@ class ConfigManager:
         self.all_configs = {**self.card_configs, **self.strategy_configs, **self.building_configs, **self.fundraising_configs, **self.other_configs, **self.account_configs}
         
         self.user_config = self._load_user_config()
-        
-        self.pending_changes: Dict[str, Any] = {}
         self._initialized = True
     
     def _load_user_config(self) -> Dict[str, Any]:
@@ -77,19 +75,14 @@ class ConfigManager:
     
     def _save_user_config(self):
         """保存用户配置到文件"""
-        if not self.pending_changes:
-            return
-        
         try:
-            self.user_config.update(self.pending_changes)
             with open(self.user_config_file, 'w', encoding='utf-8') as f:
                 json.dump(self.user_config, f, ensure_ascii=False, indent=2)
-            self.pending_changes.clear()
         except Exception as e:
             print(f"保存用户配置失败: {e}")
     
     def save_all(self):
-        """保存所有待保存的配置（页面切换时调用）"""
+        """保存所有配置（兼容旧接口）"""
         self._save_user_config()
     
     def get_card_config(self, card_name: str) -> Optional[Dict[str, Any]]:
@@ -137,7 +130,7 @@ class ConfigManager:
     
     def set_value(self, card_name: str, config_key: str, value: Any):
         """
-        设置配置值（延迟保存）
+        设置配置值（即时保存）
         
         参数:
             card_name: 卡片名称
@@ -145,12 +138,12 @@ class ConfigManager:
             value: 配置值
         """
         user_key = f"{card_name}.{config_key}"
-        self.pending_changes[user_key] = value
         self.user_config[user_key] = value
+        self._save_user_config()
     
     def reset_value(self, card_name: str, config_key: str):
         """
-        重置配置值为默认值
+        重置配置值为默认值（即时保存）
         
         参数:
             card_name: 卡片名称
@@ -159,7 +152,7 @@ class ConfigManager:
         user_key = f"{card_name}.{config_key}"
         if user_key in self.user_config:
             del self.user_config[user_key]
-            self.pending_changes[user_key] = None
+            self._save_user_config()
     
     def get_all_values(self, card_name: str) -> Dict[str, Any]:
         """
