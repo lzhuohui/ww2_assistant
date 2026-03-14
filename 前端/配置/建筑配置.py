@@ -23,7 +23,7 @@ LEVELS = [f"{i:02d}级" for i in range(1, 21)]
 LEVELS_0 = [f"{i:02d}级" for i in range(0, 21)]
 
 
-def create_dropdown(config_key: str, label: str, value: str, options: list = None, width: int = None):
+def create_dropdown(config_key: str, label: str, value: str, options: list = None, width: int = None, unit: str = "级"):
     """
     创建下拉框配置
     
@@ -33,6 +33,7 @@ def create_dropdown(config_key: str, label: str, value: str, options: list = Non
         value: 默认值
         options: 选项列表（默认为LEVELS）
         width: 宽度（默认为None，使用被调用模块的默认值）
+        unit: 单位（默认为"级"）
     
     返回:
         dict: 下拉框配置字典
@@ -43,6 +44,7 @@ def create_dropdown(config_key: str, label: str, value: str, options: list = Non
         "label": label,
         "options": options if options is not None else LEVELS,
         "value": value,
+        "unit": unit,
     }
     
     if width is not None:
