@@ -107,7 +107,6 @@ class NavButton:
         
         stack_content = ft.Stack(
             [bg_container, content_container],
-            alignment=ft.Alignment(0, 0)
         )
         
         def update_appearance():
