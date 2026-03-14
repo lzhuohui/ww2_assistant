@@ -95,12 +95,14 @@ class ControlFactory:
                 if dynamic_options and config_key in dynamic_options:
                     options = dynamic_options[config_key]
                 
+                unit = control_config.get("unit")
+                
                 control = ControlFactory._create_dropdown(
                     config=config,
                     control_config=control_config,
                     current_value=current_value,
-                    on_change=lambda value, key=config_key: ControlFactory._handle_value_change(
-                        card_name, key, value, config_manager, on_value_change
+                    on_change=lambda value, key=config_key, u=unit: ControlFactory._handle_value_change(
+                        card_name, key, value, config_manager, on_value_change, u
                     ),
                     dynamic_options=options,
                 )
@@ -175,11 +177,17 @@ class ControlFactory:
     ) -> ft.Control:
         """创建下拉框控件"""
         options = dynamic_options if dynamic_options is not None else control_config.get("options", [])
+        unit = control_config.get("unit")
+        
+        display_value = current_value or control_config.get("value")
+        if unit and display_value and not str(display_value).endswith(unit):
+            display_value = f"{display_value}{unit}"
+        
         return LabelDropdown.create(
             config=config,
             label=control_config.get("label", ""),
             options=options,
-            value=current_value or control_config.get("value"),
+            value=display_value,
             width=control_config.get("width"),
             on_change=on_change,
         )
@@ -231,14 +239,20 @@ class ControlFactory:
             if dynamic_options and dropdown_key in dynamic_options:
                 options = dynamic_options[dropdown_key]
             
+            unit = dropdown_config.get("unit")
+            display_value = dropdown_value
+            if unit and display_value and not str(display_value).endswith(unit):
+                display_value = f"{display_value}{unit}"
+            
             settings.append({
                 "type": "dropdown",
                 "label": dropdown_config.get("label", ""),
                 "options": options,
-                "value": dropdown_value,
+                "value": display_value,
+                "unit": unit,
                 "width": dropdown_config.get("width"),
-                "on_change": lambda value, key=dropdown_key: ControlFactory._handle_value_change(
-                    card_name, key, value, config_manager, on_value_change
+                "on_change": lambda value, key=dropdown_key, u=unit: ControlFactory._handle_value_change(
+                    card_name, key, value, config_manager, on_value_change, u
                 ),
             })
         
@@ -264,14 +278,17 @@ class ControlFactory:
         value: Any,
         config_manager: Any,
         on_value_change: Callable[[str, Any], None] = None,
+        unit: str = None,
     ):
         """处理值变化"""
-        # 保存到配置管理器
-        config_manager.set_value(card_name, config_key, value)
+        save_value = value
+        if unit and save_value and str(save_value).endswith(unit):
+            save_value = str(save_value)[:-len(unit)]
         
-        # 调用外部回调
+        config_manager.set_value(card_name, config_key, save_value)
+        
         if on_value_change:
-            on_value_change(config_key, value)
+            on_value_change(config_key, save_value)
     
     @staticmethod
     def _handle_block_click(

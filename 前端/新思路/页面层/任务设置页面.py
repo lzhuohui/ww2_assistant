@@ -57,7 +57,7 @@ class TaskSettingsPage:
             config=config,
             label="主线限级",
             options=main_level_options,
-            value="05级",
+            value="05",
         )
         
         main_card = UniversalCard.create(
@@ -74,7 +74,7 @@ class TaskSettingsPage:
             config=config,
             label="支线限级",
             options=side_level_options,
-            value="10级",
+            value="10",
         )
         
         side_card = UniversalCard.create(
