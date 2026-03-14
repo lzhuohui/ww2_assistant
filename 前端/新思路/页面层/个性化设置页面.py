@@ -151,6 +151,39 @@ class PersonalizationSettingsPage:
             subtitle="选择高对比度调色板",
         )
         
+        def on_style_click(style_name: str):
+            if style_name != config.当前风格名称:
+                config.切换风格(style_name)
+                if on_refresh:
+                    on_refresh()
+        
+        style_block_controls = [
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="普通平铺",
+                bg_color="#E0E0E0",
+                is_selected=(config.当前风格名称 == "普通平铺"),
+                on_click=lambda e: on_style_click("普通平铺"),
+            ),
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="3D立体",
+                bg_color="#FFFFFF",
+                is_selected=(config.当前风格名称 == "3D立体"),
+                on_click=lambda e: on_style_click("3D立体"),
+            ),
+        ]
+        
+        style_card = UniversalCard.create(
+            config=config,
+            title="风格设置",
+            icon="STYLE",
+            enabled=True,
+            controls=style_block_controls,
+            controls_per_row=2,
+            subtitle="选择界面风格",
+        )
+        
         page_content = ft.Column(
             [
                 ft.Text(
@@ -163,6 +196,8 @@ class PersonalizationSettingsPage:
                 theme_card,
                 ft.Container(height=15),
                 palette_card,
+                ft.Container(height=15),
+                style_card,
             ],
             spacing=0,
             scroll=ft.ScrollMode.HIDDEN,

@@ -156,18 +156,29 @@ class NavButton:
             is_hovering = (e.data == "true")
             update_appearance()
         
+        风格配置 = config.获取风格配置()
+        border_radius = 风格配置.get("border_radius", 8)
+        shadow_blur = 风格配置.get("shadow_blur", 8)
+        shadow_offset_y = 风格配置.get("shadow_offset_y", 2)
+        
         container = ft.Container(
             content=ft.Stack(
                 [bg_container, content_container],
                 alignment=ft.Alignment(0, 0)
             ),
-            border_radius=8,
+            border_radius=border_radius,
             ink=True,
             bgcolor="transparent",
             on_click=handle_click,
             on_hover=handle_hover,
             width=current_width,
             height=36,
+            shadow=ft.BoxShadow(
+                spread_radius=1,
+                blur_radius=shadow_blur,
+                color="#00000015",
+                offset=ft.Offset(0, shadow_offset_y),
+            ) if shadow_blur > 0 else None,
         )
         
         # 暴露控制接口

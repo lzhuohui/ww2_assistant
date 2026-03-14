@@ -124,7 +124,26 @@ class 界面配置:
             "spread_hover": 2,
             "offset_y": 2,
             "offset_y_hover": 4,
-            "inset": 16,  # 阴影收缩值（阴影比卡片小一个边距）
+            "inset": 16,
+        },
+        "风格": {
+            "current_style": "3D立体",
+            "styles": {
+                "普通平铺": {
+                    "border_radius": 0,
+                    "shadow_blur": 0,
+                    "shadow_spread": 0,
+                    "shadow_offset_y": 0,
+                    "border_width": 0,
+                },
+                "3D立体": {
+                    "border_radius": 8,
+                    "shadow_blur": 8,
+                    "shadow_spread": 1,
+                    "shadow_offset_y": 2,
+                    "border_width": 1,
+                },
+            },
         },
         "动画": {
             "duration_fast": 150,
@@ -169,6 +188,24 @@ class 界面配置:
     def 当前主题颜色(self):
         """获取当前主题颜色"""
         return self._主题配置.当前主题颜色
+    
+    def 获取风格配置(self) -> dict:
+        """获取当前风格配置"""
+        风格名称 = self.定义尺寸.get("风格", {}).get("current_style", "3D立体")
+        风格配置 = self.定义尺寸.get("风格", {}).get("styles", {}).get(风格名称, {})
+        return 风格配置
+    
+    def 切换风格(self, 风格名称: str):
+        """切换风格"""
+        if 风格名称 in self.定义尺寸.get("风格", {}).get("styles", {}):
+            self.定义尺寸["风格"]["current_style"] = 风格名称
+            return True
+        return False
+    
+    @property
+    def 当前风格名称(self):
+        """获取当前风格名称"""
+        return self.定义尺寸.get("风格", {}).get("current_style", "3D立体")
 
 
 # ==================== 调试逻辑 ====================
