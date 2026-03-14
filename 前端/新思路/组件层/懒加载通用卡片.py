@@ -103,7 +103,7 @@ class LazyUniversalCard:
     def create(self) -> ft.Container:
         """创建卡片容器"""
         from 新思路.零件层.卡片容器 import CardContainer
-        from 新思路.零件层.图标标题v2 import IconTitleV2
+        from 新思路.零件层.图标标题 import IconTitle
         
         theme_colors = self.config.当前主题颜色
         ui_config = self.config.定义尺寸.get("界面", {})
@@ -125,7 +125,7 @@ class LazyUniversalCard:
                 self.current_enabled = new_enabled
                 self._sync_lazy_hint_state(new_enabled)
             
-            icon_title = IconTitleV2.create(
+            icon_title = IconTitle.create(
                 config=self.config,
                 title=title,
                 icon=icon,
@@ -196,7 +196,7 @@ class LazyUniversalCard:
         """创建已加载状态的容器"""
         from 新思路.零件层.控件工厂 import ControlFactory
         from 新思路.零件层.卡片容器 import CardContainer
-        from 新思路.零件层.图标标题v2 import IconTitleV2
+        from 新思路.零件层.图标标题 import IconTitle
         
         theme_colors = self.config.当前主题颜色
         ui_config = self.config.定义尺寸.get("界面", {})
@@ -233,7 +233,7 @@ class LazyUniversalCard:
             self.current_enabled = new_enabled
             self._sync_controls_state(new_enabled, controls)
         
-        icon_title = IconTitleV2.create(
+        icon_title = IconTitle.create(
             config=self.config,
             title=title,
             icon=icon,
@@ -345,7 +345,7 @@ class LazyUniversalCard:
         if not self.is_loaded:
             return
         
-        from 新思路.零件层.图标标题v2 import IconTitleV2
+        from 新思路.零件层.图标标题 import IconTitle
         
         theme_colors = self.config.当前主题颜色
         ui_config = self.config.定义尺寸.get("界面", {})
@@ -357,7 +357,7 @@ class LazyUniversalCard:
         
         lazy_height = 60
         
-        icon_title = IconTitleV2.create(
+        icon_title = IconTitle.create(
             config=self.config,
             title=title,
             icon=icon,

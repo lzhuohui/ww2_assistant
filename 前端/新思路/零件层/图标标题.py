@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-图标标题v2 - 零件层（新思路）
+图标标题 - 零件层（新思路）
 
 设计思路:
     调用标签文本模块实现图标标题布局。
@@ -29,7 +29,7 @@
 使用场景:
     被组件层模块调用，也可独立使用。
 
-可独立运行调试: python 图标标题v2.py
+可独立运行调试: python 图标标题.py
 """
 
 import sys
@@ -55,8 +55,8 @@ ICON_AREA_WIDTH = DEFAULT_ICON_SIZE + ICON_TITLE_SPACING + 5 * DEFAULT_TITLE_SIZ
 # *********************************
 
 
-class IconTitleV2:
-    """图标标题v2 - 调用标签文本模块实现布局"""
+class IconTitle:
+    """图标标题 - 调用标签文本模块实现布局"""
     
     def __init__(self, config):
         """初始化图标标题（支持调试逻辑）"""
@@ -64,7 +64,7 @@ class IconTitleV2:
     
     def render(self):
         """渲染图标标题（支持调试逻辑）"""
-        return IconTitleV2.create(
+        return IconTitle.create(
             config=self.config,
             title="测试标题",
             icon="HOME",
@@ -307,7 +307,7 @@ class IconTitleV2:
 
 
 # 兼容别名
-图标标题v2 = IconTitleV2
+图标标题 = IconTitle
 
 
 # ==================== 调试逻辑 ====================
@@ -321,6 +321,6 @@ if __name__ == "__main__":
     def main(page: ft.Page):
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(IconTitleV2(配置).render())  # 只能更改此处**被测调用模块名称**
+        page.add(IconTitle(配置).render())  # 只能更改此处**被测调用模块名称**
     
     ft.run(main)

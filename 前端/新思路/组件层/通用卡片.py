@@ -33,7 +33,7 @@ import flet as ft
 from typing import Callable, Optional, List, Dict, Any
 from 配置.界面配置 import 界面配置
 from 新思路.零件层.卡片容器 import CardContainer
-from 新思路.零件层.图标标题v2 import IconTitleV2
+from 新思路.零件层.图标标题 import IconTitle
 from 新思路.零件层.标签下拉框 import LabelDropdown
 from 新思路.零件层.控件工厂 import ControlFactory
 
@@ -158,8 +158,8 @@ class UniversalCard:
             if on_state_change:
                 on_state_change(new_enabled)
         
-        # ========== 第二步：创建图标标题v2 ==========
-        icon_title = IconTitleV2.create(
+        # ========== 第二步：创建图标标题 ==========
+        icon_title = IconTitle.create(
             config=config,
             title=title,
             icon=icon,
