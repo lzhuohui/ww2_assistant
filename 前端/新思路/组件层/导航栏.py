@@ -114,13 +114,15 @@ class NavBar:
         nav_column = ft.Column(
             nav_buttons,
             spacing=4,
-            scroll=ft.ScrollMode.AUTO,
+            expand=True,
+            alignment=ft.MainAxisAlignment.SPACE_AROUND,
         )
         
         # 导航栏容器（带内边距）
         nav_container = ft.Container(
             content=nav_column,
             padding=padding,
+            expand=True,
         )
         
         return nav_container
