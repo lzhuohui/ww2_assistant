@@ -125,7 +125,7 @@ class NavBar:
             nav_buttons,
             spacing=4,
             expand=True,
-            alignment=ft.MainAxisAlignment.SPACE_AROUND,
+            alignment=ft.MainAxisAlignment.START,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         )
         

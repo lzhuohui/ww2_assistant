@@ -1,0 +1,190 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "pytest: 运行当前文件测试",
+            "type": "shell",
+            "command": "${config:python.defaultInterpreterPath}",
+            "args": [
+                "-m",
+                "pytest",
+                "${file}",
+                "-v",
+                "--tb=short",
+                "--color=yes"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "windows": {
+                "command": "${workspaceFolder}\\venv\\Scripts\\python.exe"
+            }
+        },
+        {
+            "label": "pytest: 运行当前目录测试",
+            "type": "shell",
+            "command": "${config:python.defaultInterpreterPath}",
+            "args": [
+                "-m",
+                "pytest",
+                "${fileDirname}",
+                "-v",
+                "--tb=short",
+                "--cov=前端",
+                "--cov-report=term",
+                "--color=yes"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "windows": {
+                "command": "${workspaceFolder}\\venv\\Scripts\\python.exe"
+            }
+        },
+        {
+            "label": "pytest: 运行全部测试",
+            "type": "shell",
+            "command": "${config:python.defaultInterpreterPath}",
+            "args": [
+                "-m",
+                "pytest",
+                "测试",
+                "-v",
+                "--tb=short",
+                "--cov=前端",
+                "--cov-report=html:测试/报告/htmlcov",
+                "--html=测试/报告/report.html",
+                "--color=yes"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "windows": {
+                "command": "${workspaceFolder}\\venv\\Scripts\\python.exe"
+            }
+        },
+        {
+            "label": "pytest: 运行单元测试",
+            "type": "shell",
+            "command": "${config:python.defaultInterpreterPath}",
+            "args": [
+                "-m",
+                "pytest",
+                "测试/单元测试",
+                "-v",
+                "-m",
+                "unit",
+                "--tb=short",
+                "--color=yes"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "windows": {
+                "command": "${workspaceFolder}\\venv\\Scripts\\python.exe"
+            }
+        },
+        {
+            "label": "pytest: 运行集成测试",
+            "type": "shell",
+            "command": "${config:python.defaultInterpreterPath}",
+            "args": [
+                "-m",
+                "pytest",
+                "测试/集成测试",
+                "-v",
+                "-m",
+                "integration",
+                "--tb=short",
+                "--color=yes"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "windows": {
+                "command": "${workspaceFolder}\\venv\\Scripts\\python.exe"
+            }
+        },
+        {
+            "label": "pytest: 生成覆盖率报告",
+            "type": "shell",
+            "command": "${config:python.defaultInterpreterPath}",
+            "args": [
+                "-m",
+                "pytest",
+                "测试",
+                "--cov=前端",
+                "--cov-report=html:测试/报告/htmlcov",
+                "--cov-report=xml:测试/报告/coverage.xml",
+                "--cov-report=term"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "windows": {
+                "command": "${workspaceFolder}\\venv\\Scripts\\python.exe"
+            }
+        },
+        {
+            "label": "清理测试报告",
+            "type": "shell",
+            "command": "Remove-Item",
+            "args": [
+                "-Path",
+                "${workspaceFolder}/测试/报告/*",
+                "-Recurse",
+                "-Force",
+                "-ErrorAction",
+                "SilentlyContinue"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-Command",
+                    "Remove-Item -Path '${workspaceFolder}/测试/报告/*' -Recurse -Force -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Path '${workspaceFolder}/测试/报告' -Force"
+                ]
+            }
+        }
+    ]
+}
