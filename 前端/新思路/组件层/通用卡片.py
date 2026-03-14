@@ -118,8 +118,6 @@ class UniversalCard:
         
         card_padding = ui_config.get("card_padding", 16)
         
-        card_width = width or DEFAULT_CARD_WIDTH
-        
         current_enabled = enabled
         current_controls_per_row = controls_per_row if controls_per_row is not None else DEFAULT_CONTROLS_PER_ROW
         parts: List = []
@@ -229,7 +227,7 @@ class UniversalCard:
         main_stack = ft.Stack(
             stack_children,
             height=card_height,
-            width=card_width,
+            expand=True,
             clip_behavior=ft.ClipBehavior.NONE,
         )
         
@@ -238,7 +236,7 @@ class UniversalCard:
             config=config,
             content=main_stack,
             height=card_height,
-            width=card_width,
+            expand=True,
         )
         
         # ========== 暴露控制接口 ==========

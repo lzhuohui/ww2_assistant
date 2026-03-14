@@ -43,6 +43,7 @@ class CardContainer:
         content: ft.Control,
         height: int = None,
         width: int = None,
+        expand: bool = False,
         enabled: bool = True,
         on_hover_enabled: bool = True,
         **kwargs
@@ -81,6 +82,7 @@ class CardContainer:
             content=content,
             height=height,
             width=width,
+            expand=expand,
             bgcolor=theme_colors.get("bg_card"),
             border_radius=final_border_radius,
             border=ft.Border.all(final_border_width, theme_colors.get("border_light")) if final_border_width > 0 else None,
