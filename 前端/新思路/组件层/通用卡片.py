@@ -92,7 +92,6 @@ class UniversalCard:
         controls: List[ft.Control] = None,
         subtitle: str = None,
         controls_per_row: int = None,
-        show_switch: bool = True,
         **kwargs
     ) -> ft.Container:
         """
@@ -110,7 +109,6 @@ class UniversalCard:
             controls: 右侧控件列表（支持多行）
             subtitle: 副标题（与主标题底部对齐）
             controls_per_row: 每行控件数量（默认使用 DEFAULT_CONTROLS_PER_ROW）
-            show_switch: 是否显示开关状态（False时开关不显示亮/暗）
         
         返回:
             ft.Container: 完整的卡片容器
@@ -172,7 +170,6 @@ class UniversalCard:
             on_state_change=on_icon_title_state_change,
             subtitle=subtitle,
             divider_height=card_height,
-            show_switch=show_switch,
         )
         parts.append(icon_title)
         
