@@ -3,7 +3,7 @@
 账号设置页面 - 页面层
 
 设计思路:
-    使用开关下拉卡片创建账号设置页面。
+    使用通用卡片创建账号设置页面。
     固定15个账号栏，开关控制参与挂机状态。
 
 功能:
@@ -26,7 +26,9 @@ import flet as ft
 from typing import Callable
 from 配置.界面配置 import 界面配置
 from 配置.配置管理器 import ConfigManager
-from 新思路.组件层.开关下拉卡片 import SwitchDropdownCard
+from 新思路.组件层.通用卡片 import UniversalCard
+from 新思路.零件层.标签下拉框 import LabelDropdown
+from 新思路.零件层.标签输入框 import LabelInput
 from 配置.账号配置 import MAX_ACCOUNTS, DEFAULT_AUTHORIZED_COUNT
 from 新思路.工具层.输入验证 import validate_account_input, get_subtitle_by_state, can_participate
 
@@ -168,22 +170,18 @@ class AccountSettingsPage:
             current_input = config_manager.get_value(f"{index:02d}账号", "输入框", "")
             return update_subtitle_and_count(enabled, current_input)
         
-        def on_value_change(config_key: str, value: any):
-            config_manager.set_value(f"{index:02d}账号", config_key, value)
-            
-            if config_key == "输入框":
-                current_enabled = config_manager.get_value(f"{index:02d}账号", "开关", False)
-                update_subtitle_and_count(current_enabled, value)
+        def on_role_change(value: str):
+            config_manager.set_value(f"{index:02d}账号", "统帅种类", value)
         
-        card_config = config_manager.get_card_config(f"{index:02d}账号")
-        default_role = "主帅" if index == 1 else "副帅"
-        if card_config:
-            for control in card_config.get("controls", []):
-                if control.get("config_key") == "统帅种类":
-                    default_role = control.get("default", "主帅" if index == 1 else "副帅")
-                    break
+        def on_input_change(value: str):
+            config_manager.set_value(f"{index:02d}账号", "输入框", value)
+            current_enabled = config_manager.get_value(f"{index:02d}账号", "开关", False)
+            update_subtitle_and_count(current_enabled, value)
         
-        role_value = config_manager.get_value(f"{index:02d}账号", "统帅种类", default_role)
+        def on_platform_change(value: str):
+            config_manager.set_value(f"{index:02d}账号", "平台", value)
+        
+        role_value = config_manager.get_value(f"{index:02d}账号", "统帅种类", "主帅" if index == 1 else "副帅")
         input_value = config_manager.get_value(f"{index:02d}账号", "输入框", "")
         platform_value = config_manager.get_value(f"{index:02d}账号", "平台", "Tap")
         switch_value = config_manager.get_value(f"{index:02d}账号", "开关", False)
@@ -193,40 +191,40 @@ class AccountSettingsPage:
         config_manager.set_value(f"{index:02d}账号", "输入框", input_value)
         config_manager.set_value(f"{index:02d}账号", "平台", platform_value)
         
-        settings = [
-            {
-                "type": "dropdown",
-                "label": "",
-                "options": ["主帅", "副帅"],
-                "value": role_value,
-                "width": 80,
-                "on_change": lambda v, idx=index: on_value_change("统帅种类", v),
-            },
-            {
-                "type": "input",
-                "label": "",
-                "value": input_value,
-                "width": 350,
-                "hint_text": "输入格式:名称/账号/密码",
-                "on_change": lambda v, idx=index: on_value_change("输入框", v),
-            },
-            {
-                "type": "dropdown",
-                "label": "",
-                "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"],
-                "value": platform_value,
-                "width": 80,
-                "on_change": lambda v, idx=index: on_value_change("平台", v),
-            },
-        ]
+        role_dropdown = LabelDropdown.create(
+            config=config,
+            label="",
+            options=["主帅", "副帅"],
+            value=role_value,
+            width=80,
+            on_change=on_role_change,
+        )
         
-        card = SwitchDropdownCard.create(
+        input_control = LabelInput.create(
+            config=config,
+            label="",
+            value=input_value,
+            width=350,
+            hint_text="输入格式:名称/账号/密码",
+            on_change=on_input_change,
+        )
+        
+        platform_dropdown = LabelDropdown.create(
+            config=config,
+            label="",
+            options=["Tap", "九游", "Fan", "小7", "Vivo", "Opop"],
+            value=platform_value,
+            width=80,
+            on_change=on_platform_change,
+        )
+        
+        card = UniversalCard.create(
             config=config,
             title=f"{index:02d}账号",
             icon="ACCOUNT_CIRCLE",
-            enabled=AccountSettingsPage.账号开关状态.get(index, False),
+            enabled=initial_enabled,
             on_state_change=on_state_change,
-            settings=settings,
+            controls=[role_dropdown, input_control, platform_dropdown],
             controls_per_row=3,
             subtitle=subtitle_text,
         )

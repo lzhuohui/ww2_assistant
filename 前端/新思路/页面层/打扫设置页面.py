@@ -3,7 +3,7 @@
 打扫设置页面 - 页面层
 
 设计思路:
-    使用开关下拉卡片创建打扫设置页面。
+    使用通用卡片创建打扫设置页面。
 
 功能:
     1. 打扫城区卡片（开关）
@@ -20,7 +20,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from typing import Callable
 from 配置.界面配置 import 界面配置
-from 新思路.组件层.开关下拉卡片 import SwitchDropdownCard
+from 配置.配置管理器 import ConfigManager
+from 新思路.组件层.通用卡片 import UniversalCard
 
 
 class CleaningSettingsPage:
@@ -40,30 +41,35 @@ class CleaningSettingsPage:
             ft.Container: 打扫设置页面容器
         """
         theme_colors = config.当前主题颜色
+        config_manager = ConfigManager()
         
-        def on_state_change_district(enabled: bool):
-            """打扫城区开关状态变化"""
-            print(f"打扫城区: {'开启' if enabled else '关闭'}")
+        district_enabled = config_manager.get_value("打扫城区", "开关", True)
+        region_enabled = config_manager.get_value("打扫政区", "开关", True)
         
-        def on_state_change_region(enabled: bool):
-            """打扫政区开关状态变化"""
-            print(f"打扫政区: {'开启' if enabled else '关闭'}")
+        config_manager.set_value("打扫城区", "开关", district_enabled)
+        config_manager.set_value("打扫政区", "开关", region_enabled)
         
-        district_card = SwitchDropdownCard.create(
+        def on_district_state_change(enabled: bool):
+            config_manager.set_value("打扫城区", "开关", enabled)
+        
+        def on_region_state_change(enabled: bool):
+            config_manager.set_value("打扫政区", "开关", enabled)
+        
+        district_card = UniversalCard.create(
             config=config,
             title="打扫城区",
             icon="CLEANING_SERVICES",
-            enabled=True,
-            on_state_change=on_state_change_district,
+            enabled=district_enabled,
+            on_state_change=on_district_state_change,
             subtitle="开启后执行打扫城区任务",
         )
         
-        region_card = SwitchDropdownCard.create(
+        region_card = UniversalCard.create(
             config=config,
             title="打扫政区",
-            icon="DOMAIN",
-            enabled=True,
-            on_state_change=on_state_change_region,
+            icon="LOCATION_CITY",
+            enabled=region_enabled,
+            on_state_change=on_region_state_change,
             subtitle="开启后执行打扫政区任务",
         )
         

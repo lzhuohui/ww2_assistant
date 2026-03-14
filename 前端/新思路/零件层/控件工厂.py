@@ -216,8 +216,8 @@ class ControlFactory:
         on_value_change: Callable[[str, Any], None] = None,
         dynamic_options: Dict[str, List[str]] = None,
     ) -> List[ft.Control]:
-        """创建开关下拉控件"""
-        from 新思路.组件层.开关下拉卡片 import SwitchDropdownCard
+        """创建开关下拉控件（使用通用卡片）"""
+        from 新思路.组件层.通用卡片 import UniversalCard
         
         card_name = card_config.get("title", "")
         enabled = card_config.get("enabled", True)
@@ -228,7 +228,7 @@ class ControlFactory:
         if switch_value is None:
             switch_value = switch_config.get("default_value", True)
         
-        settings = []
+        controls = []
         for dropdown_config in card_config.get("dropdown_configs", []):
             dropdown_key = dropdown_config.get("config_key")
             dropdown_value = config_manager.get_value(card_name, dropdown_key)
@@ -244,29 +244,29 @@ class ControlFactory:
             if unit and display_value and not str(display_value).endswith(unit):
                 display_value = f"{display_value}{unit}"
             
-            settings.append({
-                "type": "dropdown",
-                "label": dropdown_config.get("label", ""),
-                "options": options,
-                "value": display_value,
-                "unit": unit,
-                "width": dropdown_config.get("width"),
-                "on_change": lambda value, key=dropdown_key, u=unit: ControlFactory._handle_value_change(
+            dropdown = LabelDropdown.create(
+                config=config,
+                label=dropdown_config.get("label", ""),
+                options=options,
+                value=display_value,
+                width=dropdown_config.get("width"),
+                on_change=lambda value, key=dropdown_key, u=unit: ControlFactory._handle_value_change(
                     card_name, key, value, config_manager, on_value_change, u
                 ),
-            })
+            )
+            controls.append(dropdown)
         
-        # 创建开关下拉卡片
-        card = SwitchDropdownCard.create(
+        card = UniversalCard.create(
             config=config,
             title=card_config.get("title", ""),
             icon=card_config.get("icon", "TOGGLE_ON"),
-            subtitle=card_config.get("subtitle", ""),
             enabled=switch_value if isinstance(switch_value, bool) else enabled,
             on_state_change=lambda new_enabled: ControlFactory._handle_value_change(
                 card_name, switch_key, new_enabled, config_manager, on_value_change
             ),
-            settings=settings,
+            controls=controls,
+            controls_per_row=card_config.get("controls_per_row", 1),
+            subtitle=card_config.get("subtitle", ""),
         )
         
         return [card]
