@@ -148,7 +148,7 @@ class AccountSettingsPage:
             return True
         
         def on_value_change(config_key: str, value: any):
-            pass
+            config_manager.set_value(f"{index:02d}账号", config_key, value)
         
         card_config = config_manager.get_card_config(f"{index:02d}账号")
         default_role = "主帅" if index == 1 else "副帅"
@@ -165,7 +165,7 @@ class AccountSettingsPage:
                 "options": ["主帅", "副帅"],
                 "value": config_manager.get_value(f"{index:02d}账号", "统帅种类", default_role),
                 "width": 80,
-                "on_change": lambda v, idx=index: on_value_change(f"{idx:02d}账号_统帅种类", v),
+                "on_change": lambda v, idx=index: on_value_change("统帅种类", v),
             },
             {
                 "type": "input",
@@ -173,7 +173,7 @@ class AccountSettingsPage:
                 "value": config_manager.get_value(f"{index:02d}账号", "输入框", ""),
                 "width": 300,
                 "hint_text": "输入格式:名称/账号/密码",
-                "on_change": lambda v, idx=index: on_value_change(f"{idx:02d}账号_输入框", v),
+                "on_change": lambda v, idx=index: on_value_change("输入框", v),
             },
             {
                 "type": "dropdown",
@@ -181,7 +181,7 @@ class AccountSettingsPage:
                 "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"],
                 "value": config_manager.get_value(f"{index:02d}账号", "平台", "Tap"),
                 "width": 80,
-                "on_change": lambda v, idx=index: on_value_change(f"{idx:02d}账号_平台", v),
+                "on_change": lambda v, idx=index: on_value_change("平台", v),
             },
         ]
         
