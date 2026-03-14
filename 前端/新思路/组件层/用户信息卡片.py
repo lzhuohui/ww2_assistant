@@ -39,6 +39,7 @@ class UserInfoCard:
         username: str = "试用用户",
         is_registered: bool = False,
         expire_days: int = 7,
+        on_click: callable = None,
         **kwargs
     ) -> ft.Container:
         """
@@ -49,6 +50,7 @@ class UserInfoCard:
             username: 用户名
             is_registered: 是否注册
             expire_days: 剩余天数
+            on_click: 点击回调
         
         返回:
             ft.Container: 用户信息卡片容器
@@ -131,9 +133,20 @@ class UserInfoCard:
             content=user_info,
             bgcolor=theme_colors.get("bg_secondary"),
             width=280,
+            on_click=lambda e: on_click() if on_click else None,
+            on_hover=lambda e: UserInfoCard._on_hover(e, container, theme_colors),
         )
         
         return container
+    
+    @staticmethod
+    def _on_hover(e, container, theme_colors):
+        """鼠标悬停效果"""
+        if e.data == "true":
+            container.bgcolor = theme_colors.get("bg_tertiary", theme_colors.get("bg_secondary"))
+        else:
+            container.bgcolor = theme_colors.get("bg_secondary")
+        container.update()
 
 
 # 兼容别名

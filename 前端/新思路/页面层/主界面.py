@@ -39,6 +39,7 @@ from 新思路.页面层.打扫设置页面 import CleaningSettingsPage
 from 新思路.页面层.打野设置页面 import WildSettingsPage
 from 新思路.页面层.账号设置页面 import AccountSettingsPage
 from 新思路.页面层.个性化设置页面 import PersonalizationSettingsPage
+from 新思路.页面层.关于设置页面 import AboutSettingsPage
 
 
 class MainPage:
@@ -70,6 +71,7 @@ class MainPage:
             username="试用用户",
             is_registered=False,
             expire_days=7,
+            on_click=self.show_license_dialog,
         )
         
         # 创建导航栏
@@ -163,7 +165,7 @@ class MainPage:
         elif nav_name == "个性化":
             return PersonalizationSettingsPage.create(self.config, self.page, self.refresh)
         elif nav_name == "关于":
-            return self.get_placeholder_page(nav_name)
+            return AboutSettingsPage.create(self.config, self.page, self.refresh)
         else:
             return self.get_placeholder_page(nav_name)
     
@@ -193,6 +195,55 @@ class MainPage:
         self.current_nav = nav_name
         self.content_area.content = self.get_page_content(nav_name)
         self.content_area.update()
+    
+    def show_license_dialog(self):
+        """显示授权管理对话框"""
+        def close_dialog(e):
+            license_dialog.open = False
+            self.page.update()
+        
+        def activate(e):
+            code = license_input.value
+            if code:
+                self.page.snack_bar = ft.SnackBar(
+                    content=ft.Text(f"授权码已提交: {code}"),
+                    duration=2000,
+                )
+                self.page.snack_bar.open = True
+                license_dialog.open = False
+                self.page.update()
+        
+        license_input = ft.TextField(
+            label="请输入授权码",
+            width=300,
+            border_color=self.theme_colors.get("accent"),
+        )
+        
+        license_dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("授权管理", size=20, weight=ft.FontWeight.BOLD),
+            content=ft.Column(
+                [
+                    ft.Text("当前状态：试用用户", size=14, color=self.theme_colors.get("text_secondary")),
+                    ft.Text("剩余天数：7天", size=14, color=self.theme_colors.get("text_secondary")),
+                    ft.Container(height=10),
+                    license_input,
+                    ft.Container(height=10),
+                    ft.Text("获取授权码：请查看\"关于\"页面联系方式", size=12, color=self.theme_colors.get("text_secondary")),
+                ],
+                tight=True,
+                spacing=5,
+            ),
+            actions=[
+                ft.TextButton("取消", on_click=close_dialog),
+                ft.Button("激活", on_click=activate),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        
+        self.page.dialog = license_dialog
+        license_dialog.open = True
+        self.page.update()
     
     def refresh(self):
         """刷新整个界面（主题切换后调用）"""
