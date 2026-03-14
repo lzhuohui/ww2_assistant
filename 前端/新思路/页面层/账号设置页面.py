@@ -178,8 +178,8 @@ class AccountSettingsPage:
             {
                 "type": "dropdown",
                 "label": "",
-                "options": ["平台1", "平台2", "平台3", "平台4", "平台5"],
-                "value": config_manager.get_value(f"{index:02d}账号", "平台", "平台1"),
+                "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"],
+                "value": config_manager.get_value(f"{index:02d}账号", "平台", "Tap"),
                 "width": 80,
                 "on_change": lambda v, idx=index: on_value_change(f"{idx:02d}账号_平台", v),
             },
