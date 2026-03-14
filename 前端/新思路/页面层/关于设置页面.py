@@ -5,6 +5,7 @@
 设计思路:
     展示软件版本信息、联系方式、免责声明和缴费说明。
     使用关于通用卡片组件，保持视觉风格统一。
+    Win11风格：简洁明了、分组清晰、现代化排版。
 
 功能:
     1. 版本信息卡片
@@ -60,9 +61,9 @@ class AboutSettingsPage:
             title="版本信息",
             icon="INFO",
             content_lines=[
-                f"软件名称：二战风云辅助工具",
-                f"当前版本：{AboutSettingsPage.VERSION}",
-                f"更新时间：{AboutSettingsPage.UPDATE_DATE}",
+                f"软件名称  二战风云辅助工具",
+                f"当前版本  {AboutSettingsPage.VERSION}",
+                f"更新日期  {AboutSettingsPage.UPDATE_DATE}",
             ],
         )
         
@@ -71,9 +72,9 @@ class AboutSettingsPage:
             title="联系方式",
             icon="CONTACTS",
             content_lines=[
-                f"QQ群：{AboutSettingsPage.QQ_GROUP}",
-                f"微信：{AboutSettingsPage.WECHAT}",
-                f"邮箱：{AboutSettingsPage.EMAIL}",
+                f"QQ群  {AboutSettingsPage.QQ_GROUP}",
+                f"微信  {AboutSettingsPage.WECHAT}",
+                f"邮箱  {AboutSettingsPage.EMAIL}",
             ],
         )
         
@@ -82,11 +83,11 @@ class AboutSettingsPage:
             title="缴费说明",
             icon="PAYMENT",
             content_lines=[
-                f"授权价格：",
-                f"  月卡：{AboutSettingsPage.PRICE_MONTH}元/月",
-                f"  季卡：{AboutSettingsPage.PRICE_QUARTER}元/季",
-                f"  年卡：{AboutSettingsPage.PRICE_YEAR}元/年",
-                f"获取授权流程：",
+                f"授权价格",
+                f"  月卡  {AboutSettingsPage.PRICE_MONTH}元/月",
+                f"  季卡  {AboutSettingsPage.PRICE_QUARTER}元/季",
+                f"  年卡  {AboutSettingsPage.PRICE_YEAR}元/年",
+                f"授权流程",
                 f"  1. 添加微信或QQ群联系作者",
                 f"  2. 选择授权时长并付款",
                 f"  3. 获取授权码并激活",
@@ -99,7 +100,7 @@ class AboutSettingsPage:
             icon="WARNING_AMBER",
             content_lines=[
                 "本软件仅供学习研究使用，请勿用于商业用途。",
-                "使用本软件产生的任何后果由用户自行承担，与开发者无关。",
+                "使用本软件产生的任何后果由用户自行承担。",
                 "请遵守游戏服务条款，合理使用。",
             ],
         )
