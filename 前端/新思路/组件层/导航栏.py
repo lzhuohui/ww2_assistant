@@ -64,7 +64,8 @@ class NavBar:
             {"name": "建筑", "icon": "DOMAIN"},
             {"name": "集资", "icon": "SHOPPING_CART"},
             {"name": "账号", "icon": "ACCOUNT_CIRCLE"},
-            {"name": "其他", "icon": "MORE_HORIZ"},
+            {"name": "打扫", "icon": "CLEANING_SERVICES"},
+            {"name": "打野", "icon": "EXPLORE"},
             {"name": "个性化", "icon": "PALETTE"},
             {"name": "关于", "icon": "INFO"},
         ]

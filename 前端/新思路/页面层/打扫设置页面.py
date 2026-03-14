@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-其他设置页面 - 页面层
+打扫设置页面 - 页面层
 
 设计思路:
-    使用开关下拉卡片创建其他设置页面。
+    使用开关下拉卡片创建打扫设置页面。
 
 功能:
     1. 打扫城区卡片（开关）
     2. 打扫政区卡片（开关）
-    3. 自动打野卡片（开关）
 
 使用场景:
     被主界面调用。
@@ -24,13 +23,13 @@ from 配置.界面配置 import 界面配置
 from 新思路.组件层.开关下拉卡片 import SwitchDropdownCard
 
 
-class OtherSettingsPage:
-    """其他设置页面"""
+class CleaningSettingsPage:
+    """打扫设置页面"""
     
     @staticmethod
     def create(config: 界面配置, page: ft.Page = None, on_refresh: Callable[[], None] = None) -> ft.Container:
         """
-        创建其他设置页面
+        创建打扫设置页面
         
         参数:
             config: 界面配置对象
@@ -38,7 +37,7 @@ class OtherSettingsPage:
             on_refresh: 刷新回调
         
         返回:
-            ft.Container: 其他设置页面容器
+            ft.Container: 打扫设置页面容器
         """
         theme_colors = config.当前主题颜色
         
@@ -49,10 +48,6 @@ class OtherSettingsPage:
         def on_state_change_region(enabled: bool):
             """打扫政区开关状态变化"""
             print(f"打扫政区: {'开启' if enabled else '关闭'}")
-        
-        def on_state_change_wild(enabled: bool):
-            """自动打野开关状态变化"""
-            print(f"自动打野: {'开启' if enabled else '关闭'}")
         
         district_card = SwitchDropdownCard.create(
             config=config,
@@ -72,19 +67,10 @@ class OtherSettingsPage:
             subtitle="开启后执行打扫政区任务",
         )
         
-        wild_card = SwitchDropdownCard.create(
-            config=config,
-            title="自动打野",
-            icon="EXPLORE",
-            enabled=True,
-            on_state_change=on_state_change_wild,
-            subtitle="开启后执行自动打野任务",
-        )
-        
         page_content = ft.Column(
             [
                 ft.Text(
-                    "其他设置",
+                    "打扫设置",
                     size=24,
                     weight=ft.FontWeight.BOLD,
                     color=theme_colors.get("text_primary"),
@@ -93,8 +79,6 @@ class OtherSettingsPage:
                 district_card,
                 ft.Container(height=15),
                 region_card,
-                ft.Container(height=15),
-                wild_card,
             ],
             spacing=0,
             scroll=ft.ScrollMode.HIDDEN,
@@ -110,7 +94,7 @@ class OtherSettingsPage:
         return page_container
 
 
-其他设置页面 = OtherSettingsPage
+打扫设置页面 = CleaningSettingsPage
 
 
 if __name__ == "__main__":
@@ -119,6 +103,6 @@ if __name__ == "__main__":
     def main(page: ft.Page):
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(OtherSettingsPage.create(配置))
+        page.add(CleaningSettingsPage.create(配置))
     
     ft.run(main)
