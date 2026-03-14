@@ -44,95 +44,101 @@ class CardContainer:
         height: int = None,
         width: int = None,
         enabled: bool = True,
+        on_hover_enabled: bool = True,
         **kwargs
     ) -> ft.Container:
         theme_colors = config.当前主题颜色
         
-        # 从配置获取界面参数
         ui_config = config.定义尺寸.get("界面", {})
         
-        # 从配置获取阴影参数
         shadow_config = config.定义尺寸.get("阴影", {})
         shadow_blur_default = shadow_config.get("blur_default", 4)
         shadow_blur_hover = shadow_config.get("blur_hover", 12)
-        shadow_spread = shadow_config.get("spread", 0)  # Win11风格：阴影不扩散
-        shadow_spread_hover = shadow_config.get("spread_hover", 0)  # Win11风格：阴影不扩散
+        shadow_spread = shadow_config.get("spread", 0)
+        shadow_spread_hover = shadow_config.get("spread_hover", 0)
         shadow_offset_y = shadow_config.get("offset_y", 2)
         shadow_offset_y_hover = shadow_config.get("offset_y_hover", 4)
-        shadow_inset = 0  # Win11风格：不需要阴影收缩
         
-        # 从配置获取动画参数
         animation_config = config.定义尺寸.get("动画", {})
         animation_duration = animation_config.get("duration_fast", 150)
         animation_curve = getattr(ft.AnimationCurve, animation_config.get("curve", "EASE_OUT"), ft.AnimationCurve.EASE_OUT)
         
-        # 从配置获取边框参数
         card_border_radius = ui_config.get("card_radius", 8)
         card_border_width = ui_config.get("card_border_width", 1)
+        
+        风格配置 = config.获取风格配置()
+        style_border_radius = 风格配置.get("border_radius", 8)
+        style_shadow_blur = 风格配置.get("shadow_blur", 8)
+        style_shadow_offset_y = 风格配置.get("shadow_offset_y", 2)
+        style_border_width = 风格配置.get("border_width", 1)
+        
+        final_border_radius = style_border_radius if style_border_radius > 0 else card_border_radius
+        final_shadow_blur = style_shadow_blur if style_shadow_blur > 0 else shadow_blur_default
+        final_shadow_offset_y = style_shadow_offset_y if style_shadow_blur > 0 else shadow_offset_y
+        final_border_width = style_border_width if style_border_width > 0 else card_border_width
         
         container = ft.Container(
             content=content,
             height=height,
             width=width,
             bgcolor=theme_colors.get("bg_card"),
-            border_radius=card_border_radius,
-            border=ft.Border.all(card_border_width, theme_colors.get("border_light")),
+            border_radius=final_border_radius,
+            border=ft.Border.all(final_border_width, theme_colors.get("border_light")) if final_border_width > 0 else None,
             shadow=ft.BoxShadow(
                 spread_radius=shadow_spread,
-                blur_radius=shadow_blur_default,
+                blur_radius=final_shadow_blur,
                 color=theme_colors.get("shadow"),
-                offset=ft.Offset(0, shadow_offset_y),
-            ),
+                offset=ft.Offset(0, final_shadow_offset_y),
+            ) if final_shadow_blur > 0 else None,
             animate=ft.Animation(animation_duration, animation_curve),
             clip_behavior=ft.ClipBehavior.NONE,
         )
         
-        def on_hover(e):
-            if e.data == "true":
-                container.bgcolor = theme_colors.get("bg_hover")
-                container.border = ft.Border.all(card_border_width, theme_colors.get("border"))
+        if on_hover_enabled:
+            def on_hover(e):
+                if e.data == "true":
+                    container.bgcolor = theme_colors.get("bg_hover")
+                    container.border = ft.Border.all(final_border_width, theme_colors.get("border")) if final_border_width > 0 else None
+                    container.shadow = ft.BoxShadow(
+                        spread_radius=shadow_spread_hover,
+                        blur_radius=shadow_blur_hover,
+                        color=theme_colors.get("shadow"),
+                        offset=ft.Offset(0, shadow_offset_y_hover),
+                    ) if final_shadow_blur > 0 else None
+                else:
+                    container.bgcolor = theme_colors.get("bg_card")
+                    container.border = ft.Border.all(final_border_width, theme_colors.get("border_light")) if final_border_width > 0 else None
+                    container.shadow = ft.BoxShadow(
+                        spread_radius=shadow_spread,
+                        blur_radius=final_shadow_blur,
+                        color=theme_colors.get("shadow"),
+                        offset=ft.Offset(0, final_shadow_offset_y),
+                    ) if final_shadow_blur > 0 else None
+                container.update()
+            
+            def on_click_down(e):
+                container.bgcolor = theme_colors.get("bg_pressed", "#4A4A4A")
                 container.shadow = ft.BoxShadow(
                     spread_radius=shadow_spread_hover,
-                    blur_radius=shadow_blur_hover,
+                    blur_radius=shadow_blur_hover - 2,
                     color=theme_colors.get("shadow"),
-                    offset=ft.Offset(0, shadow_offset_y_hover),
-                )
-            else:
+                    offset=ft.Offset(0, shadow_offset_y_hover + 1),
+                ) if final_shadow_blur > 0 else None
+                container.update()
+            
+            def on_click_up(e):
                 container.bgcolor = theme_colors.get("bg_card")
-                container.border = ft.Border.all(card_border_width, theme_colors.get("border_light"))
                 container.shadow = ft.BoxShadow(
                     spread_radius=shadow_spread,
-                    blur_radius=shadow_blur_default,
+                    blur_radius=final_shadow_blur,
                     color=theme_colors.get("shadow"),
-                    offset=ft.Offset(0, shadow_offset_y),
-                )
-            container.update()
-        
-        def on_click_down(e):
-            container.bgcolor = theme_colors.get("bg_pressed", "#4A4A4A")
-            # 增强阴影效果，而不是缩放整个容器
-            container.shadow = ft.BoxShadow(
-                spread_radius=shadow_spread_hover,
-                blur_radius=shadow_blur_hover - 2,  # 阴影稍微减弱
-                color=theme_colors.get("shadow"),
-                offset=ft.Offset(0, shadow_offset_y_hover + 1),  # 阴影稍微下移
-            )
-            container.update()
-        
-        def on_click_up(e):
-            container.bgcolor = theme_colors.get("bg_card")
-            # 恢复默认阴影效果
-            container.shadow = ft.BoxShadow(
-                spread_radius=shadow_spread,
-                blur_radius=shadow_blur_default,
-                color=theme_colors.get("shadow"),
-                offset=ft.Offset(0, shadow_offset_y),
-            )
-            container.update()
-        
-        container.on_hover = on_hover
-        container.on_tap_down = on_click_down
-        container.on_tap_up = on_click_up
+                    offset=ft.Offset(0, final_shadow_offset_y),
+                ) if final_shadow_blur > 0 else None
+                container.update()
+            
+            container.on_hover = on_hover
+            container.on_tap_down = on_click_down
+            container.on_tap_up = on_click_up
         
         return container
 

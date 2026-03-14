@@ -136,7 +136,7 @@ class UserInfoCard:
         
         container = ft.Container(
             content=user_info,
-            bgcolor=theme_colors.get("bg_secondary"),
+            bgcolor=theme_colors.get("bg_card"),
             width=280,
             border_radius=border_radius,
             shadow=ft.BoxShadow(

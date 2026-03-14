@@ -28,6 +28,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
 from 配置.界面配置 import 界面配置
+from 新思路.零件层.卡片容器 import CardContainer
 from 新思路.组件层.用户信息卡片 import UserInfoCard
 from 新思路.组件层.导航栏 import NavBar
 from 新思路.页面层.系统设置页面 import SystemSettingsPage
@@ -82,12 +83,9 @@ class MainPage:
         
         # 左侧导航面板（Win11风格）
         ui_config = self.config.定义尺寸.get("界面", {})
-        风格配置 = self.config.获取风格配置()
-        border_radius = 风格配置.get("border_radius", 8)
-        shadow_blur = 风格配置.get("shadow_blur", 8)
-        shadow_offset_y = 风格配置.get("shadow_offset_y", 2)
         
-        left_panel = ft.Container(
+        left_panel = CardContainer.create(
+            config=self.config,
             content=ft.Column(
                 [
                     ft.Container(
@@ -110,14 +108,6 @@ class MainPage:
                 expand=True,
             ),
             width=ui_config.get("left_panel_width", 280),
-            bgcolor=self.theme_colors.get("bg_secondary"),
-            border_radius=border_radius,
-            shadow=ft.BoxShadow(
-                spread_radius=1,
-                blur_radius=shadow_blur,
-                color="#00000020",
-                offset=ft.Offset(0, shadow_offset_y),
-            ) if shadow_blur > 0 else None,
         )
         
         # 右侧内容区域（Win11风格）
