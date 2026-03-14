@@ -83,9 +83,10 @@ class MainPage:
         left_panel = ft.Container(
             content=ft.Column(
                 [
-                    # 用户信息区域
-                    user_info_card,
-                    # 分割线
+                    ft.Container(
+                        content=user_info_card,
+                        height=80,
+                    ),
                     ft.Container(
                         content=ft.Divider(height=1, color=self.theme_colors.get("border")),
                         padding=ft.Padding(
@@ -93,11 +94,12 @@ class MainPage:
                             right=ui_config.get("divider_padding_right", 12),
                         ),
                     ),
-                    # 导航栏（导航栏.py已经包含内边距）
-                    nav_bar,
+                    ft.Container(
+                        content=nav_bar,
+                        expand=True,
+                    ),
                 ],
                 spacing=0,
-                scroll=ft.ScrollMode.AUTO,
                 expand=True,
             ),
             width=ui_config.get("left_panel_width", 280),
