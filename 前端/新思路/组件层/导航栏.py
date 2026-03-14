@@ -77,7 +77,7 @@ class NavBar:
             padding = ft.Padding(
                 left=ui_config.get("nav_padding_left", 8),
                 right=ui_config.get("nav_padding_right", 8),
-                top=ui_config.get("nav_padding_top", 8),
+                top=ui_config.get("nav_padding_top", 16),
                 bottom=ui_config.get("nav_padding_bottom", 8),
             )
         
