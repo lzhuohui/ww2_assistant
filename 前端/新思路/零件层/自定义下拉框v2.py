@@ -153,6 +153,20 @@ class CustomDropDown:
         """设置启用状态（兼容别名）"""
         self.set_enabled(enabled)
     
+    def set_options(self, options: List[str]):
+        """设置选项列表"""
+        self.options = options
+        self.menu_items.clear()
+        for option in self.options:
+            item = ft.PopupMenuItem(
+                content=ft.Text(option),
+                on_click=lambda e, o=option: self.select_option(o),
+            )
+            self.menu_items.append(item)
+        self.popup_button.items = self.menu_items
+        if self.popup_button.page:
+            self.popup_button.update()
+    
     @staticmethod
     def create(
         config,

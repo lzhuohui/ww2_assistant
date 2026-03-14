@@ -4,6 +4,7 @@
 
 设计思路:
     使用通用卡片创建集资设置页面。
+    实现主要统帅和次要统帅的联动逻辑。
 
 功能:
     1. 小号上贡卡片（4个下拉框）
@@ -21,10 +22,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
-from typing import Callable, List, Tuple
+from typing import Callable, List
 from 配置.界面配置 import 界面配置
 from 配置.配置管理器 import ConfigManager
 from 新思路.组件层.通用卡片 import UniversalCard
+from 新思路.零件层.标签下拉框 import LabelDropdown
 
 
 def get_active_commanders(config_manager: ConfigManager) -> List[str]:
@@ -52,37 +54,6 @@ def get_active_commanders(config_manager: ConfigManager) -> List[str]:
     return commanders
 
 
-def create_dynamic_card_config(
-    config_manager: ConfigManager,
-    card_name: str,
-    base_config: dict,
-    commander_options: List[str]
-) -> dict:
-    """
-    创建动态卡片配置，更新统帅下拉框选项
-    
-    参数:
-        config_manager: 配置管理器
-        card_name: 卡片名称
-        base_config: 基础配置
-        commander_options: 统帅选项列表
-    
-    返回:
-        dict: 更新后的配置
-    """
-    import copy
-    config = copy.deepcopy(base_config)
-    
-    if card_name == "小号上贡":
-        for control in config.get("controls", []):
-            if control.get("config_key") in ["小号上贡_主要统帅", "小号上贡_备用统帅"]:
-                control["options"] = commander_options
-                if commander_options:
-                    control["default"] = commander_options[0]
-    
-    return config
-
-
 class FundraisingSettingsPage:
     """集资设置页面"""
     
@@ -100,27 +71,153 @@ class FundraisingSettingsPage:
             ft.Container: 集资设置页面容器
         """
         theme_colors = config.当前主题颜色
-        
         config_manager = ConfigManager()
         
         commander_options = get_active_commanders(config_manager)
         
-        def on_value_change(config_key: str, value: any):
-            print(f"配置变化: {config_key} = {value}")
+        primary_value = config_manager.get_value("小号上贡", "小号上贡_主要统帅", "")
+        secondary_value = config_manager.get_value("小号上贡", "小号上贡_备用统帅", "")
         
-        small_account_card = UniversalCard.create_from_config(
+        primary_dropdown = None
+        secondary_dropdown = None
+        
+        def update_secondary_options():
+            nonlocal secondary_dropdown
+            
+            if primary_dropdown:
+                current_primary = primary_dropdown.get_value()
+                secondary_options = ["请选统帅"] + [c for c in commander_options if c != current_primary]
+                
+                if secondary_dropdown:
+                    secondary_dropdown.set_options(secondary_options)
+                    if secondary_dropdown.get_value() not in secondary_options:
+                        secondary_dropdown.set_value("请选统帅")
+                        config_manager.set_value("小号上贡", "小号上贡_备用统帅", "")
+        
+        def on_primary_change(value: str):
+            config_manager.set_value("小号上贡", "小号上贡_主要统帅", value)
+            update_secondary_options()
+        
+        def on_secondary_change(value: str):
+            if value == "请选统帅":
+                config_manager.set_value("小号上贡", "小号上贡_备用统帅", "")
+            else:
+                config_manager.set_value("小号上贡", "小号上贡_备用统帅", value)
+        
+        primary_options = commander_options
+        primary_display = primary_value if primary_value in primary_options else (primary_options[0] if primary_options else "")
+        
+        primary_dropdown = LabelDropdown.create(
             config=config,
-            card_name="小号上贡",
-            config_manager=config_manager,
-            on_value_change=on_value_change,
-            dynamic_options={"小号上贡_主要统帅": commander_options, "小号上贡_备用统帅": commander_options},
+            label="主要统帅",
+            options=primary_options,
+            value=primary_display,
+            on_change=on_primary_change,
         )
         
-        rent_card = UniversalCard.create_from_config(
+        secondary_initial_options = ["请选统帅"] + commander_options
+        secondary_display = secondary_value if secondary_value in commander_options else "请选统帅"
+        
+        secondary_dropdown = LabelDropdown.create(
             config=config,
-            card_name="分城纳租",
-            config_manager=config_manager,
-            on_value_change=on_value_change,
+            label="次要统帅",
+            options=secondary_initial_options,
+            value=secondary_display,
+            on_change=on_secondary_change,
+        )
+        
+        limit_level_value = config_manager.get_value("小号上贡", "小号上贡_上贡限级", "05")
+        limit_amount_value = config_manager.get_value("小号上贡", "小号上贡_上贡限量", "2")
+        
+        config_manager.set_value("小号上贡", "小号上贡_主要统帅", primary_display)
+        config_manager.set_value("小号上贡", "小号上贡_备用统帅", secondary_value if secondary_value != "请选统帅" else "")
+        
+        limit_level_options = [f"{i:02d}级" for i in range(5, 16)]
+        limit_amount_options = [f"{i}万" for i in range(2, 21)]
+        
+        limit_level_display = f"{limit_level_value}级" if not limit_level_value.endswith("级") else limit_level_value
+        limit_amount_display = f"{limit_amount_value}万" if not limit_amount_value.endswith("万") else limit_amount_value
+        
+        config_manager.set_value("小号上贡", "小号上贡_上贡限级", limit_level_value)
+        config_manager.set_value("小号上贡", "小号上贡_上贡限量", limit_amount_value)
+        
+        def on_limit_level_change(value: str):
+            save_value = value.replace("级", "")
+            config_manager.set_value("小号上贡", "小号上贡_上贡限级", save_value)
+        
+        def on_limit_amount_change(value: str):
+            save_value = value.replace("万", "")
+            config_manager.set_value("小号上贡", "小号上贡_上贡限量", save_value)
+        
+        limit_level_dropdown = LabelDropdown.create(
+            config=config,
+            label="上贡限级",
+            options=limit_level_options,
+            value=limit_level_display,
+            on_change=on_limit_level_change,
+        )
+        
+        limit_amount_dropdown = LabelDropdown.create(
+            config=config,
+            label="上贡限量",
+            options=limit_amount_options,
+            value=limit_amount_display,
+            on_change=on_limit_amount_change,
+        )
+        
+        small_account_card = UniversalCard.create(
+            config=config,
+            title="小号上贡",
+            icon="ACCOUNT_BALANCE",
+            enabled=True,
+            subtitle="设置小号上贡的统帅和限制",
+            controls=[primary_dropdown, secondary_dropdown, limit_level_dropdown, limit_amount_dropdown],
+            controls_per_row=2,
+        )
+        
+        rent_level_value = config_manager.get_value("分城纳租", "分城纳租_纳租限级", "05")
+        rent_amount_value = config_manager.get_value("分城纳租", "分城纳租_纳租限量", "2")
+        
+        config_manager.set_value("分城纳租", "分城纳租_纳租限级", rent_level_value)
+        config_manager.set_value("分城纳租", "分城纳租_纳租限量", rent_amount_value)
+        
+        rent_level_options = [f"{i:02d}级" for i in range(5, 16)]
+        rent_amount_options = [f"{i}万" for i in range(2, 21)]
+        
+        rent_level_display = f"{rent_level_value}级" if not rent_level_value.endswith("级") else rent_level_value
+        rent_amount_display = f"{rent_amount_value}万" if not rent_amount_value.endswith("万") else rent_amount_value
+        
+        def on_rent_level_change(value: str):
+            save_value = value.replace("级", "")
+            config_manager.set_value("分城纳租", "分城纳租_纳租限级", save_value)
+        
+        def on_rent_amount_change(value: str):
+            save_value = value.replace("万", "")
+            config_manager.set_value("分城纳租", "分城纳租_纳租限量", save_value)
+        
+        rent_card = UniversalCard.create(
+            config=config,
+            title="分城纳租",
+            icon="APARTMENT",
+            enabled=True,
+            subtitle="设置分城纳租的限制",
+            controls=[
+                LabelDropdown.create(
+                    config=config,
+                    label="纳租限级",
+                    options=rent_level_options,
+                    value=rent_level_display,
+                    on_change=on_rent_level_change,
+                ),
+                LabelDropdown.create(
+                    config=config,
+                    label="纳租限量",
+                    options=rent_amount_options,
+                    value=rent_amount_display,
+                    on_change=on_rent_amount_change,
+                ),
+            ],
+            controls_per_row=2,
         )
         
         page_content = ft.Column(
@@ -141,13 +238,11 @@ class FundraisingSettingsPage:
             expand=True,
         )
         
-        page_container = ft.Container(
+        return ft.Container(
             content=page_content,
             padding=ft.Padding.all(20),
             expand=True,
         )
-        
-        return page_container
 
 
 集资设置页面 = FundraisingSettingsPage
