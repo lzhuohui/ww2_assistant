@@ -5,11 +5,11 @@
 设计思路:
     展示软件版本信息、联系方式、免责声明和缴费说明。
     使用关于通用卡片组件，保持视觉风格统一。
-    Win11风格：简洁明了、分组清晰、现代化排版。
+    Win11风格：简洁明了、分组清晰、现代化排版、链接可点击。
 
 功能:
     1. 版本信息卡片
-    2. 联系方式卡片
+    2. 联系方式卡片（链接可点击复制）
     3. 缴费说明卡片
     4. 免责声明卡片
 
@@ -56,14 +56,33 @@ class AboutSettingsPage:
         """
         theme_colors = config.当前主题颜色
         
+        def copy_to_clipboard(text: str, label: str):
+            if page:
+                page.set_clipboard(text)
+                page.snack_bar = ft.SnackBar(
+                    content=ft.Text(f"{label}已复制: {text}"),
+                    duration=2000,
+                )
+                page.snack_bar.open = True
+                page.update()
+        
+        def on_qq_click(e):
+            copy_to_clipboard(AboutSettingsPage.QQ_GROUP, "QQ群")
+        
+        def on_wechat_click(e):
+            copy_to_clipboard(AboutSettingsPage.WECHAT, "微信")
+        
+        def on_email_click(e):
+            copy_to_clipboard(AboutSettingsPage.EMAIL, "邮箱")
+        
         version_card = AboutCard.create(
             config=config,
             title="版本信息",
             icon="INFO",
-            content_lines=[
-                f"软件名称  二战风云辅助工具",
-                f"当前版本  {AboutSettingsPage.VERSION}",
-                f"更新日期  {AboutSettingsPage.UPDATE_DATE}",
+            content_items=[
+                ("软件名称", "二战风云辅助工具", None),
+                ("当前版本", AboutSettingsPage.VERSION, None),
+                ("更新日期", AboutSettingsPage.UPDATE_DATE, None),
             ],
         )
         
@@ -71,10 +90,10 @@ class AboutSettingsPage:
             config=config,
             title="联系方式",
             icon="CONTACTS",
-            content_lines=[
-                f"QQ群  {AboutSettingsPage.QQ_GROUP}",
-                f"微信  {AboutSettingsPage.WECHAT}",
-                f"邮箱  {AboutSettingsPage.EMAIL}",
+            content_items=[
+                ("QQ群", AboutSettingsPage.QQ_GROUP, on_qq_click),
+                ("微信", AboutSettingsPage.WECHAT, on_wechat_click),
+                ("邮箱", AboutSettingsPage.EMAIL, on_email_click),
             ],
         )
         
@@ -82,15 +101,15 @@ class AboutSettingsPage:
             config=config,
             title="缴费说明",
             icon="PAYMENT",
-            content_lines=[
-                f"授权价格",
-                f"  月卡  {AboutSettingsPage.PRICE_MONTH}元/月",
-                f"  季卡  {AboutSettingsPage.PRICE_QUARTER}元/季",
-                f"  年卡  {AboutSettingsPage.PRICE_YEAR}元/年",
-                f"授权流程",
-                f"  1. 添加微信或QQ群联系作者",
-                f"  2. 选择授权时长并付款",
-                f"  3. 获取授权码并激活",
+            content_items=[
+                ("", "授权价格", None),
+                ("月卡", f"{AboutSettingsPage.PRICE_MONTH}元/月", None),
+                ("季卡", f"{AboutSettingsPage.PRICE_QUARTER}元/季", None),
+                ("年卡", f"{AboutSettingsPage.PRICE_YEAR}元/年", None),
+                ("", "授权流程", None),
+                ("", "1. 添加微信或QQ群联系作者", None),
+                ("", "2. 选择授权时长并付款", None),
+                ("", "3. 获取授权码并激活", None),
             ],
         )
         
@@ -98,10 +117,10 @@ class AboutSettingsPage:
             config=config,
             title="免责声明",
             icon="WARNING_AMBER",
-            content_lines=[
-                "本软件仅供学习研究使用，请勿用于商业用途。",
-                "使用本软件产生的任何后果由用户自行承担。",
-                "请遵守游戏服务条款，合理使用。",
+            content_items=[
+                ("", "本软件仅供学习研究使用，请勿用于商业用途。", None),
+                ("", "使用本软件产生的任何后果由用户自行承担。", None),
+                ("", "请遵守游戏服务条款，合理使用。", None),
             ],
         )
         

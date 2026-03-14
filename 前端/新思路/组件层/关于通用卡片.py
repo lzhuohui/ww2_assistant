@@ -6,6 +6,7 @@
     复刻通用卡片风格，左侧图标+标题+分割线，右侧文本内容。
     无开关功能，适合展示信息类卡片。
     高度自适应内容。
+    支持Win11风格：分组标题、链接样式。
 
 布局规则（复刻自图标标题）:
     0. 全部控件边距为0
@@ -17,6 +18,7 @@
     1. 左侧：图标+标题+分割线（只复刻布局，不复刻功能）
     2. 右侧：文本内容
     3. 高度：自适应内容
+    4. 支持：分组标题、链接样式
 
 使用场景:
     被关于设置页面调用。
@@ -27,7 +29,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
-from typing import List
+from typing import List, Tuple, Optional, Callable
 from 新思路.零件层.卡片容器 import CardContainer
 from 新思路.零件层.分割线 import Divider, CONTAINER_WIDTH
 
@@ -37,8 +39,9 @@ DEFAULT_TITLE_SIZE = 14
 ICON_TITLE_SPACING = 4
 ICON_AREA_WIDTH = DEFAULT_ICON_SIZE + ICON_TITLE_SPACING + 5 * DEFAULT_TITLE_SIZE
 
-CONTENT_LINE_HEIGHT = 20
-CONTENT_LINE_SPACING = 4
+CONTENT_LINE_HEIGHT = 22
+CONTENT_LINE_SPACING = 6
+GROUP_TITLE_HEIGHT = 24
 
 
 class AboutCard:
@@ -49,16 +52,18 @@ class AboutCard:
         config,
         title: str,
         icon: str,
-        content_lines: List[str],
+        content_items: List[Tuple[str, str, Optional[Callable]]],
     ) -> ft.Container:
         """
-        创建关于卡片（高度自适应内容）
+        创建关于卡片（高度自适应内容，Win11风格）
         
         参数:
             config: 界面配置对象
             title: 卡片标题
             icon: 图标名称
-            content_lines: 右侧文本行列表
+            content_items: 内容项列表，每项为 (标签, 值, 点击回调)
+                           - 标签为空时，值为分组标题
+                           - 点击回调不为空时，值为链接样式
         
         返回:
             ft.Container: 卡片容器
@@ -76,11 +81,14 @@ class AboutCard:
         
         # ========== 高度计算（自适应内容）==========
         min_card_height = 60
-        if content_lines:
-            content_height = len(content_lines) * CONTENT_LINE_HEIGHT + (len(content_lines) - 1) * CONTENT_LINE_SPACING
-            card_height = max(content_height + card_padding * 2, min_card_height)
-        else:
-            card_height = min_card_height
+        content_height = 0
+        for label, value, _ in content_items:
+            if not label:
+                content_height += GROUP_TITLE_HEIGHT
+            else:
+                content_height += CONTENT_LINE_HEIGHT
+        content_height += (len(content_items) - 1) * CONTENT_LINE_SPACING
+        card_height = max(content_height + card_padding * 2, min_card_height)
         
         # ========== 布局计算（复刻自图标标题）==========
         icon_height = DEFAULT_ICON_SIZE
@@ -147,11 +155,44 @@ class AboutCard:
         )
         stack_children.append(icon_container)
         
-        # 4. 右侧内容
-        content_controls = [
-            ft.Text(line, size=14, color=theme_colors.get("text_secondary"))
-            for line in content_lines
-        ]
+        # 4. 右侧内容（Win11风格）
+        content_controls = []
+        for label, value, on_click in content_items:
+            if not label:
+                content_controls.append(
+                    ft.Text(
+                        value,
+                        size=14,
+                        weight=ft.FontWeight.BOLD,
+                        color=theme_colors.get("text_primary"),
+                    )
+                )
+            elif on_click:
+                content_controls.append(
+                    ft.Row([
+                        ft.Text(
+                            f"{label}  ",
+                            size=14,
+                            color=theme_colors.get("text_secondary"),
+                        ),
+                        ft.TextButton(
+                            value,
+                            style=ft.ButtonStyle(
+                                color=theme_colors.get("accent"),
+                                padding=0,
+                            ),
+                            on_click=on_click,
+                        ),
+                    ], spacing=0)
+                )
+            else:
+                content_controls.append(
+                    ft.Text(
+                        f"{label}  {value}",
+                        size=14,
+                        color=theme_colors.get("text_secondary"),
+                    )
+                )
         
         content_column = ft.Column(
             content_controls,
@@ -173,14 +214,12 @@ class AboutCard:
             clip_behavior=ft.ClipBehavior.NONE,
         )
         
-        container = CardContainer.create(
+        return CardContainer.create(
             config=config,
             content=main_stack,
             height=card_height,
             width=card_width,
         )
-        
-        return container
 
 
 关于通用卡片 = AboutCard
