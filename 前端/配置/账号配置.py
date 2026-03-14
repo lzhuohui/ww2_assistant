@@ -38,7 +38,7 @@ def create_account_config(index: int) -> dict:
         "controls": [
             {
                 "type": "dropdown",
-                "label": "统帅种类",
+                "label": "统帅种类:",
                 "config_key": "统帅种类",
                 "options": ["主帅", "副帅"],
                 "default": default_role,
@@ -46,14 +46,14 @@ def create_account_config(index: int) -> dict:
             },
             {
                 "type": "textfield",
-                "label": "输入框",
+                "label": "输入框:",
                 "config_key": "输入框",
                 "default": "",
                 "width": 100,
             },
             {
                 "type": "dropdown",
-                "label": "平台",
+                "label": "平台:",
                 "config_key": "平台",
                 "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"],
                 "default": "Tap",

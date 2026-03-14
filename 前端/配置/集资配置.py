@@ -30,7 +30,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     "controls": [
         {
             "type": "dropdown",
-            "label": "上贡限级",
+            "label": "上贡限级:",
             "config_key": "小号上贡_上贡限级",
             "options": ["05级", "06级", "07级", "08级", "09级", "10级", "11级", "12级", "13级", "14级", "15级"],
             "default": "05",
@@ -39,7 +39,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
         },
         {
             "type": "dropdown",
-            "label": "上贡限量",
+            "label": "上贡限量:",
             "config_key": "小号上贡_上贡限量",
             "options": ["2万", "3万", "4万", "5万", "6万", "7万", "8万", "9万", "10万", "11万", "12万", "13万", "14万", "15万", "16万", "17万", "18万", "19万", "20万"],
             "default": "2",
@@ -48,7 +48,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
         },
         {
             "type": "dropdown",
-            "label": "主要统帅",
+            "label": "主要统帅:",
             "config_key": "小号上贡_主要统帅",
             "options": ["统帅A", "统帅B", "统帅C", "统帅D", "统帅E"],
             "default": "统帅A",
@@ -56,7 +56,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
         },
         {
             "type": "dropdown",
-            "label": "备用统帅",
+            "label": "备用统帅:",
             "config_key": "小号上贡_备用统帅",
             "options": ["统帅A", "统帅B", "统帅C", "统帅D", "统帅E"],
             "default": "统帅B",
@@ -78,7 +78,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     "controls": [
         {
             "type": "dropdown",
-            "label": "纳租限级",
+            "label": "纳租限级:",
             "config_key": "分城纳租_纳租限级",
             "options": ["05级", "06级", "07级", "08级", "09级", "10级", "11级", "12级", "13级", "14级", "15级"],
             "default": "05",
@@ -87,7 +87,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
         },
         {
             "type": "dropdown",
-            "label": "纳租限量",
+            "label": "纳租限量:",
             "config_key": "分城纳租_纳租限量",
             "options": ["2万", "3万", "4万", "5万", "6万", "7万", "8万", "9万", "10万", "11万", "12万", "13万", "14万", "15万", "16万", "17万", "18万", "19万", "20万"],
             "default": "2",

@@ -77,7 +77,7 @@ class TaskSettingsPage:
         # ========== 主线任务卡片 ==========
         main_dropdown = LabelDropdown.create(
             config=config,
-            label="主线限级",
+            label="主线限级:",
             options=main_level_options,
             value=main_display_value,
             on_change=on_main_level_change,
@@ -95,7 +95,7 @@ class TaskSettingsPage:
         # ========== 支线任务卡片 ==========
         side_dropdown = LabelDropdown.create(
             config=config,
-            label="支线限级",
+            label="支线限级:",
             options=side_level_options,
             value=side_display_value,
             on_change=on_side_level_change,
