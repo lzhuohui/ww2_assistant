@@ -116,15 +116,18 @@ class UserInfoCard:
             alignment=ft.MainAxisAlignment.CENTER,
         )
         
-        # 用户信息容器（水平排列，居中）
-        user_info_content = ft.Row(
-            [
-                avatar,
-                ft.Container(width=12),
-                user_info_right,
-            ],
-            alignment=ft.MainAxisAlignment.CENTER,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        # 用户信息容器（水平排列，居中，带内边距）
+        user_info_content = ft.Container(
+            content=ft.Row(
+                [
+                    avatar,
+                    ft.Container(width=12),
+                    user_info_right,
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+            padding=12,
         )
         
         # 使用卡片容器统一风格
