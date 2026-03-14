@@ -85,6 +85,8 @@ class LabelInput:
             content_padding=ft.Padding(left=8, right=8, top=8, bottom=8),
             width=width if width is not None else 120,
             on_change=lambda e: on_change(e.control.value) if on_change else None,
+            on_submit=lambda e: on_change(e.control.value) if on_change else None,
+            on_blur=lambda e: on_change(e.control.value) if on_change else None,
             hint_text=hint_text,
         )
         

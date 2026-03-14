@@ -160,19 +160,27 @@ class AccountSettingsPage:
                     default_role = control.get("default", "主帅" if index == 1 else "副帅")
                     break
         
+        role_value = config_manager.get_value(f"{index:02d}账号", "统帅种类", default_role)
+        input_value = config_manager.get_value(f"{index:02d}账号", "输入框", "")
+        platform_value = config_manager.get_value(f"{index:02d}账号", "平台", "Tap")
+        
+        config_manager.set_value(f"{index:02d}账号", "统帅种类", role_value)
+        config_manager.set_value(f"{index:02d}账号", "输入框", input_value)
+        config_manager.set_value(f"{index:02d}账号", "平台", platform_value)
+        
         settings = [
             {
                 "type": "dropdown",
                 "label": "",
                 "options": ["主帅", "副帅"],
-                "value": config_manager.get_value(f"{index:02d}账号", "统帅种类", default_role),
+                "value": role_value,
                 "width": 80,
                 "on_change": lambda v, idx=index: on_value_change("统帅种类", v),
             },
             {
                 "type": "input",
                 "label": "",
-                "value": config_manager.get_value(f"{index:02d}账号", "输入框", ""),
+                "value": input_value,
                 "width": 300,
                 "hint_text": "输入格式:名称/账号/密码",
                 "on_change": lambda v, idx=index: on_value_change("输入框", v),
@@ -181,7 +189,7 @@ class AccountSettingsPage:
                 "type": "dropdown",
                 "label": "",
                 "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"],
-                "value": config_manager.get_value(f"{index:02d}账号", "平台", "Tap"),
+                "value": platform_value,
                 "width": 80,
                 "on_change": lambda v, idx=index: on_value_change("平台", v),
             },
