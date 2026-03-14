@@ -59,7 +59,7 @@ def create_dropdown(config_key: str, label: str, value: str, options: list = Non
         "card_type": "standard",
         "title": "主帅主城",
         "icon": "HOME",
-        "subtitle": "",
+        "subtitle": "设置主帅主城建筑等级",
         "enabled": True,
         "controls_per_row": 6,
         "controls": [
@@ -81,7 +81,7 @@ def create_dropdown(config_key: str, label: str, value: str, options: list = Non
         "card_type": "standard",
         "title": "主帅分城",
         "icon": "LOCATION_CITY",
-        "subtitle": "",
+        "subtitle": "设置主帅分城建筑等级",
         "enabled": True,
         "controls_per_row": 6,
         "controls": [
@@ -103,7 +103,7 @@ def create_dropdown(config_key: str, label: str, value: str, options: list = Non
         "card_type": "standard",
         "title": "付帅主城",
         "icon": "APARTMENT",
-        "subtitle": "",
+        "subtitle": "设置付帅主城建筑等级",
         "enabled": True,
         "controls_per_row": 6,
         "controls": [
@@ -125,7 +125,7 @@ def create_dropdown(config_key: str, label: str, value: str, options: list = Non
         "card_type": "standard",
         "title": "付帅分城",
         "icon": "BUSINESS",
-        "subtitle": "",
+        "subtitle": "设置付帅分城建筑等级",
         "enabled": True,
         "controls_per_row": 6,
         "controls": [
@@ -147,7 +147,7 @@ def create_dropdown(config_key: str, label: str, value: str, options: list = Non
         "card_type": "standard",
         "title": "军团城市",
         "icon": "FORT",
-        "subtitle": "",
+        "subtitle": "设置军团城市建筑等级",
         "enabled": True,
         "controls_per_row": 4,
         "controls": [

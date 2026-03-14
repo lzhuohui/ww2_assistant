@@ -160,14 +160,14 @@ class PersonalizationSettingsPage:
         style_block_controls = [
             ThemeColorBlock.create(
                 config=config,
-                theme_name="普通平铺",
+                theme_name="平铺",
                 bg_color="#E0E0E0",
                 is_selected=(config.当前风格名称 == "普通平铺"),
                 on_click=lambda e: on_style_click("普通平铺"),
             ),
             ThemeColorBlock.create(
                 config=config,
-                theme_name="3D立体",
+                theme_name="立体",
                 bg_color="#FFFFFF",
                 is_selected=(config.当前风格名称 == "3D立体"),
                 on_click=lambda e: on_style_click("3D立体"),
