@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
 MAX_ACCOUNTS = 15
-DEFAULT_AUTHORIZED_COUNT = 3
+DEFAULT_AUTHORIZED_COUNT = 15
 
 
 def create_account_config(index: int) -> dict:
