@@ -21,7 +21,7 @@
 # 卡片配置字典
 卡片配置 = {
     "基础设置": {
-        "card_type": "standard",  # 卡片类型：standard/color_blocks
+        "card_type": "standard",
         "title": "基础设置",
         "icon": "SETTINGS",
         "subtitle": "通用配置描述",
@@ -30,30 +30,30 @@
             {
                 "type": "dropdown",
                 "label": "挂机模式:",
-                "options": ["自动挂机", "手动挂机", "半自动挂机"],
-                "value": "自动挂机",
+                "options": ["自动", "手动"],
+                "value": "自动",
                 "config_key": "挂机模式"
             },
             {
                 "type": "dropdown",
                 "label": "指令速度:",
-                "options": ["快速", "正常", "慢速"],
-                "value": "正常",
+                "options": ["100", "150", "200", "250", "300", "350", "400", "450", "500"],
+                "value": "100",
                 "config_key": "指令速度"
             },
             {
                 "type": "dropdown",
                 "label": "尝试次数:",
                 "options": ["10", "15", "20", "25", "30"],
-                "value": "15",
+                "value": "10",
                 "config_key": "尝试次数"
             },
             {
                 "type": "dropdown",
-                "label": "清换限量:",
+                "label": "清缓限量:",
                 "options": ["1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "4.5", "5.0"],
                 "value": "1.0",
-                "config_key": "清换限量"
+                "config_key": "清缓限量"
             }
         ]
     },
