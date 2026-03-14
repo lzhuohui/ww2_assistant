@@ -127,6 +127,8 @@ class AccountSettingsPage:
         subtitle_text = "参与挂机" if initial_enabled else "禁止挂机"
         
         def on_state_change(enabled: bool):
+            config_manager.set_value(f"{index:02d}账号", "开关", enabled)
+            
             if enabled:
                 if AccountSettingsPage.当前参与数量 >= AccountSettingsPage.授权数量:
                     return False
