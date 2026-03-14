@@ -83,7 +83,7 @@ class AccountSettingsPage:
                 count_text=count_text,
             )
             account_cards.append(card)
-            account_cards.append(ft.Container(height=10))
+            account_cards.append(ft.Container(height=4))
         
         page_content = ft.Column(
             [
@@ -101,7 +101,7 @@ class AccountSettingsPage:
                     alignment=ft.MainAxisAlignment.START,
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
-                ft.Container(height=10),
+                ft.Container(height=4),
                 *account_cards,
             ],
             spacing=0,
