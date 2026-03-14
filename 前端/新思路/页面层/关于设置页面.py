@@ -55,25 +55,14 @@ class AboutSettingsPage:
         """
         theme_colors = config.当前主题颜色
         
-        def copy_to_clipboard(text: str, label: str):
-            if page:
-                page.set_clipboard(text)
-                page.snack_bar = ft.SnackBar(
-                    content=ft.Text(f"{label}已复制: {text}"),
-                    duration=2000,
-                )
-                page.snack_bar.open = True
-                page.update()
-        
         version_card = AboutCard.create(
             config=config,
             title="版本信息",
             icon="INFO",
-            subtitle="软件版本详情",
-            content_controls=[
-                ft.Text(f"软件名称：二战风云辅助工具", size=14, color=theme_colors.get("text_secondary")),
-                ft.Text(f"当前版本：{AboutSettingsPage.VERSION}", size=14, color=theme_colors.get("text_secondary")),
-                ft.Text(f"更新时间：{AboutSettingsPage.UPDATE_DATE}", size=14, color=theme_colors.get("text_secondary")),
+            content_lines=[
+                f"软件名称：二战风云辅助工具",
+                f"当前版本：{AboutSettingsPage.VERSION}",
+                f"更新时间：{AboutSettingsPage.UPDATE_DATE}",
             ],
             height=90,
         )
@@ -82,48 +71,27 @@ class AboutSettingsPage:
             config=config,
             title="联系方式",
             icon="CONTACTS",
-            subtitle="获取帮助与反馈",
-            content_controls=[
-                ft.Row([
-                    ft.Text("QQ群：", size=14, color=theme_colors.get("text_secondary")),
-                    ft.TextButton(
-                        AboutSettingsPage.QQ_GROUP,
-                        on_click=lambda e: copy_to_clipboard(AboutSettingsPage.QQ_GROUP, "QQ群"),
-                    ),
-                ], spacing=0),
-                ft.Row([
-                    ft.Text("微信：", size=14, color=theme_colors.get("text_secondary")),
-                    ft.TextButton(
-                        AboutSettingsPage.WECHAT,
-                        on_click=lambda e: copy_to_clipboard(AboutSettingsPage.WECHAT, "微信"),
-                    ),
-                ], spacing=0),
-                ft.Row([
-                    ft.Text("邮箱：", size=14, color=theme_colors.get("text_secondary")),
-                    ft.TextButton(
-                        AboutSettingsPage.EMAIL,
-                        on_click=lambda e: copy_to_clipboard(AboutSettingsPage.EMAIL, "邮箱"),
-                    ),
-                ], spacing=0),
+            content_lines=[
+                f"QQ群：{AboutSettingsPage.QQ_GROUP}",
+                f"微信：{AboutSettingsPage.WECHAT}",
+                f"邮箱：{AboutSettingsPage.EMAIL}",
             ],
-            height=100,
+            height=90,
         )
         
         payment_card = AboutCard.create(
             config=config,
             title="缴费说明",
             icon="PAYMENT",
-            subtitle="授权价格与流程",
-            content_controls=[
-                ft.Text("授权价格：", size=14, weight=ft.FontWeight.BOLD, color=theme_colors.get("text_primary")),
-                ft.Text(f"  月卡：{AboutSettingsPage.PRICE_MONTH}元/月", size=14, color=theme_colors.get("text_secondary")),
-                ft.Text(f"  季卡：{AboutSettingsPage.PRICE_QUARTER}元/季", size=14, color=theme_colors.get("text_secondary")),
-                ft.Text(f"  年卡：{AboutSettingsPage.PRICE_YEAR}元/年", size=14, color=theme_colors.get("text_secondary")),
-                ft.Container(height=4),
-                ft.Text("获取授权流程：", size=14, weight=ft.FontWeight.BOLD, color=theme_colors.get("text_primary")),
-                ft.Text("  1. 添加微信或QQ群联系作者", size=14, color=theme_colors.get("text_secondary")),
-                ft.Text("  2. 选择授权时长并付款", size=14, color=theme_colors.get("text_secondary")),
-                ft.Text("  3. 获取授权码并激活", size=14, color=theme_colors.get("text_secondary")),
+            content_lines=[
+                f"授权价格：",
+                f"  月卡：{AboutSettingsPage.PRICE_MONTH}元/月",
+                f"  季卡：{AboutSettingsPage.PRICE_QUARTER}元/季",
+                f"  年卡：{AboutSettingsPage.PRICE_YEAR}元/年",
+                f"获取授权流程：",
+                f"  1. 添加微信或QQ群联系作者",
+                f"  2. 选择授权时长并付款",
+                f"  3. 获取授权码并激活",
             ],
             height=170,
         )
@@ -132,15 +100,12 @@ class AboutSettingsPage:
             config=config,
             title="免责声明",
             icon="WARNING_AMBER",
-            subtitle="使用须知",
-            content_controls=[
-                ft.Text(
-                    "本软件仅供学习研究使用，请勿用于商业用途。使用本软件产生的任何后果由用户自行承担，与开发者无关。请遵守游戏服务条款，合理使用。",
-                    size=14,
-                    color=theme_colors.get("text_secondary"),
-                ),
+            content_lines=[
+                "本软件仅供学习研究使用，请勿用于商业用途。",
+                "使用本软件产生的任何后果由用户自行承担，与开发者无关。",
+                "请遵守游戏服务条款，合理使用。",
             ],
-            height=80,
+            height=100,
         )
         
         page_content = ft.Column(

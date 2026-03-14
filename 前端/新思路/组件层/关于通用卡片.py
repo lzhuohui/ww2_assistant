@@ -3,13 +3,12 @@
 关于通用卡片 - 组件层
 
 设计思路:
-    复刻通用卡片风格，左侧图标+标题+分割线，右侧内容区域。
+    复刻通用卡片风格，左侧图标+标题+分割线，右侧文本内容。
     无开关功能，适合展示信息类卡片。
 
 功能:
-    1. 左侧：图标+标题+副标题+分割线
-    2. 右侧：内容区域（可自定义）
-    3. 无开关功能
+    1. 左侧：图标+标题+分割线
+    2. 右侧：文本内容
 
 使用场景:
     被关于设置页面调用。
@@ -20,9 +19,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
-from typing import List, Optional
+from typing import List
 from 新思路.零件层.卡片容器 import CardContainer
-from 新思路.零件层.图标标题 import IconTitle
+from 新思路.零件层.分割线 import Divider
 
 
 class AboutCard:
@@ -33,9 +32,8 @@ class AboutCard:
         config,
         title: str,
         icon: str,
-        content_controls: List[ft.Control],
-        subtitle: str = None,
-        height: int = None,
+        content_lines: List[str],
+        height: int = 80,
     ) -> ft.Container:
         """
         创建关于卡片
@@ -44,9 +42,8 @@ class AboutCard:
             config: 界面配置对象
             title: 卡片标题
             icon: 图标名称
-            content_controls: 右侧内容控件列表
-            subtitle: 副标题（可选）
-            height: 卡片高度（可选，自动计算）
+            content_lines: 右侧文本行列表
+            height: 卡片高度
         
         返回:
             ft.Container: 卡片容器
@@ -60,22 +57,32 @@ class AboutCard:
         page_padding = ui_config.get("page_padding", 10)
         card_width = window_width - left_panel_width - 20 - page_padding * 2
         
-        icon_title = IconTitle.create(
-            config=config,
-            title=title,
-            icon=icon,
-            enabled=True,
-            on_state_change=None,
-            subtitle=subtitle,
-            divider_height=height,
+        icon_name = getattr(ft.Icons, icon, ft.Icons.INFO)
+        
+        left_content = ft.Column(
+            [
+                ft.Icon(icon_name, color=theme_colors.get("accent"), size=24),
+                ft.Text(title, size=14, weight=ft.FontWeight.BOLD, color=theme_colors.get("text_primary")),
+                Divider.create(config, height),
+            ],
+            spacing=4,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         )
         
-        left_container = ft.Container(content=icon_title)
+        left_container = ft.Container(
+            content=left_content,
+            left=card_padding,
+            top=card_padding,
+        )
+        
+        content_controls = [
+            ft.Text(line, size=14, color=theme_colors.get("text_secondary"))
+            for line in content_lines
+        ]
         
         content_column = ft.Column(
             content_controls,
             spacing=4,
-            alignment=ft.MainAxisAlignment.CENTER,
         )
         
         right_container = ft.Container(
@@ -83,13 +90,6 @@ class AboutCard:
             right=20,
             top=card_padding,
         )
-        
-        if height is None:
-            content_height = sum(
-                getattr(c, 'height', 20) if hasattr(c, 'height') else 20
-                for c in content_controls
-            ) + (len(content_controls) - 1) * 4
-            height = max(60, content_height + card_padding * 2)
         
         main_stack = ft.Stack(
             [left_container, right_container],
