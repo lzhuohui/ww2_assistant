@@ -160,10 +160,11 @@ class 界面配置:
         saved_theme = self.配置管理器.get_value("个性化", "主题")
         saved_palette = self.配置管理器.get_value("个性化", "调色板")
         saved_style = self.配置管理器.get_value("个性化", "风格")
+        saved_palette_enabled = self.配置管理器.get_value("个性化", "调色板开关", True)
         
         if saved_theme:
             主题名称 = saved_theme
-        if saved_palette:
+        if saved_palette_enabled and saved_palette:
             调色板名称 = saved_palette
         if saved_style:
             self.定义尺寸["风格"]["current_style"] = saved_style
