@@ -240,25 +240,28 @@ class AccountSettingsPage:
         
         name_input = LabelInput.create(
             config=config,
-            label="名称:",
+            label="",
             value=name_value,
-            width=100,
+            width=200,
+            hint_text="请输入统帅名称",
             on_change=on_name_change,
         )
         
         account_input = LabelInput.create(
             config=config,
-            label="账号:",
+            label="",
             value=account_value,
-            width=120,
+            width=200,
+            hint_text="请输入统帅账号",
             on_change=on_account_change,
         )
         
         password_input = LabelInput.create(
             config=config,
-            label="密码:",
+            label="",
             value=password_value,
-            width=120,
+            width=200,
+            hint_text="请输入统帅密码",
             password=True,
             on_change=on_password_change,
         )
