@@ -124,15 +124,18 @@ class AboutSettingsPage:
             ],
         )
         
-        page_content = ft.Column(
+        page_title = ft.Container(
+            content=ft.Text(
+                "关于",
+                size=24,
+                weight=ft.FontWeight.BOLD,
+                color=theme_colors.get("text_primary"),
+            ),
+            padding=ft.Padding(bottom=4),
+        )
+        
+        scrollable_content = ft.Column(
             [
-                ft.Text(
-                    "关于",
-                    size=24,
-                    weight=ft.FontWeight.BOLD,
-                    color=theme_colors.get("text_primary"),
-                ),
-                ft.Container(height=4),
                 version_card,
                 ft.Container(height=4),
                 contact_card,
@@ -143,6 +146,15 @@ class AboutSettingsPage:
             ],
             spacing=0,
             scroll=ft.ScrollMode.HIDDEN,
+            expand=True,
+        )
+        
+        page_content = ft.Column(
+            [
+                page_title,
+                scrollable_content,
+            ],
+            spacing=0,
             expand=True,
         )
         

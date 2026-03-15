@@ -58,19 +58,31 @@ class WildSettingsPage:
             subtitle="开启后执行自动打野任务",
         )
         
-        page_content = ft.Column(
+        page_title = ft.Container(
+            content=ft.Text(
+                "打野设置",
+                size=24,
+                weight=ft.FontWeight.BOLD,
+                color=theme_colors.get("text_primary"),
+            ),
+            padding=ft.Padding(bottom=4),
+        )
+        
+        scrollable_content = ft.Column(
             [
-                ft.Text(
-                    "打野设置",
-                    size=24,
-                    weight=ft.FontWeight.BOLD,
-                    color=theme_colors.get("text_primary"),
-                ),
-                ft.Container(height=4),
                 wild_card,
             ],
             spacing=0,
             scroll=ft.ScrollMode.HIDDEN,
+            expand=True,
+        )
+        
+        page_content = ft.Column(
+            [
+                page_title,
+                scrollable_content,
+            ],
+            spacing=0,
             expand=True,
         )
         

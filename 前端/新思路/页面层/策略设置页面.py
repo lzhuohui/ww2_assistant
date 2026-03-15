@@ -79,16 +79,18 @@ class StrategySettingsPage:
         )
         
         # ========== 页面容器 ==========
-        page_content = ft.Column(
+        page_title = ft.Container(
+            content=ft.Text(
+                "策略设置",
+                size=24,
+                weight=ft.FontWeight.BOLD,
+                color=theme_colors.get("text_primary"),
+            ),
+            padding=ft.Padding(bottom=4),
+        )
+        
+        scrollable_content = ft.Column(
             [
-                # 页面标题
-                ft.Text(
-                    "策略设置",
-                    size=24,
-                    weight=ft.FontWeight.BOLD,
-                    color=theme_colors.get("text_primary"),
-                ),
-                ft.Container(height=4),
                 # 建筑速建卡片
                 building_speed_card,
                 ft.Container(height=4),
@@ -100,6 +102,15 @@ class StrategySettingsPage:
             ],
             spacing=0,
             scroll=ft.ScrollMode.HIDDEN,
+            expand=True,
+        )
+        
+        page_content = ft.Column(
+            [
+                page_title,
+                scrollable_content,
+            ],
+            spacing=0,
             expand=True,
         )
         
