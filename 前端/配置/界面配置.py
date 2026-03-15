@@ -21,12 +21,12 @@
 import flet as ft
 from typing import Dict, Any
 from .主题配置 import 主题配置
+from .配置管理器 import ConfigManager
 
 
 class 界面配置:
     """界面配置类 - 提供界面尺寸和布局管理"""
     
-    # ==================== 尺寸定义 ====================
     定义尺寸 = {
         "字体": {
             "font_size_xs": 10,      # 微小文本（辅助信息、标签）
@@ -155,6 +155,19 @@ class 界面配置:
     
     def __init__(self, 主题名称: str = "深色", 调色板名称: str = None):
         """初始化界面配置"""
+        self.配置管理器 = ConfigManager()
+        
+        saved_theme = self.配置管理器.get_value("个性化", "主题")
+        saved_palette = self.配置管理器.get_value("个性化", "调色板")
+        saved_style = self.配置管理器.get_value("个性化", "风格")
+        
+        if saved_theme:
+            主题名称 = saved_theme
+        if saved_palette:
+            调色板名称 = saved_palette
+        if saved_style:
+            self.定义尺寸["风格"]["current_style"] = saved_style
+        
         self._主题配置 = 主题配置(主题名称, 调色板名称)
     
     def 切换主题(self, 主题名称: str):

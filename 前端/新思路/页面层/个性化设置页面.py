@@ -46,6 +46,7 @@ class PersonalizationSettingsPage:
             ft.Container: 个性化设置页面容器
         """
         theme_colors = config.当前主题颜色
+        config_manager = config.配置管理器
         
         current_theme = config.主题名称
         current_palette = config.调色板名称
@@ -53,14 +54,19 @@ class PersonalizationSettingsPage:
         def on_theme_click(theme_name: str):
             if theme_name != current_theme:
                 config.切换主题(theme_name)
+                config_manager.set_value("个性化", "主题", theme_name)
                 if on_refresh:
                     on_refresh()
         
         def on_palette_click(palette_name: str):
-            if palette_name != current_palette:
+            if palette_name == current_palette:
+                config.切换调色板
+                config_manager.set_value("个性化", "调色板", "")
+            else:
                 config.切换调色板(palette_name)
-                if on_refresh:
-                    on_refresh()
+                config_manager.set_value("个性化", "调色板", palette_name)
+            if on_refresh:
+                on_refresh()
         
         theme_block_controls = [
             ThemeColorBlock.create(
@@ -154,6 +160,7 @@ class PersonalizationSettingsPage:
         def on_style_click(style_name: str):
             if style_name != config.当前风格名称:
                 config.切换风格(style_name)
+                config_manager.set_value("个性化", "风格", style_name)
                 if on_refresh:
                     on_refresh()
         
