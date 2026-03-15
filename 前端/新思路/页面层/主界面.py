@@ -261,18 +261,14 @@ class MainPage:
     
     def refresh(self):
         """刷新整个界面（主题切换后调用）"""
-        # 更新主题颜色
-        self.theme_colors = self.config.当前主题颜色
-        
-        # 重新创建整个界面以应用新主题
         if self.page:
-            # 清空页面
+            current_nav = self.current_nav
             self.page.controls.clear()
-            # 重新创建主界面
             main_page = MainPage(self.config)
             main_page.page = self.page
+            main_page.current_nav = current_nav
             self.page.add(main_page.create())
-            # 更新页面
+            main_page.handle_nav_change(current_nav)
             self.page.update()
 
 
