@@ -367,13 +367,21 @@ class 主题配置:
             return True
         return False
     
+    def 切换调色板(self, 调色板名称: str):
+        """切换高对比度调色板
+        
+        参数:
+            调色板名称: 调色板名称，传入None或空字符串可取消调色板效果
+        """
         if 调色板名称 in self.高对比度调色板:
             self._调色板名称 = 调色板名称
             self.当前主题颜色 = self.高对比度调色板[调色板名称]
-        else:
+            return True
+        elif 调色板名称 is None or 调色板名称 == "":
             self._调色板名称 = None
             self.当前主题颜色 = self.主题颜色[self._主题名称]
-        return self._主题配置.切换调色板(调色板名称)
+            return True
+        return False
     
     def 获取颜色(self, 颜色名称: str) -> str:
         """获取指定颜色的值"""
