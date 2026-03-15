@@ -86,7 +86,7 @@ class CleaningSettingsPage:
         scrollable_content = ft.Column(
             [
                 district_card,
-                ft.Container(height=4),
+                ft.Container(height=5),
                 region_card,
             ],
             spacing=0,

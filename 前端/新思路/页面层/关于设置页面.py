@@ -137,11 +137,11 @@ class AboutSettingsPage:
         scrollable_content = ft.Column(
             [
                 version_card,
-                ft.Container(height=4),
+                ft.Container(height=5),
                 contact_card,
-                ft.Container(height=4),
+                ft.Container(height=5),
                 payment_card,
-                ft.Container(height=4),
+                ft.Container(height=5),
                 disclaimer_card,
             ],
             spacing=0,

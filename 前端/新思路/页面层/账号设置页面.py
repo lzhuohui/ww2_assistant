@@ -83,7 +83,7 @@ class AccountSettingsPage:
                 count_text=count_text,
             )
             account_cards.append(card)
-            account_cards.append(ft.Container(height=4))
+            account_cards.append(ft.Container(height=5))
         
         page_title = ft.Container(
             content=ft.Row(

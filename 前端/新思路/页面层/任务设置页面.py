@@ -124,7 +124,7 @@ class TaskSettingsPage:
         scrollable_content = ft.Column(
             [
                 main_card,
-                ft.Container(height=4),
+                ft.Container(height=5),
                 side_card,
             ],
             spacing=0,

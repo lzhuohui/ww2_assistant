@@ -72,11 +72,11 @@ class BuildingSettingsPage:
                 weight=ft.FontWeight.BOLD,
                 color=theme_colors.get("text_primary"),
             ),
-            padding=ft.Padding(bottom=4),
+            padding=ft.Padding(bottom=5),
         )
         
         scrollable_content = ft.Column(
-            [ft.Container(content=card, margin=ft.Margin(bottom=4)) for card in lazy_cards],
+            [ft.Container(content=card, margin=ft.Margin(bottom=5)) for card in lazy_cards],
             spacing=0,
             scroll=ft.ScrollMode.HIDDEN,
             expand=True,

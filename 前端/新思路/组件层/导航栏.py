@@ -123,7 +123,7 @@ class NavBar:
         # 导航栏容器
         nav_column = ft.Column(
             nav_buttons,
-            spacing=4,
+            spacing=5,
             expand=True,
             alignment=ft.MainAxisAlignment.START,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,

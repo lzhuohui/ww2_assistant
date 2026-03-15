@@ -233,7 +233,7 @@ class FundraisingSettingsPage:
         scrollable_content = ft.Column(
             [
                 small_account_card,
-                ft.Container(height=4),
+                ft.Container(height=5),
                 rent_card,
             ],
             spacing=0,

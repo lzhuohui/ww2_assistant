@@ -93,11 +93,11 @@ class SystemSettingsPage:
         scrollable_content = ft.Column(
             [
                 auto_mode_card,
-                ft.Container(height=4),
+                ft.Container(height=5),
                 speed_card,
-                ft.Container(height=4),
+                ft.Container(height=5),
                 retry_card,
-                ft.Container(height=4),
+                ft.Container(height=5),
                 cache_card,
             ],
             spacing=0,

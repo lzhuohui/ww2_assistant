@@ -197,9 +197,9 @@ class PersonalizationSettingsPage:
         scrollable_content = ft.Column(
             [
                 theme_card,
-                ft.Container(height=4),
+                ft.Container(height=5),
                 palette_card,
-                ft.Container(height=4),
+                ft.Container(height=5),
                 style_card,
             ],
             spacing=0,

@@ -93,10 +93,10 @@ class StrategySettingsPage:
             [
                 # 建筑速建卡片
                 building_speed_card,
-                ft.Container(height=4),
+                ft.Container(height=5),
                 # 资源速产卡片
                 resource_speed_card,
-                ft.Container(height=4),
+                ft.Container(height=5),
                 # 策点保留卡片
                 points_keep_card,
             ],
