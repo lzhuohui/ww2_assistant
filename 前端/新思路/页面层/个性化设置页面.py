@@ -65,11 +65,16 @@ class PersonalizationSettingsPage:
             if not enabled:
                 config.切换调色板
                 config_manager.set_value("个性化", "调色板", "")
+            else:
+                saved_palette = config_manager.get_value("个性化", "调色板")
+                if saved_palette:
+                    config.切换调色板(saved_palette)
             if on_refresh:
                 on_refresh()
         
         def on_palette_click(palette_name: str):
-            if palette_name == current_palette:
+            actual_current_palette = config.调色板名称
+            if palette_name == actual_current_palette:
                 config.切换调色板
                 config_manager.set_value("个性化", "调色板", "")
             else:
