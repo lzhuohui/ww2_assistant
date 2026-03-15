@@ -5,6 +5,7 @@
 设计思路:
     使用通用卡片创建账号设置页面。
     固定15个账号栏，开关控制参与挂机状态。
+    输入框拆分为名称/账号/密码三个独立输入框，防止用户输错格式。
 
 功能:
     1. 显示15个账号卡片
@@ -12,7 +13,7 @@
     3. 开关状态不影响控件操作
     4. 计数机制：开关打开且输入有效时计数+1
     5. 授权限制：超过授权数量禁止打开开关
-    6. 输入格式验证：格式错误时副标题显示提示
+    6. 输入验证：名称/账号/密码都不为空时才有效
 
 使用场景:
     被主界面调用。
@@ -30,7 +31,6 @@ from 新思路.组件层.通用卡片 import UniversalCard
 from 新思路.零件层.标签下拉框 import LabelDropdown
 from 新思路.零件层.标签输入框 import LabelInput
 from 配置.账号配置 import MAX_ACCOUNTS, DEFAULT_AUTHORIZED_COUNT
-from 新思路.工具层.输入验证 import validate_account_input, get_subtitle_by_state, can_participate
 
 
 class AccountSettingsPage:
@@ -63,9 +63,11 @@ class AccountSettingsPage:
         
         for i in range(1, MAX_ACCOUNTS + 1):
             enabled = config_manager.get_value(f"{i:02d}账号", "开关", False)
-            input_value = config_manager.get_value(f"{i:02d}账号", "输入框", "")
+            name = config_manager.get_value(f"{i:02d}账号", "名称", "")
+            account = config_manager.get_value(f"{i:02d}账号", "账号", "")
+            password = config_manager.get_value(f"{i:02d}账号", "密码", "")
             AccountSettingsPage.账号开关状态[i] = enabled
-            if can_participate(enabled, input_value):
+            if enabled and name and account and password:
                 AccountSettingsPage.当前参与数量 += 1
         
         count_text = ft.Text(
@@ -127,32 +129,49 @@ class AccountSettingsPage:
         """创建单个账号卡片"""
         
         initial_enabled = AccountSettingsPage.账号开关状态.get(index, False)
-        input_value = config_manager.get_value(f"{index:02d}账号", "输入框", "")
-        subtitle_text = get_subtitle_by_state(initial_enabled, input_value)
+        name_value = config_manager.get_value(f"{index:02d}账号", "名称", "")
+        account_value = config_manager.get_value(f"{index:02d}账号", "账号", "")
+        password_value = config_manager.get_value(f"{index:02d}账号", "密码", "")
+        
+        def get_subtitle(enabled: bool, name: str, account: str, password: str) -> str:
+            """获取副标题"""
+            if not enabled:
+                return "未参与挂机"
+            if not name or not account or not password:
+                return "请填写完整的账号信息"
+            return f"已配置: {name}"
+        
+        subtitle_text = get_subtitle(initial_enabled, name_value, account_value, password_value)
         
         card = None
         
-        def update_subtitle_and_count(enabled: bool, input_text: str):
+        def can_participate(enabled: bool, name: str, account: str, password: str) -> bool:
+            """判断是否可以参与挂机"""
+            return enabled and bool(name) and bool(account) and bool(password)
+        
+        def update_subtitle_and_count(enabled: bool, name: str, account: str, password: str):
             """更新副标题和计数"""
             nonlocal card
             
-            old_can_participate = can_participate(
+            old_can = can_participate(
                 AccountSettingsPage.账号开关状态.get(index, False),
-                config_manager.get_value(f"{index:02d}账号", "输入框", "")
+                config_manager.get_value(f"{index:02d}账号", "名称", ""),
+                config_manager.get_value(f"{index:02d}账号", "账号", ""),
+                config_manager.get_value(f"{index:02d}账号", "密码", ""),
             )
             
-            new_can_participate = can_participate(enabled, input_text)
+            new_can = can_participate(enabled, name, account, password)
             
-            if new_can_participate and not old_can_participate:
+            if new_can and not old_can:
                 if AccountSettingsPage.当前参与数量 >= AccountSettingsPage.授权数量:
                     return False
                 AccountSettingsPage.当前参与数量 += 1
-            elif not new_can_participate and old_can_participate:
+            elif not new_can and old_can:
                 AccountSettingsPage.当前参与数量 -= 1
             
             AccountSettingsPage.账号开关状态[index] = enabled
             
-            subtitle = get_subtitle_by_state(enabled, input_text)
+            subtitle = get_subtitle(enabled, name, account, password)
             if card:
                 card.set_subtitle(subtitle)
             
@@ -167,28 +186,47 @@ class AccountSettingsPage:
         
         def on_state_change(enabled: bool):
             config_manager.set_value(f"{index:02d}账号", "开关", enabled)
-            current_input = config_manager.get_value(f"{index:02d}账号", "输入框", "")
-            return update_subtitle_and_count(enabled, current_input)
+            current_name = config_manager.get_value(f"{index:02d}账号", "名称", "")
+            current_account = config_manager.get_value(f"{index:02d}账号", "账号", "")
+            current_password = config_manager.get_value(f"{index:02d}账号", "密码", "")
+            return update_subtitle_and_count(enabled, current_name, current_account, current_password)
         
         def on_role_change(value: str):
             config_manager.set_value(f"{index:02d}账号", "统帅种类", value)
         
-        def on_input_change(value: str):
-            config_manager.set_value(f"{index:02d}账号", "输入框", value)
+        def on_name_change(value: str):
+            config_manager.set_value(f"{index:02d}账号", "名称", value)
             current_enabled = config_manager.get_value(f"{index:02d}账号", "开关", False)
-            update_subtitle_and_count(current_enabled, value)
+            current_account = config_manager.get_value(f"{index:02d}账号", "账号", "")
+            current_password = config_manager.get_value(f"{index:02d}账号", "密码", "")
+            update_subtitle_and_count(current_enabled, value, current_account, current_password)
+        
+        def on_account_change(value: str):
+            config_manager.set_value(f"{index:02d}账号", "账号", value)
+            current_enabled = config_manager.get_value(f"{index:02d}账号", "开关", False)
+            current_name = config_manager.get_value(f"{index:02d}账号", "名称", "")
+            current_password = config_manager.get_value(f"{index:02d}账号", "密码", "")
+            update_subtitle_and_count(current_enabled, current_name, value, current_password)
+        
+        def on_password_change(value: str):
+            config_manager.set_value(f"{index:02d}账号", "密码", value)
+            current_enabled = config_manager.get_value(f"{index:02d}账号", "开关", False)
+            current_name = config_manager.get_value(f"{index:02d}账号", "名称", "")
+            current_account = config_manager.get_value(f"{index:02d}账号", "账号", "")
+            update_subtitle_and_count(current_enabled, current_name, current_account, value)
         
         def on_platform_change(value: str):
             config_manager.set_value(f"{index:02d}账号", "平台", value)
         
         role_value = config_manager.get_value(f"{index:02d}账号", "统帅种类", "主帅" if index == 1 else "副帅")
-        input_value = config_manager.get_value(f"{index:02d}账号", "输入框", "")
         platform_value = config_manager.get_value(f"{index:02d}账号", "平台", "Tap")
         switch_value = config_manager.get_value(f"{index:02d}账号", "开关", False)
         
         config_manager.set_value(f"{index:02d}账号", "开关", switch_value)
         config_manager.set_value(f"{index:02d}账号", "统帅种类", role_value)
-        config_manager.set_value(f"{index:02d}账号", "输入框", input_value)
+        config_manager.set_value(f"{index:02d}账号", "名称", name_value)
+        config_manager.set_value(f"{index:02d}账号", "账号", account_value)
+        config_manager.set_value(f"{index:02d}账号", "密码", password_value)
         config_manager.set_value(f"{index:02d}账号", "平台", platform_value)
         
         role_dropdown = LabelDropdown.create(
@@ -200,13 +238,29 @@ class AccountSettingsPage:
             on_change=on_role_change,
         )
         
-        input_control = LabelInput.create(
+        name_input = LabelInput.create(
             config=config,
-            label="",
-            value=input_value,
-            width=350,
-            hint_text="输入格式:名称/账号/密码",
-            on_change=on_input_change,
+            label="名称:",
+            value=name_value,
+            width=100,
+            on_change=on_name_change,
+        )
+        
+        account_input = LabelInput.create(
+            config=config,
+            label="账号:",
+            value=account_value,
+            width=120,
+            on_change=on_account_change,
+        )
+        
+        password_input = LabelInput.create(
+            config=config,
+            label="密码:",
+            value=password_value,
+            width=120,
+            password=True,
+            on_change=on_password_change,
         )
         
         platform_dropdown = LabelDropdown.create(
@@ -224,8 +278,8 @@ class AccountSettingsPage:
             icon="ACCOUNT_CIRCLE",
             enabled=initial_enabled,
             on_state_change=on_state_change,
-            controls=[role_dropdown, input_control, platform_dropdown],
-            controls_per_row=3,
+            controls=[role_dropdown, name_input, account_input, password_input, platform_dropdown],
+            controls_per_row=5,
             subtitle=subtitle_text,
         )
         

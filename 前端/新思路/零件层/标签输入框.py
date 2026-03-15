@@ -46,6 +46,7 @@ class LabelInput:
         width: int = None,
         on_change: Callable[[str], None] = None,
         hint_text: str = None,
+        password: bool = False,
         **kwargs
     ) -> ft.Row:
         """
@@ -58,6 +59,7 @@ class LabelInput:
             width: 输入框宽度（可选，默认从配置中获取）
             on_change: 值变化回调
             hint_text: 提示文本（可选）
+            password: 是否为密码输入框（可选，默认False）
         
         返回:
             ft.Row: 标签输入框容器
@@ -88,6 +90,8 @@ class LabelInput:
             on_submit=lambda e: on_change(e.control.value) if on_change else None,
             on_blur=lambda e: on_change(e.control.value) if on_change else None,
             hint_text=hint_text,
+            password=password,
+            can_reveal_password=password,
         )
         
         # 创建行容器（标签紧靠输入框）
