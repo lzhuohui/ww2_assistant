@@ -152,8 +152,11 @@ class CustomDropDown:
     def set_state(self, enabled: bool):
         """设置启用状态 - 只改变透明度，不改变可操作性"""
         self.selected_text.opacity = 1.0 if enabled else 0.4
-        if self.selected_text.page:
-            self.selected_text.update()
+        try:
+            if self.selected_text.page:
+                self.selected_text.update()
+        except RuntimeError:
+            pass
     
     def set_options(self, options: List[str]):
         """设置选项列表"""

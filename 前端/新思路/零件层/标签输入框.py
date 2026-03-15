@@ -108,8 +108,11 @@ class LabelInput:
         def set_state(enabled: bool):
             """设置启用状态 - 只改变透明度，不改变可操作性"""
             label_control.opacity = 1.0 if enabled else 0.4
-            if label_control.page:
-                label_control.update()
+            try:
+                if label_control.page:
+                    label_control.update()
+            except RuntimeError:
+                pass
         
         row.set_state = set_state
         

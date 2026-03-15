@@ -188,6 +188,13 @@ class UniversalCard:
                     if control.page:
                         control.update()
         
+        # 初始化控件透明度
+        if controls and not current_enabled:
+            for control in controls:
+                control.opacity = 0.4
+                if hasattr(control, 'set_state'):
+                    control.set_state(current_enabled)
+        
         # ========== 第三步：创建左侧区域 ==========
         left_container = ft.Container(
             content=icon_title,
