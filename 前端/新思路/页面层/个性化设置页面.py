@@ -7,7 +7,8 @@
 
 功能:
     1. 主题设置卡片
-    2. 调色板设置卡片
+    2. 调色板设置卡片（带开关）
+    3. 风格设置卡片
 
 数据来源:
     所有配置数据从配置目录获取。
@@ -50,6 +51,11 @@ class PersonalizationSettingsPage:
         
         current_theme = config.主题名称
         current_palette = config.调色板名称
+        current_style = config.当前风格名称
+        
+        palette_enabled = config_manager.get_value("个性化", "调色板开关", False)
+        if isinstance(palette_enabled, str):
+            palette_enabled = palette_enabled == "True"
         
         def on_theme_click(theme_name: str):
             if theme_name != current_theme:
@@ -59,12 +65,24 @@ class PersonalizationSettingsPage:
                     on_refresh()
         
         def on_palette_click(palette_name: str):
+            if not palette_enabled:
+                return
             if palette_name == current_palette:
                 config.切换调色板
                 config_manager.set_value("个性化", "调色板", "")
             else:
                 config.切换调色板(palette_name)
                 config_manager.set_value("个性化", "调色板", palette_name)
+            if on_refresh:
+                on_refresh()
+        
+        def on_palette_switch_change(enabled: bool):
+            nonlocal palette_enabled
+            palette_enabled = enabled
+            config_manager.set_value("个性化", "调色板开关", str(enabled))
+            if not enabled:
+                config.切换调色板
+                config_manager.set_value("个性化", "调色板", "")
             if on_refresh:
                 on_refresh()
         
@@ -106,33 +124,39 @@ class PersonalizationSettingsPage:
             ),
         ]
         
+        palette_switch = ft.Switch(
+            value=palette_enabled,
+            active_color=theme_colors.get("accent"),
+            on_change=lambda e: on_palette_switch_change(e.control.value),
+        )
+        
         palette_block_controls = [
             ThemeColorBlock.create(
                 config=config,
                 theme_name="水生",
                 bg_color="#006994",
-                is_selected=(current_palette == "水生"),
+                is_selected=(palette_enabled and current_palette == "水生"),
                 on_click=lambda e: on_palette_click("水生"),
             ),
             ThemeColorBlock.create(
                 config=config,
                 theme_name="沙漠",
                 bg_color="#C19A6B",
-                is_selected=(current_palette == "沙漠"),
+                is_selected=(palette_enabled and current_palette == "沙漠"),
                 on_click=lambda e: on_palette_click("沙漠"),
             ),
             ThemeColorBlock.create(
                 config=config,
                 theme_name="黄昏",
                 bg_color="#FF6B6B",
-                is_selected=(current_palette == "黄昏"),
+                is_selected=(palette_enabled and current_palette == "黄昏"),
                 on_click=lambda e: on_palette_click("黄昏"),
             ),
             ThemeColorBlock.create(
                 config=config,
                 theme_name="夜空",
                 bg_color="#2C3E50",
-                is_selected=(current_palette == "夜空"),
+                is_selected=(palette_enabled and current_palette == "夜空"),
                 on_click=lambda e: on_palette_click("夜空"),
             ),
         ]
@@ -147,18 +171,60 @@ class PersonalizationSettingsPage:
             subtitle="选择界面主题风格",
         )
         
-        palette_card = UniversalCard.create(
-            config=config,
-            title="调色板设置",
-            icon="CONTRAST",
-            enabled=True,
-            controls=palette_block_controls,
-            controls_per_row=4,
-            subtitle="选择高对比度调色板",
+        palette_title_row = ft.Row(
+            [
+                ft.Icon(ft.Icons.CONTRAST, size=20, color=theme_colors.get("accent")),
+                ft.Container(width=12),
+                ft.Text(
+                    "调色板设置",
+                    size=16,
+                    weight=ft.FontWeight.W_500,
+                    color=theme_colors.get("text_primary"),
+                ),
+                ft.Container(expand=True),
+                palette_switch,
+            ],
+            alignment=ft.MainAxisAlignment.START,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        )
+        
+        palette_subtitle = ft.Text(
+            "开启后选择高对比度调色板",
+            size=12,
+            color=theme_colors.get("text_secondary"),
+        )
+        
+        palette_card_content = ft.Column(
+            [
+                palette_title_row,
+                ft.Container(height=4),
+                palette_subtitle,
+                ft.Container(height=12),
+                ft.Row(
+                    palette_block_controls,
+                    spacing=16,
+                    alignment=ft.MainAxisAlignment.START,
+                ),
+            ],
+            spacing=0,
+        )
+        
+        palette_card = ft.Container(
+            content=palette_card_content,
+            padding=16,
+            bgcolor=theme_colors.get("bg_card"),
+            border_radius=8,
+            border=ft.Border.all(1, theme_colors.get("border_light")),
+            shadow=ft.BoxShadow(
+                spread_radius=1,
+                blur_radius=12,
+                color=theme_colors.get("shadow"),
+                offset=ft.Offset(0, 2),
+            ),
         )
         
         def on_style_click(style_name: str):
-            if style_name != config.当前风格名称:
+            if style_name != current_style:
                 config.切换风格(style_name)
                 config_manager.set_value("个性化", "风格", style_name)
                 if on_refresh:
@@ -169,14 +235,14 @@ class PersonalizationSettingsPage:
                 config=config,
                 theme_name="平铺",
                 bg_color="#E0E0E0",
-                is_selected=(config.当前风格名称 == "普通平铺"),
+                is_selected=(current_style == "普通平铺"),
                 on_click=lambda e: on_style_click("普通平铺"),
             ),
             ThemeColorBlock.create(
                 config=config,
                 theme_name="立体",
                 bg_color="#FFFFFF",
-                is_selected=(config.当前风格名称 == "3D立体"),
+                is_selected=(current_style == "3D立体"),
                 on_click=lambda e: on_style_click("3D立体"),
             ),
         ]
@@ -198,7 +264,7 @@ class PersonalizationSettingsPage:
                 weight=ft.FontWeight.BOLD,
                 color=theme_colors.get("text_primary"),
             ),
-            padding=ft.Padding(bottom=4),
+            padding=ft.Padding(bottom=5),
         )
         
         scrollable_content = ft.Column(
