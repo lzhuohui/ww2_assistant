@@ -378,6 +378,7 @@ class 主题配置:
             self.当前主题颜色 = self.高对比度调色板[调色板名称]
             return True
         elif 调色板名称 is None or 调色板名称 == "":
+            # 取消调色板效果，恢复到当前主题
             self._调色板名称 = None
             self.当前主题颜色 = self.主题颜色[self._主题名称]
             return True

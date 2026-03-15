@@ -106,11 +106,9 @@ class LabelInput:
         row.set_value = lambda v: setattr(input_control, "value", v) or input_control.update()
         
         def set_state(enabled: bool):
-            """设置启用状态"""
-            input_control.disabled = not enabled
+            """设置启用状态 - 只改变透明度，不改变可操作性"""
             label_control.opacity = 1.0 if enabled else 0.4
-            if input_control.page:
-                input_control.update()
+            if label_control.page:
                 label_control.update()
         
         row.set_state = set_state

@@ -220,33 +220,21 @@ class FundraisingSettingsPage:
             controls_per_row=2,
         )
         
-        page_title = ft.Container(
-            content=ft.Text(
-                "集资设置",
-                size=24,
-                weight=ft.FontWeight.BOLD,
-                color=theme_colors.get("text_primary"),
-            ),
-            padding=ft.Padding(bottom=4),
-        )
-        
-        scrollable_content = ft.Column(
+        page_content = ft.Column(
             [
+                ft.Text(
+                    "集资设置",
+                    size=24,
+                    weight=ft.FontWeight.BOLD,
+                    color=theme_colors.get("text_primary"),
+                ),
+                ft.Container(height=4),
                 small_account_card,
-                ft.Container(height=5),
+                ft.Container(height=4),
                 rent_card,
             ],
             spacing=0,
             scroll=ft.ScrollMode.HIDDEN,
-            expand=True,
-        )
-        
-        page_content = ft.Column(
-            [
-                page_title,
-                scrollable_content,
-            ],
-            spacing=0,
             expand=True,
         )
         

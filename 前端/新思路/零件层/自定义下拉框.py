@@ -150,8 +150,10 @@ class CustomDropDown:
         return not self.popup_button.disabled
     
     def set_state(self, enabled: bool):
-        """设置启用状态（兼容别名）"""
-        self.set_enabled(enabled)
+        """设置启用状态 - 只改变透明度，不改变可操作性"""
+        self.selected_text.opacity = 1.0 if enabled else 0.4
+        if self.selected_text.page:
+            self.selected_text.update()
     
     def set_options(self, options: List[str]):
         """设置选项列表"""

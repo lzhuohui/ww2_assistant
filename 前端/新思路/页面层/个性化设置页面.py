@@ -46,42 +46,21 @@ class PersonalizationSettingsPage:
             ft.Container: 个性化设置页面容器
         """
         theme_colors = config.当前主题颜色
-        config_manager = config.配置管理器
         
         current_theme = config.主题名称
         current_palette = config.调色板名称
         
-        saved_palette_enabled = config_manager.get_value("个性化", "调色板开关", True)
-        
         def on_theme_click(theme_name: str):
             if theme_name != current_theme:
                 config.切换主题(theme_name)
-                config_manager.set_value("个性化", "主题", theme_name)
                 if on_refresh:
                     on_refresh()
         
-        def on_palette_enabled_change(enabled: bool):
-            config_manager.set_value("个性化", "调色板开关", enabled)
-            if not enabled:
-                config.切换调色板()
-                config_manager.set_value("个性化", "调色板", "")
-            else:
-                saved_palette = config_manager.get_value("个性化", "调色板")
-                if saved_palette:
-                    config.切换调色板(saved_palette)
-            if on_refresh:
-                on_refresh()
-        
         def on_palette_click(palette_name: str):
-            actual_current_palette = config.调色板名称
-            if palette_name == actual_current_palette:
-                config.切换调色板()
-                config_manager.set_value("个性化", "调色板", "")
-            else:
+            if palette_name != current_palette:
                 config.切换调色板(palette_name)
-                config_manager.set_value("个性化", "调色板", palette_name)
-            if on_refresh:
-                on_refresh()
+                if on_refresh:
+                    on_refresh()
         
         theme_block_controls = [
             ThemeColorBlock.create(
@@ -121,6 +100,37 @@ class PersonalizationSettingsPage:
             ),
         ]
         
+        palette_block_controls = [
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="水生",
+                bg_color="#006994",
+                is_selected=(current_palette == "水生"),
+                on_click=lambda e: on_palette_click("水生"),
+            ),
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="沙漠",
+                bg_color="#C19A6B",
+                is_selected=(current_palette == "沙漠"),
+                on_click=lambda e: on_palette_click("沙漠"),
+            ),
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="黄昏",
+                bg_color="#FF6B6B",
+                is_selected=(current_palette == "黄昏"),
+                on_click=lambda e: on_palette_click("黄昏"),
+            ),
+            ThemeColorBlock.create(
+                config=config,
+                theme_name="夜空",
+                bg_color="#2C3E50",
+                is_selected=(current_palette == "夜空"),
+                on_click=lambda e: on_palette_click("夜空"),
+            ),
+        ]
+        
         theme_card = UniversalCard.create(
             config=config,
             title="主题设置",
@@ -131,43 +141,11 @@ class PersonalizationSettingsPage:
             subtitle="选择界面主题风格",
         )
         
-        palette_block_controls = [
-            ThemeColorBlock.create(
-                config=config,
-                theme_name="水生",
-                bg_color="#006994",
-                is_selected=(saved_palette_enabled and current_palette == "水生"),
-                on_click=lambda e: on_palette_click("水生"),
-            ),
-            ThemeColorBlock.create(
-                config=config,
-                theme_name="沙漠",
-                bg_color="#C19A6B",
-                is_selected=(saved_palette_enabled and current_palette == "沙漠"),
-                on_click=lambda e: on_palette_click("沙漠"),
-            ),
-            ThemeColorBlock.create(
-                config=config,
-                theme_name="黄昏",
-                bg_color="#FF6B6B",
-                is_selected=(saved_palette_enabled and current_palette == "黄昏"),
-                on_click=lambda e: on_palette_click("黄昏"),
-            ),
-            ThemeColorBlock.create(
-                config=config,
-                theme_name="夜空",
-                bg_color="#2C3E50",
-                is_selected=(saved_palette_enabled and current_palette == "夜空"),
-                on_click=lambda e: on_palette_click("夜空"),
-            ),
-        ]
-        
         palette_card = UniversalCard.create(
             config=config,
             title="调色板设置",
             icon="CONTRAST",
-            enabled=saved_palette_enabled,
-            on_state_change=on_palette_enabled_change,
+            enabled=True,
             controls=palette_block_controls,
             controls_per_row=4,
             subtitle="选择高对比度调色板",
@@ -176,7 +154,6 @@ class PersonalizationSettingsPage:
         def on_style_click(style_name: str):
             if style_name != config.当前风格名称:
                 config.切换风格(style_name)
-                config_manager.set_value("个性化", "风格", style_name)
                 if on_refresh:
                     on_refresh()
         
@@ -207,35 +184,23 @@ class PersonalizationSettingsPage:
             subtitle="选择界面风格",
         )
         
-        page_title = ft.Container(
-            content=ft.Text(
-                "个性化设置",
-                size=24,
-                weight=ft.FontWeight.BOLD,
-                color=theme_colors.get("text_primary"),
-            ),
-            padding=ft.Padding(bottom=4),
-        )
-        
-        scrollable_content = ft.Column(
+        page_content = ft.Column(
             [
+                ft.Text(
+                    "个性化设置",
+                    size=24,
+                    weight=ft.FontWeight.BOLD,
+                    color=theme_colors.get("text_primary"),
+                ),
+                ft.Container(height=4),
                 theme_card,
-                ft.Container(height=5),
+                ft.Container(height=4),
                 palette_card,
-                ft.Container(height=5),
+                ft.Container(height=4),
                 style_card,
             ],
             spacing=0,
             scroll=ft.ScrollMode.HIDDEN,
-            expand=True,
-        )
-        
-        page_content = ft.Column(
-            [
-                page_title,
-                scrollable_content,
-            ],
-            spacing=0,
             expand=True,
         )
         

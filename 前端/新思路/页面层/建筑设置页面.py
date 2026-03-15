@@ -65,29 +65,19 @@ class BuildingSettingsPage:
                 )
                 lazy_cards.append(card.create())
         
-        page_title = ft.Container(
-            content=ft.Text(
-                "建筑设置",
-                size=24,
-                weight=ft.FontWeight.BOLD,
-                color=theme_colors.get("text_primary"),
-            ),
-            padding=ft.Padding(bottom=5),
-        )
-        
-        scrollable_content = ft.Column(
-            [ft.Container(content=card, margin=ft.Margin(bottom=5)) for card in lazy_cards],
-            spacing=0,
-            scroll=ft.ScrollMode.HIDDEN,
-            expand=True,
-        )
-        
         page_content = ft.Column(
             [
-                page_title,
-                scrollable_content,
+                ft.Text(
+                    "建筑设置",
+                    size=24,
+                    weight=ft.FontWeight.BOLD,
+                    color=theme_colors.get("text_primary"),
+                ),
+                ft.Container(height=4),
+                *[ft.Container(content=card, margin=ft.Margin(bottom=4)) for card in lazy_cards],
             ],
             spacing=0,
+            scroll=ft.ScrollMode.HIDDEN,
             expand=True,
         )
         

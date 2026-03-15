@@ -85,37 +85,27 @@ class AccountSettingsPage:
             account_cards.append(card)
             account_cards.append(ft.Container(height=5))
         
-        page_title = ft.Container(
-            content=ft.Row(
-                [
-                    ft.Text(
-                        "账号设置",
-                        size=24,
-                        weight=ft.FontWeight.BOLD,
-                        color=theme_colors.get("text_primary"),
-                    ),
-                    ft.Container(width=20),
-                    count_text,
-                ],
-                alignment=ft.MainAxisAlignment.START,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            ),
-            padding=ft.Padding(bottom=4),
-        )
-        
-        scrollable_content = ft.Column(
-            account_cards,
-            spacing=0,
-            scroll=ft.ScrollMode.HIDDEN,
-            expand=True,
-        )
-        
         page_content = ft.Column(
             [
-                page_title,
-                scrollable_content,
+                ft.Row(
+                    [
+                        ft.Text(
+                            "账号设置",
+                            size=24,
+                            weight=ft.FontWeight.BOLD,
+                            color=theme_colors.get("text_primary"),
+                        ),
+                        ft.Container(width=20),
+                        count_text,
+                    ],
+                    alignment=ft.MainAxisAlignment.START,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+                ft.Container(height=4),
+                *account_cards,
             ],
             spacing=0,
+            scroll=ft.ScrollMode.HIDDEN,
             expand=True,
         )
         

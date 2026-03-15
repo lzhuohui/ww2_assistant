@@ -21,12 +21,12 @@
 import flet as ft
 from typing import Dict, Any
 from .主题配置 import 主题配置
-from .配置管理器 import ConfigManager
 
 
 class 界面配置:
     """界面配置类 - 提供界面尺寸和布局管理"""
     
+    # ==================== 尺寸定义 ====================
     定义尺寸 = {
         "字体": {
             "font_size_xs": 10,      # 微小文本（辅助信息、标签）
@@ -118,8 +118,8 @@ class 界面配置:
             "vertical_center": True,
         },
         "阴影": {
-            "blur_default": 8,
-            "blur_hover": 16,
+            "blur_default": 4,
+            "blur_hover": 12,
             "spread": 1,
             "spread_hover": 2,
             "offset_y": 2,
@@ -130,15 +130,15 @@ class 界面配置:
             "current_style": "3D立体",
             "styles": {
                 "普通平铺": {
-                    "border_radius": 8,
+                    "border_radius": 0,
                     "shadow_blur": 0,
                     "shadow_spread": 0,
                     "shadow_offset_y": 0,
-                    "border_width": 1,
+                    "border_width": 0,
                 },
                 "3D立体": {
                     "border_radius": 8,
-                    "shadow_blur": 12,
+                    "shadow_blur": 8,
                     "shadow_spread": 1,
                     "shadow_offset_y": 2,
                     "border_width": 1,
@@ -155,28 +155,14 @@ class 界面配置:
     
     def __init__(self, 主题名称: str = "深色", 调色板名称: str = None):
         """初始化界面配置"""
-        self.配置管理器 = ConfigManager()
-        
-        saved_theme = self.配置管理器.get_value("个性化", "主题")
-        saved_palette = self.配置管理器.get_value("个性化", "调色板")
-        saved_style = self.配置管理器.get_value("个性化", "风格")
-        saved_palette_enabled = self.配置管理器.get_value("个性化", "调色板开关", True)
-        
-        if saved_theme:
-            主题名称 = saved_theme
-        if saved_palette_enabled and saved_palette:
-            调色板名称 = saved_palette
-        if saved_style:
-            self.定义尺寸["风格"]["current_style"] = saved_style
-        
         self._主题配置 = 主题配置(主题名称, 调色板名称)
     
     def 切换主题(self, 主题名称: str):
         """切换主题"""
         return self._主题配置.切换主题(主题名称)
     
-    def 切换调色板(self, 调色板名称: str = None):
-        """切换调色板（不传参数则取消调色板）"""
+    def 切换调色板(self, 调色板名称: str):
+        """切换调色板"""
         return self._主题配置.切换调色板(调色板名称)
     
     def 获取颜色(self, 颜色名称: str) -> str:

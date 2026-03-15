@@ -120,7 +120,7 @@ class ThemeColorBlock:
         
         def set_state(enabled: bool):
             """设置启用状态"""
-            card.disabled = not enabled
+            card.opacity = 1.0 if enabled else 0.4
             if card.page:
                 card.update()
         
