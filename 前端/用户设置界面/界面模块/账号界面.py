@@ -2,18 +2,18 @@
 """
 模块名称：账号界面 | 层级：界面模块层
 设计思路：
-    账号界面，包含15个账号设置卡片。
+    使用通用卡片创建账号设置界面。
     固定15个账号栏，开关控制参与挂机状态。
-    输入框拆分为名称、账号、密码三个独立输入框。
-    计数机制：开关打开且输入有效时计数+1。
-    授权限制：超过授权数量禁止打开开关。
+    输入框拆分为名称/账号/密码三个独立输入框，防止用户输错格式。
 
 功能：
-    1. 15个账号设置卡片
+    1. 显示15个账号卡片
     2. 开关控制参与挂机状态
-    3. 计数机制
-    4. 授权限制
-    5. 输入验证
+    3. 开关状态不影响控件操作
+    4. 计数机制：开关打开且输入有效时计数+1
+    5. 授权限制：超过授权数量禁止打开开关
+    6. 输入验证：名称/账号/密码都不为空时才有效
+    7. 计数显示：页面顶部显示"已启用: X/Y"
 
 对外接口：
     - create(): 创建账号界面
@@ -60,6 +60,7 @@ class AccountInterface:
             ft.Container: 账号界面容器
         """
         配置 = 界面配置()
+        theme_colors = 配置.当前主题颜色
         
         try:
             config_manager = ConfigManager()
@@ -70,7 +71,68 @@ class AccountInterface:
         AccountInterface.当前参与数量 = 0
         AccountInterface.账号开关状态 = {}
         
+        for i in range(1, MAX_ACCOUNTS + 1):
+            card_name = f"{i:02d}账号"
+            enabled = config_manager.get_value(card_name, "开关", False) if config_manager else False
+            name = config_manager.get_value(card_name, "名称", "") if config_manager else ""
+            account = config_manager.get_value(card_name, "账号", "") if config_manager else ""
+            password = config_manager.get_value(card_name, "密码", "") if config_manager else ""
+            AccountInterface.账号开关状态[card_name] = enabled
+            if enabled and name and account and password:
+                AccountInterface.当前参与数量 += 1
+        
+        count_text = ft.Text(
+            f"已启用: {AccountInterface.当前参与数量}/{AccountInterface.授权数量}",
+            size=14,
+            color=theme_colors.get("text_secondary"),
+        )
+        
         card_refs = {}
+        
+        def get_subtitle(enabled: bool, name: str, account: str, password: str) -> str:
+            """获取副标题"""
+            if not enabled:
+                return "未参与挂机"
+            if not name or not account or not password:
+                return "请填写完整的账号信息"
+            return f"已配置: {name}"
+        
+        def can_participate(enabled: bool, name: str, account: str, password: str) -> bool:
+            """判断是否可以参与挂机"""
+            return enabled and bool(name) and bool(account) and bool(password)
+        
+        def update_subtitle_and_count(card_name: str, card: ft.Container, enabled: bool, name: str, account: str, password: str) -> bool:
+            """更新副标题和计数"""
+            old_can = can_participate(
+                AccountInterface.账号开关状态.get(card_name, False),
+                config_manager.get_value(card_name, "名称", "") if config_manager else "",
+                config_manager.get_value(card_name, "账号", "") if config_manager else "",
+                config_manager.get_value(card_name, "密码", "") if config_manager else "",
+            )
+            
+            new_can = can_participate(enabled, name, account, password)
+            
+            if new_can and not old_can:
+                if AccountInterface.当前参与数量 >= AccountInterface.授权数量:
+                    return False
+                AccountInterface.当前参与数量 += 1
+            elif not new_can and old_can:
+                AccountInterface.当前参与数量 -= 1
+            
+            AccountInterface.账号开关状态[card_name] = enabled
+            
+            subtitle = get_subtitle(enabled, name, account, password)
+            if card:
+                card.set_subtitle(subtitle)
+            
+            count_text.value = f"已启用: {AccountInterface.当前参与数量}/{AccountInterface.授权数量}"
+            try:
+                if count_text.page:
+                    count_text.update()
+            except RuntimeError:
+                pass
+            
+            return True
         
         def on_value_change(card_name: str, config_key: str, value):
             """值变化回调 - 保存配置并更新副标题"""
@@ -78,16 +140,16 @@ class AccountInterface:
             if config_manager:
                 config_manager.set_value(card_name, config_key, value)
             
-            if card_name in card_refs and AccountInterface.账号开关状态.get(card_name, False):
+            if card_name in card_refs:
                 card = card_refs[card_name]
-                name = config_manager.get_value(card_name, "名称", "") if config_manager else ""
-                account = config_manager.get_value(card_name, "账号", "") if config_manager else ""
-                password = config_manager.get_value(card_name, "密码", "") if config_manager else ""
-                is_valid = bool(name and account and password)
-                if is_valid:
-                    card.set_subtitle("有效账号")
-                else:
-                    card.set_subtitle("信息不完整")
+                current_enabled = AccountInterface.账号开关状态.get(card_name, False)
+                current_name = config_manager.get_value(card_name, "名称", "") if config_manager else ""
+                current_account = config_manager.get_value(card_name, "账号", "") if config_manager else ""
+                current_password = config_manager.get_value(card_name, "密码", "") if config_manager else ""
+                
+                subtitle = get_subtitle(current_enabled, current_name, current_account, current_password)
+                card.set_subtitle(subtitle)
+                
                 try:
                     if card.page:
                         card.update()
@@ -118,33 +180,6 @@ class AccountInterface:
             )
             return input_control
         
-        def update_subtitle(card_name: str, card: ft.Container, enabled: bool):
-            """更新副标题"""
-            if enabled:
-                name = config_manager.get_value(card_name, "名称", "") if config_manager else ""
-                account = config_manager.get_value(card_name, "账号", "") if config_manager else ""
-                password = config_manager.get_value(card_name, "密码", "") if config_manager else ""
-                is_valid = bool(name and account and password)
-                if is_valid:
-                    card.set_subtitle("有效账号")
-                else:
-                    card.set_subtitle("信息不完整")
-            else:
-                card.set_subtitle("未参与挂机")
-        
-        def check_and_update_count():
-            """检查并更新参与数量"""
-            count = 0
-            for i in range(1, MAX_ACCOUNTS + 1):
-                card_name = f"{i:02d}账号"
-                if AccountInterface.账号开关状态.get(card_name, False):
-                    name = config_manager.get_value(card_name, "名称", "") if config_manager else ""
-                    account = config_manager.get_value(card_name, "账号", "") if config_manager else ""
-                    password = config_manager.get_value(card_name, "密码", "") if config_manager else ""
-                    if name and account and password:
-                        count += 1
-            AccountInterface.当前参与数量 = count
-        
         account_cards = []
         
         for i in range(1, MAX_ACCOUNTS + 1):
@@ -158,14 +193,13 @@ class AccountInterface:
             platform_value = config_manager.get_value(card_name, "平台", "Tap") if config_manager else "Tap"
             switch_value = config_manager.get_value(card_name, "开关", False) if config_manager else False
             
-            AccountInterface.账号开关状态[card_name] = switch_value
-            
-            if switch_value:
-                name = name_value
-                account = account_value
-                password = password_value
-                if name and account and password:
-                    AccountInterface.当前参与数量 += 1
+            if config_manager:
+                config_manager.set_value(card_name, "开关", switch_value)
+                config_manager.set_value(card_name, "统帅种类", role_value)
+                config_manager.set_value(card_name, "名称", name_value)
+                config_manager.set_value(card_name, "账号", account_value)
+                config_manager.set_value(card_name, "密码", password_value)
+                config_manager.set_value(card_name, "平台", platform_value)
             
             role_control = create_dropdown_control(
                 options=["主帅", "副帅"],
@@ -206,34 +240,27 @@ class AccountInterface:
             def make_state_change_handler(cn, card_ref):
                 """创建状态变化处理器"""
                 def handler(enabled: bool):
-                    AccountInterface.账号开关状态[cn] = enabled
+                    current_name = config_manager.get_value(cn, "名称", "") if config_manager else ""
+                    current_account = config_manager.get_value(cn, "账号", "") if config_manager else ""
+                    current_password = config_manager.get_value(cn, "密码", "") if config_manager else ""
                     
                     if enabled:
-                        check_and_update_count()
-                        if AccountInterface.当前参与数量 > AccountInterface.授权数量:
+                        if not update_subtitle_and_count(cn, card_ref, enabled, current_name, current_account, current_password):
                             AccountInterface.账号开关状态[cn] = False
                             if card_ref:
                                 card_ref.set_state(False)
-                            if config_manager:
-                                config_manager.set_value(cn, "开关", False)
-                            AccountInterface.当前参与数量 -= 1
                             return
-                        
-                        if config_manager:
-                            config_manager.set_value(cn, "开关", enabled)
-                        
-                        if card_ref:
-                            update_subtitle(cn, card_ref, enabled)
                     else:
                         if config_manager:
                             config_manager.set_value(cn, "开关", False)
-                        check_and_update_count()
-                        if card_ref:
-                            update_subtitle(cn, card_ref, False)
+                        update_subtitle_and_count(cn, card_ref, enabled, current_name, current_account, current_password)
+                    
+                    if config_manager:
+                        config_manager.set_value(cn, "开关", enabled)
                 return handler
             
             initial_enabled = switch_value
-            subtitle_text = "有效账号" if initial_enabled and name_value and account_value and password_value else ("未参与挂机" if not initial_enabled else "信息不完整")
+            subtitle_text = get_subtitle(initial_enabled, name_value, account_value, password_value)
             
             card = UniversalCard.create(
                 title=card_name,
@@ -251,12 +278,54 @@ class AccountInterface:
             
             account_cards.append(card)
         
-        return FunctionContainer.create(
-            config=配置,
-            title="账号设置",
-            icon="ACCOUNT_CIRCLE",
-            cards=account_cards,
+        header_content = ft.Row(
+            [
+                ft.Icon(ft.Icons.ACCOUNT_CIRCLE, size=20, color=theme_colors.get("accent")),
+                ft.Container(width=8),
+                ft.Text(
+                    "账号设置",
+                    size=16,
+                    weight=ft.FontWeight.BOLD,
+                    color=theme_colors.get("text_primary"),
+                ),
+                ft.Container(width=20),
+                count_text,
+            ],
+            alignment=ft.MainAxisAlignment.START,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        )
+        
+        divider = ft.Container(
+            content=ft.Divider(
+                height=1,
+                thickness=1,
+                color=theme_colors.get("border"),
+            ),
+            opacity=0.5,
+        )
+        
+        card_list = ft.Column(
+            controls=account_cards,
+            spacing=5,
             expand=True,
+            scroll=ft.ScrollMode.HIDDEN,
+        )
+        
+        content = ft.Column(
+            controls=[
+                header_content,
+                divider,
+                card_list,
+            ],
+            spacing=8,
+            expand=True,
+        )
+        
+        from 前端.用户设置界面.单元模块.通用容器 import GenericContainer
+        return GenericContainer.create(
+            content=content,
+            expand=True,
+            padding=16,
         )
 
 
