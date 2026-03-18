@@ -221,7 +221,7 @@ class AccountInterface:
                 title=card_name,
                 icon="ACCOUNT_CIRCLE",
                 enabled=initial_enabled,
-                on_state_change=make_state_change_handler(card_name, card),
+                on_state_change=make_state_change_handler(card_name, None),
                 controls=[role_control, name_control, account_control, password_control, platform_control],
                 controls_per_row=5,
                 subtitle=subtitle_text,
