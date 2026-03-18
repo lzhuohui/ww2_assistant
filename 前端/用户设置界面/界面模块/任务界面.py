@@ -55,26 +55,15 @@ class TaskInterface:
             if config_manager:
                 config_manager.set_value(card_name, config_key, save_value)
         
-        def create_dropdown_control(label: str, options: list, value: str, card_name: str, config_key: str, width: int = None):
-            """创建下拉框控件"""
+        def create_dropdown_control(options: list, value: str, card_name: str, config_key: str, width: int = 80):
+            """创建下拉框控件（无标签）"""
             dropdown = Dropdown.create(
                 options=options,
                 value=value,
                 width=width,
                 on_change=lambda v: on_value_change(card_name, config_key, v),
             )
-            
-            label_text = ft.Text(
-                label,
-                color=ThemeProvider.get_color("text_secondary"),
-                size=14,
-            )
-            
-            return ft.Row(
-                [label_text, dropdown],
-                spacing=8,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            )
+            return dropdown
         
         main_level_options = [f"{i:02d}级" for i in range(1, 16)]
         side_level_options = [f"{i:02d}级" for i in range(5, 16)]
@@ -83,7 +72,6 @@ class TaskInterface:
         main_display_value = f"{main_level_value}级" if not main_level_value.endswith("级") else main_level_value
         
         main_level_control = create_dropdown_control(
-            label="主线限级:",
             options=main_level_options,
             value=main_display_value,
             card_name="主线任务",
@@ -102,7 +90,6 @@ class TaskInterface:
         side_display_value = f"{side_level_value}级" if not side_level_value.endswith("级") else side_level_value
         
         side_level_control = create_dropdown_control(
-            label="支线限级:",
             options=side_level_options,
             value=side_display_value,
             card_name="支线任务",
