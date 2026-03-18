@@ -9,6 +9,7 @@
 功能:
     1. 输入框
     2. 值变化回调
+    3. 统一高度控制（密码框和普通框一致）
 
 数据来源:
     所有配置数据从配置目录获取。
@@ -46,24 +47,25 @@ class Input:
         hint_text: str = None,
         password: bool = False,
         **kwargs
-    ) -> ft.TextField:
+    ) -> ft.Container:
         """
         创建输入框
         
         参数:
             config: 界面配置对象
             value: 初始值
-            width: 输入框宽度（可选，默认从配置中获取）
+            width: 输入框宽度（可选，默认120）
             height: 输入框高度（可选，默认32）
             on_change: 值变化回调
             hint_text: 提示文本（可选）
             password: 是否为密码输入框（可选，默认False）
         
         返回:
-            ft.TextField: 输入框控件
+            ft.Container: 输入框容器（精确控制高度）
         """
         theme_colors = config.当前主题颜色
         
+        current_width = width if width is not None else 120
         current_height = height if height is not None else 32
         
         input_control = ft.TextField(
@@ -75,8 +77,8 @@ class Input:
             focused_border_color=theme_colors.get("accent"),
             border_radius=4,
             dense=True,
-            content_padding=ft.Padding(left=8, right=8, top=6, bottom=6),
-            width=width if width is not None else 120,
+            content_padding=ft.Padding(left=8, right=8, top=8, bottom=8),
+            width=current_width,
             on_change=lambda e: on_change(e.control.value) if on_change else None,
             on_submit=lambda e: on_change(e.control.value) if on_change else None,
             on_blur=lambda e: on_change(e.control.value) if on_change else None,
@@ -87,14 +89,13 @@ class Input:
         
         container = ft.Container(
             content=input_control,
-            width=width if width is not None else 120,
+            width=current_width,
             height=current_height,
             clip_behavior=ft.ClipBehavior.HARD_EDGE,
         )
         
-        # 暴露控制接口
-        input_control.get_value = lambda: input_control.value
-        input_control.set_value = lambda v: setattr(input_control, "value", v) or input_control.update()
+        container.get_value = lambda: input_control.value
+        container.set_value = lambda v: setattr(input_control, "value", v) or input_control.update()
         
         def set_state(enabled: bool):
             """设置启用状态 - 只改变透明度，不改变可操作性"""
@@ -105,9 +106,9 @@ class Input:
             except RuntimeError:
                 pass
         
-        input_control.set_state = set_state
+        container.set_state = set_state
         
-        return input_control
+        return container
 
 
 # 兼容别名
@@ -116,15 +117,11 @@ class Input:
 
 # ==================== 调试逻辑 ====================
 if __name__ == "__main__":
-    # 1. 界面配置初始化
     配置 = 界面配置()
     
-    # 2. 自动加载用户数据覆盖默认值（在界面配置.__init__中自动完成）
-    
-    # 3. 正常启动被测模块
     def main(page: ft.Page):
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(Input.create(配置, value="3"))  # 只能更改此处**被测调用模块名称**
+        page.add(Input.create(配置, value="3"))
     
     ft.run(main)
