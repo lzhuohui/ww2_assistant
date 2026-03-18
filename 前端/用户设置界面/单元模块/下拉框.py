@@ -68,7 +68,9 @@ class Dropdown:
         
         theme_colors = {
             "text_primary": ThemeProvider.get_color("text_primary"),
+            "text_secondary": ThemeProvider.get_color("text_secondary"),
             "bg_secondary": ThemeProvider.get_color("bg_secondary"),
+            "bg_card": ThemeProvider.get_color("bg_card"),
             "border": ThemeProvider.get_color("border"),
         }
         
@@ -108,7 +110,15 @@ class Dropdown:
         
         for option in options:
             item = ft.PopupMenuItem(
-                content=ft.Text(option),
+                content=ft.Container(
+                    content=ft.Text(
+                        option,
+                        color=theme_colors["text_primary"],
+                        size=14,
+                    ),
+                    bgcolor=theme_colors["bg_card"],
+                    padding=ft.Padding(left=12, right=12, top=8, bottom=8),
+                ),
                 on_click=lambda e, o=option: select_option(o),
             )
             menu_items.append(item)
@@ -119,6 +129,7 @@ class Dropdown:
             disabled=not enabled,
             tooltip="",
             menu_padding=ft.Padding.all(0),
+            bgcolor=theme_colors["bg_card"],
         )
         
         container = ft.Container(
