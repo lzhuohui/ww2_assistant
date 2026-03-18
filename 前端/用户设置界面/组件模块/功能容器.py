@@ -153,7 +153,7 @@ class FunctionContainer:
             scroll=ft.ScrollMode.HIDDEN if expand else None,
         )
         
-        # 内容
+        # 内容（标题固定，只有卡片列表滚动）
         content = ft.Column(
             controls=[
                 header_content,
@@ -162,7 +162,6 @@ class FunctionContainer:
             ],
             spacing=8,
             expand=expand,
-            scroll=ft.ScrollMode.HIDDEN if expand else None,
         )
         
         # 使用通用容器包装
