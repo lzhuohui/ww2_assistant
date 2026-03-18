@@ -194,7 +194,8 @@ class AccountInterface:
                         check_and_update_count()
                         if AccountInterface.当前参与数量 > AccountInterface.授权数量:
                             AccountInterface.账号开关状态[cn] = False
-                            card_ref.set_state(False)
+                            if card_ref:
+                                card_ref.set_state(False)
                             if config_manager:
                                 config_manager.set_value(cn, "开关", False)
                             AccountInterface.当前参与数量 -= 1
@@ -203,12 +204,14 @@ class AccountInterface:
                         if config_manager:
                             config_manager.set_value(cn, "开关", enabled)
                         
-                        update_subtitle(cn, card_ref, enabled)
+                        if card_ref:
+                            update_subtitle(cn, card_ref, enabled)
                     else:
                         if config_manager:
                             config_manager.set_value(cn, "开关", False)
                         check_and_update_count()
-                        update_subtitle(cn, card_ref, False)
+                        if card_ref:
+                            update_subtitle(cn, card_ref, False)
                 return handler
             
             initial_enabled = switch_value
@@ -218,7 +221,7 @@ class AccountInterface:
                 title=card_name,
                 icon="ACCOUNT_CIRCLE",
                 enabled=initial_enabled,
-                on_state_change=make_state_change_handler(card_name, None),
+                on_state_change=make_state_change_handler(card_name, card),
                 controls=[role_control, name_control, account_control, password_control, platform_control],
                 controls_per_row=5,
                 subtitle=subtitle_text,
