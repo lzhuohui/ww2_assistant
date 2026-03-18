@@ -31,12 +31,12 @@ from 前端.用户设置界面.单元模块.输入框 import Input
 
 
 # *** 用户指定变量 - AI不得修改 ***
-DROPDOWN_WIDTH = 80  # 下拉框宽度
+DROPDOWN_WIDTH = 60  # 下拉框宽度
 INPUT_WIDTH = 200    # 输入框宽度
 CONTROL_HEIGHT = 32  # 控件高度
 # *********************************
 
-MAX_ACCOUNTS = 15 #     
+MAX_ACCOUNTS = 15
 DEFAULT_AUTHORIZED_COUNT = 15
 
 
@@ -87,12 +87,13 @@ class AccountInterface:
             )
             return dropdown
         
-        def create_input_control(value: str, card_name: str, config_key: str, width: int = INPUT_WIDTH, hint_text: str = "", password: bool = False):
+        def create_input_control(value: str, card_name: str, config_key: str, width: int = INPUT_WIDTH, height: int = CONTROL_HEIGHT, hint_text: str = "", password: bool = False):
             """创建输入框控件（无标签）"""
             input_control = Input.create(
                 config=配置,
                 value=value,
                 width=width,
+                height=height,
                 hint_text=hint_text,
                 password=password,
                 on_change=lambda v: on_value_change(card_name, config_key, v),
@@ -153,14 +154,12 @@ class AccountInterface:
                 value=role_value,
                 card_name=card_name,
                 config_key="统帅种类",
-                width=80,
             )
             
             name_control = create_input_control(
                 value=name_value,
                 card_name=card_name,
                 config_key="名称",
-                width=200,
                 hint_text="统帅名称",
             )
             
@@ -168,7 +167,6 @@ class AccountInterface:
                 value=account_value,
                 card_name=card_name,
                 config_key="账号",
-                width=200,
                 hint_text="统帅账号",
             )
             
@@ -176,7 +174,6 @@ class AccountInterface:
                 value=password_value,
                 card_name=card_name,
                 config_key="密码",
-                width=200,
                 hint_text="统帅密码",
                 password=True,
             )
@@ -186,7 +183,6 @@ class AccountInterface:
                 value=platform_value,
                 card_name=card_name,
                 config_key="平台",
-                width=80,
             )
             
             def make_state_change_handler(cn, card_ref):
