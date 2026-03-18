@@ -18,12 +18,16 @@
     被 ConfigManager 调用。
 """
 
+# *** 用户指定变量 - AI不得修改 ***
+DROPDOWN_WIDTH = 60  # 下拉框宽度
+# *********************************
+
 # 等级选项 (01-20级)
 LEVELS = [f"{i:02d}级" for i in range(1, 21)]
 LEVELS_0 = [f"{i:02d}级" for i in range(0, 21)]
 
 
-def create_dropdown(config_key: str, label: str, value: str, options: list = None, width: int = None, unit: str = "级"):
+def create_dropdown(config_key: str, label: str, value: str, options: list = None, width: int = DROPDOWN_WIDTH, unit: str = "级"):
     """
     创建下拉框配置
     
@@ -32,7 +36,7 @@ def create_dropdown(config_key: str, label: str, value: str, options: list = Non
         label: 标签
         value: 默认值
         options: 选项列表（默认为LEVELS）
-        width: 宽度（默认为None，使用被调用模块的默认值）
+        width: 宽度（默认为DROPDOWN_WIDTH）
         unit: 单位（默认为"级"）
     
     返回:
@@ -45,10 +49,8 @@ def create_dropdown(config_key: str, label: str, value: str, options: list = Non
         "options": options if options is not None else LEVELS,
         "value": value,
         "unit": unit,
+        "width": width,
     }
-    
-    if width is not None:
-        dropdown_config["width"] = width
     
     return dropdown_config
 
