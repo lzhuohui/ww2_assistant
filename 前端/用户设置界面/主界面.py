@@ -11,6 +11,7 @@ from 前端.用户设置界面.界面模块.策略界面 import StrategyInterfac
 from 前端.用户设置界面.界面模块.任务界面 import TaskInterface
 from 前端.用户设置界面.界面模块.建筑界面 import BuildingInterface
 from 前端.用户设置界面.界面模块.集资界面 import FundraisingInterface
+from 前端.用户设置界面.界面模块.账号界面 import AccountInterface
 
 
 # *** 用户指定变量 - AI不得修改 ***
@@ -54,6 +55,8 @@ class MainInterface:
             return BuildingInterface.create()
         elif nav_name == "集资":
             return FundraisingInterface.create()
+        elif nav_name == "账号":
+            return AccountInterface.create()
         else:
             return ft.Column(
                 [
