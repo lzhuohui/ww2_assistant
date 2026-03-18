@@ -2,12 +2,14 @@
 """
 模块名称：集资界面 | 层级：界面模块层
 设计思路：
-    集资界面，包含集资管理、资源分配等设置卡片。
-    使用配置管理器获取和保存配置值。
+    集资界面，包含多个集资设置卡片。
+    使用懒加载机制，默认加载"小号上贡"，其他卡片点击后加载。
+    切换时销毁上一个卡片，保持内存低占用。
 
 功能：
-    1. 集资管理设置
-    2. 资源分配设置
+    1. 默认加载"小号上贡"
+    2. 其他卡片显示"点击加载"
+    3. 切换时保存上一个卡片数据并销毁
 
 对外接口：
     - create(): 创建集资界面
@@ -18,9 +20,9 @@ from typing import Callable
 from 前端.配置.界面配置 import 界面配置
 from 前端.配置.配置管理器 import ConfigManager
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-from 前端.用户设置界面.组件模块.通用卡片 import UniversalCard
+from 前端.用户设置界面.组件模块.懒加载卡片 import LazyCard
+from 前端.用户设置界面.组件模块.懒加载状态管理器 import LazyState
 from 前端.用户设置界面.组件模块.功能容器 import FunctionContainer
-from 前端.用户设置界面.单元模块.下拉框 import Dropdown
 
 
 class FundraisingInterface:
@@ -45,74 +47,34 @@ class FundraisingInterface:
         except ImportError:
             config_manager = None
         
-        def on_value_change(card_name: str, config_key: str, value):
+        state = LazyState()
+        state.set_config_manager(config_manager)
+        
+        def on_value_change(config_key: str, value):
             """值变化回调 - 保存配置"""
-            print(f"配置变化: {card_name}.{config_key} = {value}")
-            if config_manager:
-                config_manager.set_value(card_name, config_key, value)
+            print(f"配置变化: {config_key} = {value}")
         
-        def create_dropdown_control(label: str, options: list, value: str, card_name: str, config_key: str, width: int = None):
-            """创建下拉框控件"""
-            dropdown = Dropdown.create(
-                options=options,
-                value=value,
-                width=width,
-                on_change=lambda v: on_value_change(card_name, config_key, v),
-            )
-            
-            label_text = ft.Text(
-                label,
-                color=ThemeProvider.get_color("text_secondary"),
-                size=14,
-            )
-            
-            return ft.Row(
-                [label_text, dropdown],
-                alignment=ft.MainAxisAlignment.END,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                spacing=8,
-                expand=True,
-            )
+        card_names = ["小号上贡", "分城纳租"]
         
-        fundraising_value = config_manager.get_value("集资管理", "集资模式", "自动") if config_manager else "自动"
-        fundraising_control = create_dropdown_control(
-            label="集资模式:",
-            options=["自动", "手动"],
-            value=fundraising_value,
-            card_name="集资管理",
-            config_key="集资模式",
-        )
-        
-        fundraising_card = UniversalCard.create(
-            title="集资管理",
-            icon="SHOPPING_CART",
-            subtitle="自动参与联盟集资，提升联盟等级",
-            enabled=True,
-            controls=[fundraising_control],
-        )
-        
-        allocation_value = config_manager.get_value("资源分配", "分配比例", "平均") if config_manager else "平均"
-        allocation_control = create_dropdown_control(
-            label="分配比例:",
-            options=["平均", "侧重木材", "侧重铁矿", "侧重粮食"],
-            value=allocation_value,
-            card_name="资源分配",
-            config_key="分配比例",
-        )
-        
-        allocation_card = UniversalCard.create(
-            title="资源分配",
-            icon="EQUALIZER",
-            subtitle="调整资源分配比例，优化资源使用",
-            enabled=True,
-            controls=[allocation_control],
-        )
+        lazy_cards = []
+        for i, card_name in enumerate(card_names):
+            card_config = config_manager.get_card_config(card_name) if config_manager else None
+            if card_config:
+                is_default = (i == 0)
+                card = LazyCard(
+                    card_name=card_name,
+                    card_config=card_config,
+                    config_manager=config_manager,
+                    on_value_change=on_value_change,
+                    is_default=is_default,
+                )
+                lazy_cards.append(card.create())
         
         return FunctionContainer.create(
             config=配置,
             title="集资设置",
             icon="SHOPPING_CART",
-            cards=[fundraising_card, allocation_card],
+            cards=lazy_cards,
             expand=True,
         )
 

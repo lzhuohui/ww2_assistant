@@ -4,6 +4,7 @@
 
 设计思路:
     定义集资相关的卡片配置。
+    使用配置驱动架构，统一配置格式。
 
 功能:
     1. 小号上贡卡片配置
@@ -11,11 +12,51 @@
 
 数据来源:
     部分数据来自按键精灵脚本。
+
+使用场景:
+    被 ConfigManager 调用。
 """
 
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# *** 用户指定变量 - AI不得修改 ***
+DROPDOWN_WIDTH = 80  # 下拉框宽度
+# *********************************
+
+# 等级选项 (05-15级)
+LEVELS = [f"{i:02d}级" for i in range(5, 16)]
+
+# 数量选项 (2-20万)
+AMOUNTS = [f"{i}万" for i in range(2, 21)]
+
+# 统帅选项
+COMMANDERS = ["统帅A", "统帅B", "统帅C", "统帅D", "统帅E"]
+
+
+def create_dropdown(config_key: str, label: str, value: str, options: list = None, width: int = DROPDOWN_WIDTH, unit: str = ""):
+    """
+    创建下拉框配置
+    
+    参数:
+        config_key: 配置键
+        label: 标签
+        value: 默认值
+        options: 选项列表
+        width: 宽度（默认为DROPDOWN_WIDTH）
+        unit: 单位
+    
+    返回:
+        dict: 下拉框配置字典
+    """
+    dropdown_config = {
+        "type": "dropdown",
+        "config_key": config_key,
+        "label": label,
+        "options": options if options is not None else LEVELS,
+        "value": value,
+        "unit": unit,
+        "width": width,
+    }
+    
+    return dropdown_config
 
 
 # ==================== 小号上贡卡片 ====================
@@ -28,40 +69,30 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     "card_type": "standard",
     "controls_per_row": 2,
     "controls": [
-        {
-            "type": "dropdown",
-            "label": "上贡限级:",
-            "config_key": "小号上贡_上贡限级",
-            "options": ["05级", "06级", "07级", "08级", "09级", "10级", "11级", "12级", "13级", "14级", "15级"],
-            "default": "05",
-            "unit": "级",
-            "width": 80,
-        },
-        {
-            "type": "dropdown",
-            "label": "上贡限量:",
-            "config_key": "小号上贡_上贡限量",
-            "options": ["2万", "3万", "4万", "5万", "6万", "7万", "8万", "9万", "10万", "11万", "12万", "13万", "14万", "15万", "16万", "17万", "18万", "19万", "20万"],
-            "default": "2",
-            "unit": "万",
-            "width": 80,
-        },
-        {
-            "type": "dropdown",
-            "label": "主要统帅:",
-            "config_key": "小号上贡_主要统帅",
-            "options": ["统帅A", "统帅B", "统帅C", "统帅D", "统帅E"],
-            "default": "统帅A",
-            "width": 80,
-        },
-        {
-            "type": "dropdown",
-            "label": "备用统帅:",
-            "config_key": "小号上贡_备用统帅",
-            "options": ["统帅A", "统帅B", "统帅C", "统帅D", "统帅E"],
-            "default": "统帅B",
-            "width": 80,
-        },
+        create_dropdown(
+            config_key="上贡限级",
+            label="上贡限级:",
+            value="05级",
+            options=LEVELS,
+        ),
+        create_dropdown(
+            config_key="上贡限量",
+            label="上贡限量:",
+            value="2万",
+            options=AMOUNTS,
+        ),
+        create_dropdown(
+            config_key="主要统帅",
+            label="主要统帅:",
+            value="统帅A",
+            options=COMMANDERS,
+        ),
+        create_dropdown(
+            config_key="备用统帅",
+            label="备用统帅:",
+            value="统帅B",
+            options=COMMANDERS,
+        ),
     ],
 }
 
@@ -76,24 +107,18 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     "card_type": "standard",
     "controls_per_row": 2,
     "controls": [
-        {
-            "type": "dropdown",
-            "label": "纳租限级:",
-            "config_key": "分城纳租_纳租限级",
-            "options": ["05级", "06级", "07级", "08级", "09级", "10级", "11级", "12级", "13级", "14级", "15级"],
-            "default": "05",
-            "unit": "级",
-            "width": 80,
-        },
-        {
-            "type": "dropdown",
-            "label": "纳租限量:",
-            "config_key": "分城纳租_纳租限量",
-            "options": ["2万", "3万", "4万", "5万", "6万", "7万", "8万", "9万", "10万", "11万", "12万", "13万", "14万", "15万", "16万", "17万", "18万", "19万", "20万"],
-            "default": "2",
-            "unit": "万",
-            "width": 80,
-        },
+        create_dropdown(
+            config_key="纳租限级",
+            label="纳租限级:",
+            value="05级",
+            options=LEVELS,
+        ),
+        create_dropdown(
+            config_key="纳租限量",
+            label="纳租限量:",
+            value="2万",
+            options=AMOUNTS,
+        ),
     ],
 }
 
@@ -104,3 +129,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     "小号上贡": 小号上贡配置,
     "分城纳租": 分城纳租配置,
 }
+
+
+# ==================== 调试逻辑 ====================
+if __name__ == "__main__":
+    print("=== 集资配置调试 ===")
+    print(f"下拉框宽度: {DROPDOWN_WIDTH}")
+    print(f"等级选项: {LEVELS}")
+    print(f"数量选项: {AMOUNTS}")
+    print(f"统帅选项: {COMMANDERS}")
+    print(f"\n卡片配置数量: {len(集资卡片配置)}")
+    for name, config in 集资卡片配置.items():
+        print(f"  - {name}: {len(config.get('controls', []))} 个控件")
