@@ -23,7 +23,6 @@ import flet as ft
 from typing import Callable
 from 前端.配置.界面配置 import 界面配置
 from 前端.配置.配置管理器 import ConfigManager
-from 前端.配置.账号配置 import DROPDOWN_HEIGHT, INPUT_HEIGHT
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.组件模块.通用卡片 import UniversalCard
 from 前端.用户设置界面.组件模块.功能容器 import FunctionContainer
@@ -31,7 +30,13 @@ from 前端.用户设置界面.单元模块.下拉框 import Dropdown
 from 前端.用户设置界面.单元模块.输入框 import Input
 
 
-MAX_ACCOUNTS = 15
+# *** 用户指定变量 - AI不得修改 ***
+DROPDOWN_WIDTH = 80  # 下拉框宽度
+INPUT_WIDTH = 200    # 输入框宽度
+CONTROL_HEIGHT = 32  # 控件高度
+# *********************************
+
+MAX_ACCOUNTS = 15 #     
 DEFAULT_AUTHORIZED_COUNT = 15
 
 
@@ -71,24 +76,23 @@ class AccountInterface:
             if config_manager:
                 config_manager.set_value(card_name, config_key, value)
         
-        def create_dropdown_control(options: list, value: str, card_name: str, config_key: str, width: int = 80):
+        def create_dropdown_control(options: list, value: str, card_name: str, config_key: str, width: int = DROPDOWN_WIDTH, height: int = CONTROL_HEIGHT):
             """创建下拉框控件（无标签）"""
             dropdown = Dropdown.create(
                 options=options,
                 value=value,
                 width=width,
-                height=DROPDOWN_HEIGHT,
+                height=height,
                 on_change=lambda v: on_value_change(card_name, config_key, v),
             )
             return dropdown
         
-        def create_input_control(value: str, card_name: str, config_key: str, width: int = 200, hint_text: str = "", password: bool = False):
+        def create_input_control(value: str, card_name: str, config_key: str, width: int = INPUT_WIDTH, hint_text: str = "", password: bool = False):
             """创建输入框控件（无标签）"""
             input_control = Input.create(
                 config=配置,
                 value=value,
                 width=width,
-                height=INPUT_HEIGHT,
                 hint_text=hint_text,
                 password=password,
                 on_change=lambda v: on_value_change(card_name, config_key, v),
