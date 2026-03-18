@@ -56,18 +56,15 @@ class ThemeColorBlock:
             if on_click:
                 on_click(color_value)
         
-        # Win11风格主题色块
         return ft.Container(
             width=size,
             height=size,
             bgcolor=color_value,
             border=ft.border.all(border_width, border_color),
-            border_radius=ft.BorderRadius.all(size // 3),  # Win11风格更圆润的圆角
+            border_radius=ft.BorderRadius.all(size // 3),
             on_click=handle_click,
             tooltip=color_name if color_name else color_value,
             ink=True,
-            # Win11风格交互效果
-            hover=ft.MouseCursor.POINTER,
             **kwargs
         )
     
