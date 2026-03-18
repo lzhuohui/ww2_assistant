@@ -423,3 +423,10 @@ if __name__ == "__main__":
         page.add(Avatar.create(配置, diameter=60, text="帅", show_glow=True, show_scan=True))  # 只能更改此处**被测调用模块名称**
     
     ft.run(main)
+# *** 调试逻辑 ***
+if __name__ == "__main__":
+    配置 = 界面配置()
+    def main(page: ft.Page):
+        # 不设置任何页面属性，让被测模块自己决定
+        page.add(Avatar(配置).render())
+    ft.run(main)

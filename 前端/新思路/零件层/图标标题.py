@@ -66,7 +66,7 @@ class IconTitle:
         """渲染图标标题（支持调试逻辑）"""
         return IconTitle.create(
             config=self.config,
-            title="测试标题",
+            title="测题",
             icon="HOME",
             enabled=True,
             subtitle="这是副标题",
