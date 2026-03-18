@@ -145,11 +145,12 @@ class FunctionContainer:
             opacity=0.5,
         )
         
-        # Win11风格卡片列表：间距更合理
+        # Win11风格卡片列表：间距更合理，支持滚动但隐藏滚动条
         card_list = ft.Column(
             controls=final_cards,
             spacing=5,
             expand=expand,
+            scroll=ft.ScrollMode.HIDDEN if expand else None,
         )
         
         # 内容
@@ -161,6 +162,7 @@ class FunctionContainer:
             ],
             spacing=8,
             expand=expand,
+            scroll=ft.ScrollMode.HIDDEN if expand else None,
         )
         
         # 使用通用容器包装
