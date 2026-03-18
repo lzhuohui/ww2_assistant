@@ -170,15 +170,13 @@ class MainInterface:
         
         # ========== 创建功能界面容器 ==========
         # 直接创建一个容器来容纳功能页面内容，不使用ContentArea的通用容器
+        # 注意：在Stack布局中使用绝对定位时，不要设置expand，否则会冲突
         content_container = ft.Container(
             content=MainInterface.get_page_content(MainInterface.current_nav),
             left=content_left,
             top=content_top,
             right=content_right,
             bottom=content_bottom,
-            width=None,  # 必须清除默认宽度，以实现自适应
-            height=None,  # 必须清除默认高度，以实现自适应
-            expand=True,
         )
         MainInterface.content_area = content_container
         
