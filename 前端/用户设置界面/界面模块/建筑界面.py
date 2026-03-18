@@ -20,7 +20,8 @@ from typing import Callable
 from 前端.配置.界面配置 import 界面配置
 from 前端.配置.配置管理器 import ConfigManager
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-from 前端.用户设置界面.组件模块.懒加载卡片 import LazyUniversalCard, LazyCardManager
+from 前端.用户设置界面.组件模块.懒加载卡片 import LazyCard
+from 前端.用户设置界面.组件模块.懒加载状态管理器 import LazyState
 from 前端.用户设置界面.组件模块.功能容器 import FunctionContainer
 
 
@@ -46,8 +47,8 @@ class BuildingInterface:
         except ImportError:
             config_manager = None
         
-        manager = LazyCardManager()
-        manager.config_manager = config_manager
+        state = LazyState()
+        state.set_config_manager(config_manager)
         
         def on_value_change(config_key: str, value):
             """值变化回调 - 保存配置"""
@@ -60,7 +61,7 @@ class BuildingInterface:
             card_config = config_manager.get_card_config(card_name) if config_manager else None
             if card_config:
                 is_default = (i == 0)
-                card = LazyUniversalCard(
+                card = LazyCard(
                     card_name=card_name,
                     card_config=card_config,
                     config_manager=config_manager,

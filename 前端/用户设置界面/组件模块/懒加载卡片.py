@@ -2,9 +2,14 @@
 """
 模块名称：懒加载卡片 | 层级：组件模块层
 设计思路：
-    未加载时：左侧图标+标题+分割线，右侧显示"点击加载数据"
-    加载后：直接调用通用卡片显示控件
-    使用用户设置界面的通用卡片和卡片容器
+    组合模式：组装状态管理、触发器、资源加载器、UI渲染器。
+    单一职责：协调各模块，不直接实现具体功能。
+    
+    模块化拆分：
+    - 状态管理：LazyState（懒加载状态管理器.py）
+    - 触发检测：LazyTrigger（懒加载触发器.py）
+    - 资源加载：LazyLoader（懒加载资源加载器.py）
+    - UI渲染：LazyRenderer（懒加载UI渲染器.py）
 
 功能：
     1. 未加载状态：左侧与通用卡片一致，右侧显示"点击加载数据"
@@ -12,68 +17,20 @@
     3. 点击时：保存上一个卡片 + 销毁上一个卡片 + 加载当前卡片
 
 对外接口：
-    - LazyCardManager: 懒加载卡片管理器（单例）
-    - LazyUniversalCard: 懒加载通用卡片
+    - LazyCard: 懒加载卡片（协调器）
 """
 
 import flet as ft
-from typing import Callable, Dict, Any, Optional, List
-from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-from 前端.用户设置界面.单元模块.卡片容器 import CardContainer
-from 前端.用户设置界面.组件模块.图标标题 import IconTitle
-from 前端.用户设置界面.组件模块.通用卡片 import UniversalCard
-from 前端.用户设置界面.单元模块.下拉框 import Dropdown
+from typing import Callable, Dict, Any, Optional
+from 前端.用户设置界面.组件模块.懒加载状态管理器 import LazyState
+from 前端.用户设置界面.组件模块.懒加载触发器 import LazyTrigger
+from 前端.用户设置界面.组件模块.懒加载资源加载器 import LazyLoader
+from 前端.用户设置界面.组件模块.懒加载UI渲染器 import LazyRenderer, LAZY_HEIGHT
 from 前端.配置.界面配置 import 界面配置
 
 
-DEFAULT_CONTROL_MARGIN_RIGHT = 20
-LAZY_HEIGHT = 60
-
-
-class LazyCardManager:
-    """懒加载卡片管理器（单例）"""
-    
-    _instance = None
-    
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance._initialized = False
-        return cls._instance
-    
-    def __init__(self):
-        if self._initialized:
-            return
-        
-        self.current_card_name: Optional[str] = None
-        self.config_manager: Optional[Any] = None
-        self.cards: Dict[str, 'LazyUniversalCard'] = {}
-        self._initialized = True
-    
-    def register_card(self, card_name: str, card: 'LazyUniversalCard'):
-        """注册卡片"""
-        self.cards[card_name] = card
-    
-    def switch_to(self, card_name: str):
-        """切换到指定卡片"""
-        if self.current_card_name and self.config_manager:
-            self.config_manager.save_all()
-        
-        if self.current_card_name and self.current_card_name in self.cards:
-            self.cards[self.current_card_name].destroy()
-        
-        if card_name in self.cards:
-            self.cards[card_name].load()
-            self.current_card_name = card_name
-    
-    def save_current(self):
-        """保存当前卡片数据"""
-        if self.current_card_name and self.config_manager:
-            self.config_manager.save_all()
-
-
-class LazyUniversalCard:
-    """懒加载通用卡片"""
+class LazyCard:
+    """懒加载卡片 - 协调器，组装各模块"""
     
     def __init__(
         self,
@@ -89,235 +46,126 @@ class LazyUniversalCard:
         self.on_value_change = on_value_change
         self.is_default = is_default
         
-        self.is_loaded = False
-        self.container: Optional[ft.Container] = None
-        self.current_enabled = True
-        self.lazy_hint_icon: Optional[ft.Icon] = None
-        self.lazy_hint_text: Optional[ft.Text] = None
-        self.icon_title = None
+        self._is_loaded = False
+        self._container: Optional[ft.Container] = None
+        self._is_enabled = True
+        self._hint_controls: Dict[str, ft.Control] = {}
         
-        manager = LazyCardManager()
-        manager.register_card(card_name, self)
+        state = LazyState()
+        state.register_card(card_name, self)
         if is_default:
-            manager.config_manager = config_manager
+            state.set_config_manager(config_manager)
     
-    def _get_card_width(self) -> int:
-        """计算卡片宽度"""
-        配置 = 界面配置()
-        ui_config = 配置.定义尺寸.get("界面", {})
-        window_width = ui_config.get("window_width", 1200)
-        left_panel_width = ui_config.get("left_panel_width", 280)
-        page_padding = ui_config.get("page_padding", 10)
-        return window_width - left_panel_width - 20 - page_padding * 2
+    @property
+    def is_loaded(self) -> bool:
+        """是否已加载"""
+        return self._is_loaded
     
-    def _create_lazy_container(self, enabled: bool = True, on_state_change: Callable = None) -> ft.Container:
-        """创建未加载状态的容器"""
-        配置 = 界面配置()
-        theme_colors = 配置.当前主题颜色
-        ui_config = 配置.定义尺寸.get("界面", {})
-        card_padding = ui_config.get("card_padding", 16)
-        card_width = self._get_card_width()
-        
-        title = self.card_config.get("title", self.card_name)
-        icon = self.card_config.get("icon", "DOMAIN")
-        subtitle = self.card_config.get("subtitle")
-        
-        icon_title = IconTitle.create(
-            title=title,
-            icon=icon,
-            enabled=enabled,
-            on_state_change=on_state_change,
-            subtitle=subtitle,
-            divider_height=LAZY_HEIGHT,
-        )
-        
-        left_container = ft.Container(content=icon_title)
-        
-        lazy_hint_icon = ft.Icon(ft.Icons.FOLDER_OPEN, size=18, color=theme_colors.get("text_secondary"))
-        lazy_hint_text = ft.Text("点击加载数据", size=14, color=theme_colors.get("text_secondary"))
-        
-        if not enabled:
-            lazy_hint_icon.opacity = 0.4
-            lazy_hint_text.opacity = 0.4
-        
-        lazy_hint = ft.Row(
-            [lazy_hint_icon, ft.Container(width=8), lazy_hint_text],
-            alignment=ft.MainAxisAlignment.END,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
-        )
-        
-        right_container = ft.Container(
-            content=lazy_hint,
-            right=DEFAULT_CONTROL_MARGIN_RIGHT,
-            top=card_padding,
-        )
-        
-        main_stack = ft.Stack(
-            [left_container, right_container],
-            height=LAZY_HEIGHT,
-            width=card_width,
-            clip_behavior=ft.ClipBehavior.NONE,
-        )
-        
-        container = CardContainer.create(
-            config=配置,
-            content=main_stack,
-            height=LAZY_HEIGHT,
-            width=card_width,
-        )
-        
-        self.lazy_hint_icon = lazy_hint_icon
-        self.lazy_hint_text = lazy_hint_text
-        self.icon_title = icon_title
-        
-        return container
+    @property
+    def is_enabled(self) -> bool:
+        """是否启用"""
+        return self._is_enabled
     
     def create(self) -> ft.Container:
         """创建卡片容器"""
         if self.is_default:
-            self.container = self._create_loaded_container()
-            self.is_loaded = True
-            manager = LazyCardManager()
-            manager.current_card_name = self.card_name
+            self._container = self._render_loaded()
+            self._is_loaded = True
+            state = LazyState()
+            state.set_current(self.card_name)
         else:
-            def on_state_change(new_enabled: bool):
-                self.current_enabled = new_enabled
-                self._sync_lazy_hint_state(new_enabled)
-            
-            self.container = self._create_lazy_container(
-                enabled=self.current_enabled,
-                on_state_change=on_state_change,
-            )
-            self.container.on_click = self._on_click
+            self._container = self._render_lazy()
+            self._container.on_click = self._on_click
         
-        return self.container
-    
-    def _sync_lazy_hint_state(self, enabled: bool):
-        """同步懒加载提示的状态"""
-        opacity = 1.0 if enabled else 0.4
-        for control in [self.lazy_hint_icon, self.lazy_hint_text]:
-            if control:
-                control.opacity = opacity
-                try:
-                    if control.page:
-                        control.update()
-                except RuntimeError:
-                    pass
-    
-    def _create_loaded_container(self) -> ft.Container:
-        """创建已加载状态的容器 - 直接调用通用卡片"""
-        title = self.card_config.get("title", self.card_name)
-        icon = self.card_config.get("icon", "DOMAIN")
-        subtitle = self.card_config.get("subtitle")
-        enabled = self.card_config.get("enabled", True)
-        controls_per_row = self.card_config.get("controls_per_row", 1)
-        controls_config = self.card_config.get("controls", [])
-        
-        controls = []
-        for control_config in controls_config:
-            if control_config.get("type") == "dropdown":
-                dropdown = self._create_dropdown_from_config(control_config)
-                controls.append(dropdown)
-        
-        container = UniversalCard.create(
-            title=title,
-            icon=icon,
-            enabled=enabled,
-            subtitle=subtitle,
-            controls=controls,
-            controls_per_row=controls_per_row,
-        )
-        
-        self.icon_title = container
-        return container
-    
-    def _create_dropdown_from_config(self, control_config: Dict[str, Any]) -> ft.Control:
-        """根据配置创建下拉框控件"""
-        config_key = control_config.get("config_key", "")
-        label = control_config.get("label", "")
-        options = control_config.get("options", [])
-        value = control_config.get("value", "")
-        width = control_config.get("width")
-        unit = control_config.get("unit", "")
-        
-        if self.config_manager:
-            saved_value = self.config_manager.get_value(self.card_name, config_key, value)
-            value = saved_value
-        
-        def on_change(v):
-            if self.on_value_change:
-                self.on_value_change(config_key, v)
-            if self.config_manager:
-                self.config_manager.set_value(self.card_name, config_key, v)
-        
-        dropdown = Dropdown.create(
-            options=options,
-            value=value,
-            width=width,
-            on_change=on_change,
-        )
-        
-        label_text = ft.Text(
-            f"{label}:",
-            color=ThemeProvider.get_color("text_secondary"),
-            size=14,
-        )
-        
-        return ft.Row(
-            [label_text, dropdown],
-            alignment=ft.MainAxisAlignment.END,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=8,
-            expand=True,
-        )
-    
-    def _on_click(self, e):
-        """点击卡片时"""
-        if self.is_loaded or not self.current_enabled:
-            return
-        
-        LazyCardManager().switch_to(self.card_name)
+        return self._container
     
     def load(self):
         """加载卡片内容"""
-        if self.is_loaded:
+        if self._is_loaded:
             return
         
-        new_container = self._create_loaded_container()
+        new_container = self._render_loaded()
         
-        self.container.content = new_container.content
-        self.container.on_click = None
-        self.container.height = new_container.height
-        self.is_loaded = True
+        self._container.content = new_container.content
+        self._container.on_click = None
+        self._container.height = new_container.height
+        self._is_loaded = True
         
-        manager = LazyCardManager()
-        manager.current_card_name = self.card_name
+        state = LazyState()
+        state.set_current(self.card_name)
         
-        try:
-            if self.container.page:
-                self.container.update()
-        except RuntimeError:
-            pass
+        self._update_container()
     
     def destroy(self):
         """销毁卡片内容"""
-        if not self.is_loaded:
+        if not self._is_loaded:
             return
         
-        self.container.content = self._create_lazy_container(enabled=True).content
-        self.container.on_click = self._on_click
-        self.container.height = LAZY_HEIGHT
-        self.is_loaded = False
+        lazy_result = LazyRenderer.render_lazy_state(
+            card_config=self.card_config,
+            enabled=True,
+        )
         
+        self._container.content = lazy_result["container"].content
+        self._container.on_click = self._on_click
+        self._container.height = LAZY_HEIGHT
+        self._is_loaded = False
+        
+        self._hint_controls = lazy_result["hint_controls"]
+        
+        self._update_container()
+    
+    def _render_lazy(self) -> ft.Container:
+        """渲染未加载状态"""
+        def on_state_change(new_enabled: bool):
+            self._is_enabled = new_enabled
+            LazyRenderer.update_hint_state(self._hint_controls, new_enabled)
+        
+        result = LazyRenderer.render_lazy_state(
+            card_config=self.card_config,
+            enabled=self._is_enabled,
+            on_state_change=on_state_change,
+        )
+        
+        self._hint_controls = result["hint_controls"]
+        
+        return result["container"]
+    
+    def _render_loaded(self) -> ft.Container:
+        """渲染已加载状态"""
+        return LazyRenderer.render_loaded_state(
+            card_config=self.card_config,
+            card_name=self.card_name,
+            config_manager=self.config_manager,
+            on_value_change=self.on_value_change,
+        )
+    
+    def _on_click(self, e: ft.ControlEvent):
+        """点击事件处理"""
+        if not LazyTrigger.can_trigger(self._is_loaded, self._is_enabled):
+            return
+        
+        state = LazyState()
+        
+        current_card = state.get_current()
+        if current_card:
+            state.save_current()
+            current_card_obj = state.get_card(current_card)
+            if current_card_obj:
+                current_card_obj.destroy()
+        
+        self.load()
+    
+    def _update_container(self):
+        """更新容器显示"""
         try:
-            if self.container.page:
-                self.container.update()
+            if self._container and self._container.page:
+                self._container.update()
         except RuntimeError:
             pass
 
 
-懒加载卡片 = LazyUniversalCard
-懒加载卡片管理器 = LazyCardManager
+懒加载卡片 = LazyCard
 
 
 # *** 调试逻辑 ***
@@ -335,7 +183,7 @@ if __name__ == "__main__":
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
         
-        card = LazyUniversalCard(
+        card = LazyCard(
             card_name=DEFAULT_CARD_NAME,
             card_config=DEFAULT_CARD_CONFIG,
             is_default=True,
