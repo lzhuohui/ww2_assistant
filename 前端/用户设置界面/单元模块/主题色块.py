@@ -28,11 +28,15 @@ class ThemeColorBlock:
     
     @staticmethod
     def create(
-        color_value: str,
+        color_value: str = None,
         color_name: str = "",
         selected: bool = False,
         on_click: Callable[[str], None] = None,
         size: int = 40,
+        config: 界面配置 = None,
+        theme_name: str = None,
+        bg_color: str = None,
+        is_selected: bool = None,
         **kwargs
     ) -> ft.Container:
         """
@@ -42,28 +46,36 @@ class ThemeColorBlock:
             color_value: 颜色值（如 "#FF5722"）
             color_name: 颜色名称（可选，用于提示）
             selected: 是否选中
-            on_click: 点击回调，参数为颜色值
+            on_click: 点击回调，参数为颜色值或事件
             size: 色块尺寸
+            config: 界面配置对象（可选，新思路兼容）
+            theme_name: 主题名称（可选，新思路兼容，用作color_name）
+            bg_color: 背景颜色（可选，新思路兼容，用作color_value）
+            is_selected: 是否选中（可选，新思路兼容，用作selected）
             **kwargs: 其他Container参数
         
         返回:
             ft.Container: 色块容器
         """
-        border_color = ThemeProvider.get_color("primary") if selected else "transparent"
-        border_width = 3 if selected else 0
+        actual_color = bg_color if bg_color else color_value
+        actual_name = theme_name if theme_name else color_name
+        actual_selected = is_selected if is_selected is not None else selected
+        
+        border_color = ThemeProvider.get_color("primary") if actual_selected else "transparent"
+        border_width = 3 if actual_selected else 0
         
         def handle_click(e):
             if on_click:
-                on_click(color_value)
+                on_click(e)
         
         return ft.Container(
             width=size,
             height=size,
-            bgcolor=color_value,
+            bgcolor=actual_color,
             border=ft.border.all(border_width, border_color),
             border_radius=ft.BorderRadius.all(size // 3),
             on_click=handle_click,
-            tooltip=color_name if color_name else color_value,
+            tooltip=actual_name if actual_name else actual_color,
             ink=True,
             **kwargs
         )
@@ -91,7 +103,6 @@ class ThemeColorBlock:
         返回:
             ft.Row: 色块组容器
         """
-        # 如果没有传入colors，使用默认颜色列表
         if colors is None:
             colors = [
                 {"name": "红色", "value": "#FF5722"},
@@ -120,6 +131,10 @@ class ThemeColorBlock:
             wrap=True,
             **kwargs
         )
+
+
+# 兼容别名
+主题色块 = ThemeColorBlock
 
 
 # *** 调试逻辑 ***
