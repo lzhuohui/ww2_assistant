@@ -25,6 +25,7 @@ import flet as ft
 from typing import List, Optional, Dict, Any
 from 前端.配置.界面配置 import 界面配置
 from 前端.用户设置界面.单元模块.通用容器 import GenericContainer
+from 前端.用户设置界面.单元模块.文本标签 import LabelText
 
 
 # *** 用户指定变量 - AI不得修改 ***
@@ -116,12 +117,11 @@ class FunctionContainer:
                 color=config.当前主题颜色.get("accent"),
             )
         
-        # Win11风格标签：更现代的字体样式
-        label_text = ft.Text(
-            title,
+        # 使用文本标签组件（统一主题颜色管理）
+        label_text = LabelText.create(
+            text=title,
+            role="primary",
             size=16,
-            weight=ft.FontWeight.W_500,
-            color=config.当前主题颜色.get("text_primary"),
         )
         
         # Win11风格图标和标签组合
@@ -148,7 +148,7 @@ class FunctionContainer:
         # Win11风格卡片列表：间距更合理
         card_list = ft.Column(
             controls=final_cards,
-            spacing=12,
+            spacing=5,
             expand=expand,
         )
         
