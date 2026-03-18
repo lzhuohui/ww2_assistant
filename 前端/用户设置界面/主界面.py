@@ -12,6 +12,10 @@ from 前端.用户设置界面.界面模块.任务界面 import TaskInterface
 from 前端.用户设置界面.界面模块.建筑界面 import BuildingInterface
 from 前端.用户设置界面.界面模块.集资界面 import FundraisingInterface
 from 前端.用户设置界面.界面模块.账号界面 import AccountInterface
+from 前端.用户设置界面.界面模块.打扫界面 import CleaningInterface
+from 前端.用户设置界面.界面模块.打野界面 import WildInterface
+from 前端.用户设置界面.界面模块.个性化界面 import PersonalizationInterface
+from 前端.用户设置界面.界面模块.关于界面 import AboutInterface
 
 
 # *** 用户指定变量 - AI不得修改 ***
@@ -57,6 +61,14 @@ class MainInterface:
             return FundraisingInterface.create()
         elif nav_name == "账号":
             return AccountInterface.create()
+        elif nav_name == "打扫":
+            return CleaningInterface.create()
+        elif nav_name == "打野":
+            return WildInterface.create()
+        elif nav_name == "个性化":
+            return PersonalizationInterface.create()
+        elif nav_name == "关于":
+            return AboutInterface.create()
         else:
             return ft.Column(
                 [
