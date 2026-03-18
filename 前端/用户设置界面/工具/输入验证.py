@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-输入验证工具 - 工具层
-
-设计思路:
+模块名称：输入验证 | 层级：工具层
+设计思路：
     提供输入格式验证功能，确保数据质量。
-
-功能:
+功能列表：
     1. 账号输入格式验证
     2. 验证结果返回
-
-数据来源:
-    无。
-
-使用场景:
-    被页面层调用。
+对外接口：
+    - validate_account_input(input_text): 验证账号输入格式
+    - get_subtitle_by_state(switch_enabled, input_text): 根据状态获取副标题
+    - can_participate(switch_enabled, input_text): 判断是否可以参与挂机
 """
 
 from typing import Tuple
+
+# *** 用户指定变量 - AI不得修改 ***
+# *********************************
 
 
 def validate_account_input(input_text: str) -> Tuple[bool, str, str]:
@@ -85,3 +84,19 @@ def can_participate(switch_enabled: bool, input_text: str) -> bool:
     
     is_valid, _, _ = validate_account_input(input_text)
     return is_valid
+
+
+
+
+
+# *** 调试逻辑 ***
+if __name__ == "__main__":
+    test_cases = [
+        ("测试用户/test_account/test_password", True),
+        ("测试用户/test_account/", False),
+        ("无效格式", False),
+    ]
+    for input_text, expected_valid in test_cases:
+        is_valid, subtitle, tip_type = validate_account_input(input_text)
+        status = "✓" if is_valid == expected_valid else "✗"
+        print(f"{status} 输入: '{input_text}' -> 有效={is_valid}, 副标题='{subtitle}'")

@@ -65,22 +65,22 @@ class 系统配置:
         return self.系统常量.get(名称)
     
     @property
-    def 基础目录:
+    def 基础目录(self) -> str:
         """获取基础目录"""
         return str(self._base_dir)
     
     @property
-    def 前端目录:
+    def 前端目录(self) -> str:
         """获取前端目录"""
         return str(self._frontend_dir)
     
     @property
-    def 配置目录:
+    def 配置目录(self) -> str:
         """获取配置目录"""
         return str(self._config_dir)
     
     @property
-    def 日志目录:
+    def 日志目录(self) -> str:
         """获取日志目录"""
         return str(self._logs_dir)
 

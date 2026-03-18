@@ -394,15 +394,15 @@ class 主题配置:
         return self._主题名称
     
     @property
-    def 调色板名称:
+    def 调色板名称(self) -> str:
         """获取当前调色板名称"""
         return self._调色板名称
     
-    def 获取所有主题 -> list:
+    def 获取所有主题(self) -> list:
         """获取所有主题名称"""
         return list(self.主题颜色.keys())
     
-    def 获取所有调色板 -> list:
+    def 获取所有调色板(self) -> list:
         """获取所有调色板名称"""
         return list(self.高对比度调色板.keys())
 

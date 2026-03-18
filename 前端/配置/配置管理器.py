@@ -26,12 +26,13 @@
 import json
 from pathlib import Path
 from typing import Any, Dict, Optional
-from 配置.卡片配置 import 卡片配置
-from 配置.策略配置 import 策略配置
-from 配置.建筑配置 import 建筑配置
-from 配置.集资配置 import 集资卡片配置
-from 配置.其他设置配置 import 其他卡片配置
-from 配置.账号配置 import 账号卡片配置
+from .卡片配置 import 卡片配置
+from .策略配置 import 策略配置
+from .建筑配置 import 建筑配置
+from .集资配置 import 集资卡片配置
+from .其他设置配置 import 其他卡片配置
+from .账号配置 import 账号卡片配置
+from .任务配置 import 任务卡片配置
 
 
 class ConfigManager:
@@ -50,6 +51,7 @@ class ConfigManager:
         
         self.config_dir = Path(config_dir) if config_dir else Path(__file__).parent
         self.user_config_file = self.config_dir / "用户配置.json"
+        self.default_config_file = self.config_dir / "默认配置.json"
         
         self.card_configs = 卡片配置.copy()
         self.strategy_configs = 策略配置.copy()
@@ -63,14 +65,32 @@ class ConfigManager:
         self._initialized = True
     
     def _load_user_config(self) -> Dict[str, Any]:
-        """加载用户配置"""
-        if self.user_config_file.exists():
+        """加载用户配置（自动初始化）"""
+        if not self.user_config_file.exists():
+            return self._create_default_config()
+        
+        try:
+            with open(self.user_config_file, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+                if not content:
+                    return self._create_default_config()
+                return json.loads(content)
+        except Exception as e:
+            print(f"加载用户配置失败: {e}")
+            return self._create_default_config()
+    
+    def _create_default_config(self) -> Dict[str, Any]:
+        """创建默认配置"""
+        if self.default_config_file.exists():
             try:
-                with open(self.user_config_file, 'r', encoding='utf-8') as f:
-                    return json.load(f)
+                with open(self.default_config_file, 'r', encoding='utf-8') as f:
+                    default_config = json.load(f)
+                self.user_config = default_config
+                self._save_user_config()
+                print("已自动创建默认配置文件")
+                return default_config
             except Exception as e:
-                print(f"加载用户配置失败: {e}")
-                return {}
+                print(f"加载默认配置失败: {e}")
         return {}
     
     def _save_user_config(self):
