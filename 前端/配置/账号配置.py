@@ -20,6 +20,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
+# *** 用户指定变量 - AI不得修改 ***
+DROPDOWN_HEIGHT = 32  # 下拉框高度
+INPUT_HEIGHT = 32  # 输入框高度
+# *********************************
+
+
 MAX_ACCOUNTS = 15
 DEFAULT_AUTHORIZED_COUNT = 15
 

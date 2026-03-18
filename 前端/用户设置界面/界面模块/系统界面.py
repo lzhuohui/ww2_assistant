@@ -56,18 +56,32 @@ class SystemInterface:
             if config_manager:
                 config_manager.set_value(card_name, config_key, value)
         
-        def create_dropdown_control(options: list, value: str, card_name: str, config_key: str, width: int = 80):
-            """创建下拉框控件（无标签）"""
+        def create_dropdown_control(label: str, options: list, value: str, card_name: str, config_key: str, width: int = None):
+            """创建下拉框控件"""
             dropdown = Dropdown.create(
                 options=options,
                 value=value,
                 width=width,
                 on_change=lambda v: on_value_change(card_name, config_key, v),
             )
-            return dropdown
+            
+            label_text = ft.Text(
+                label,
+                color=ThemeProvider.get_color("text_secondary"),
+                size=14,
+            )
+            
+            return ft.Row(
+                [label_text, dropdown],
+                alignment=ft.MainAxisAlignment.END,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=8,
+                expand=True,
+            )
         
         auto_mode_value = config_manager.get_value("挂机模式", "挂机模式", "自动") if config_manager else "自动"
         auto_mode_control = create_dropdown_control(
+            label="模式选择:",
             options=["自动", "手动"],
             value=auto_mode_value,
             card_name="挂机模式",
@@ -84,6 +98,7 @@ class SystemInterface:
         
         speed_value = config_manager.get_value("指令速度", "指令速度", "100毫秒") if config_manager else "100毫秒"
         speed_control = create_dropdown_control(
+            label="速度选择:",
             options=["100毫秒", "150毫秒", "200毫秒", "250毫秒", "300毫秒", "350毫秒", "400毫秒", "450毫秒", "500毫秒"],
             value=speed_value,
             card_name="指令速度",
@@ -100,6 +115,7 @@ class SystemInterface:
         
         retry_value = config_manager.get_value("尝试次数", "尝试次数", "10次") if config_manager else "10次"
         retry_control = create_dropdown_control(
+            label="次数选择:",
             options=["10次", "15次", "20次", "25次", "30次"],
             value=retry_value,
             card_name="尝试次数",
@@ -116,6 +132,7 @@ class SystemInterface:
         
         cache_value = config_manager.get_value("清缓限量", "清缓限量", "1.0M") if config_manager else "1.0M"
         cache_control = create_dropdown_control(
+            label="限量选择:",
             options=["1.0M", "1.5M", "2.0M", "2.5M", "3.0M", "3.5M", "4.0M", "4.5M", "5.0M"],
             value=cache_value,
             card_name="清缓限量",

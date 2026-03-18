@@ -23,6 +23,7 @@ import flet as ft
 from typing import Callable
 from 前端.配置.界面配置 import 界面配置
 from 前端.配置.配置管理器 import ConfigManager
+from 前端.配置.账号配置 import DROPDOWN_HEIGHT, INPUT_HEIGHT
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.组件模块.通用卡片 import UniversalCard
 from 前端.用户设置界面.组件模块.功能容器 import FunctionContainer
@@ -76,6 +77,7 @@ class AccountInterface:
                 options=options,
                 value=value,
                 width=width,
+                height=DROPDOWN_HEIGHT,
                 on_change=lambda v: on_value_change(card_name, config_key, v),
             )
             return dropdown
@@ -86,6 +88,7 @@ class AccountInterface:
                 config=配置,
                 value=value,
                 width=width,
+                height=INPUT_HEIGHT,
                 hint_text=hint_text,
                 password=password,
                 on_change=lambda v: on_value_change(card_name, config_key, v),

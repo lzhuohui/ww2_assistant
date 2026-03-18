@@ -55,21 +55,33 @@ class StrategyInterface:
             if config_manager:
                 config_manager.set_value(card_name, config_key, value)
         
-        def create_dropdown_control(options: list, value: str, card_name: str, config_key: str, width: int = 80):
-            """创建下拉框控件（无标签）"""
+        def create_dropdown_control(label: str, options: list, value: str, card_name: str, config_key: str, width: int = None):
+            """创建下拉框控件"""
             dropdown = Dropdown.create(
                 options=options,
                 value=value,
                 width=width,
                 on_change=lambda v: on_value_change(card_name, config_key, v),
             )
-            return dropdown
+            
+            label_text = ft.Text(
+                label,
+                color=ThemeProvider.get_color("text_secondary"),
+                size=14,
+            )
+            
+            return ft.Row(
+                [label_text, dropdown],
+                spacing=8,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            )
         
         building_level_value = config_manager.get_value("建筑速建", "速建限级", "08级") if config_manager else "08级"
         building_type_value = config_manager.get_value("建筑速建", "速建类型", "城资建筑") if config_manager else "城资建筑"
         building_switch_value = config_manager.get_value("建筑速建", "速建开关", True) if config_manager else True
         
         building_level_control = create_dropdown_control(
+            label="速建限级:",
             options=["05级", "06级", "07级", "08级", "09级", "10级", "11级", "12级", "13级", "14级", "15级"],
             value=building_level_value,
             card_name="建筑速建",
@@ -77,6 +89,7 @@ class StrategyInterface:
         )
         
         building_type_control = create_dropdown_control(
+            label="建筑类型:",
             options=["城资建筑", "城市建筑", "资源建筑"],
             value=building_type_value,
             card_name="建筑速建",
@@ -98,6 +111,7 @@ class StrategyInterface:
         resource_switch_value = config_manager.get_value("资源速产", "速产开关", True) if config_manager else True
         
         resource_level_control = create_dropdown_control(
+            label="速产限级:",
             options=["05级", "06级", "07级", "08级", "09级", "10级", "11级", "12级", "13级", "14级", "15级"],
             value=resource_level_value,
             card_name="资源速产",
@@ -105,6 +119,7 @@ class StrategyInterface:
         )
         
         resource_type_control = create_dropdown_control(
+            label="策略类型:",
             options=["平衡资源", "战时经济", "钢铁熔炉", "橡胶采集", "石油开采"],
             value=resource_type_value,
             card_name="资源速产",
@@ -125,6 +140,7 @@ class StrategyInterface:
         points_switch_value = config_manager.get_value("策点保留", "保留开关", True) if config_manager else True
         
         points_control = create_dropdown_control(
+            label="保留点数:",
             options=["30点", "60点", "90点", "120点", "150点", "180点", "210点", "240点"],
             value=points_value,
             card_name="策点保留",

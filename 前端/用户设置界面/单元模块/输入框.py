@@ -29,7 +29,7 @@ from 前端.配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改 ***
-# (用户指定的变量放在这里，用户没有指定之前就空着)
+DEFAULT_HEIGHT = 32  # 输入框高度
 # *********************************
 
 
@@ -41,6 +41,7 @@ class Input:
         config: 界面配置,
         value: str = "",
         width: int = None,
+        height: int = None,
         on_change: Callable[[str], None] = None,
         hint_text: str = None,
         password: bool = False,
@@ -53,6 +54,7 @@ class Input:
             config: 界面配置对象
             value: 初始值
             width: 输入框宽度（可选，默认从配置中获取）
+            height: 输入框高度（可选，默认为DEFAULT_HEIGHT）
             on_change: 值变化回调
             hint_text: 提示文本（可选）
             password: 是否为密码输入框（可选，默认False）
@@ -61,6 +63,7 @@ class Input:
             ft.TextField: 输入框控件
         """
         theme_colors = config.当前主题颜色
+        current_height = height if height is not None else DEFAULT_HEIGHT
         
         # 创建输入框（宽度由调用者决定，或使用默认值120）
         input_control = ft.TextField(
@@ -74,6 +77,7 @@ class Input:
             dense=True,
             content_padding=ft.Padding(left=8, right=8, top=8, bottom=8),
             width=width if width is not None else 120,
+            height=current_height,
             on_change=lambda e: on_change(e.control.value) if on_change else None,
             on_submit=lambda e: on_change(e.control.value) if on_change else None,
             on_blur=lambda e: on_change(e.control.value) if on_change else None,
