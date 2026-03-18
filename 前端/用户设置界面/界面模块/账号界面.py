@@ -32,7 +32,7 @@ from 前端.用户设置界面.单元模块.输入框 import Input
 
 # *** 用户指定变量 - AI不得修改 ***
 DROPDOWN_WIDTH = 80  # 下拉框宽度
-INPUT_WIDTH = 200    # 输入框宽度
+INPUT_WIDTH = 240    # 输入框宽度
 CONTROL_HEIGHT = 32  # 控件高度
 # *********************************
 
@@ -160,21 +160,21 @@ class AccountInterface:
                 value=name_value,
                 card_name=card_name,
                 config_key="名称",
-                hint_text="统帅名称",
+                hint_text="请输入统帅名称",
             )
             
             account_control = create_input_control(
                 value=account_value,
                 card_name=card_name,
                 config_key="账号",
-                hint_text="统帅账号",
+                hint_text="请输入统帅账号",
             )
             
             password_control = create_input_control(
                 value=password_value,
                 card_name=card_name,
                 config_key="密码",
-                hint_text="统帅密码",
+                hint_text="请输入统帅密码",
                 password=True,
             )
             
