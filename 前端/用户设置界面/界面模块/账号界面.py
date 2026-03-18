@@ -70,11 +70,29 @@ class AccountInterface:
         AccountInterface.当前参与数量 = 0
         AccountInterface.账号开关状态 = {}
         
+        card_refs = {}
+        
         def on_value_change(card_name: str, config_key: str, value):
-            """值变化回调 - 保存配置"""
+            """值变化回调 - 保存配置并更新副标题"""
             print(f"配置变化: {card_name}.{config_key} = {value}")
             if config_manager:
                 config_manager.set_value(card_name, config_key, value)
+            
+            if card_name in card_refs and AccountInterface.账号开关状态.get(card_name, False):
+                card = card_refs[card_name]
+                name = config_manager.get_value(card_name, "名称", "") if config_manager else ""
+                account = config_manager.get_value(card_name, "账号", "") if config_manager else ""
+                password = config_manager.get_value(card_name, "密码", "") if config_manager else ""
+                is_valid = bool(name and account and password)
+                if is_valid:
+                    card.set_subtitle("有效账号")
+                else:
+                    card.set_subtitle("信息不完整")
+                try:
+                    if card.page:
+                        card.update()
+                except RuntimeError:
+                    pass
         
         def create_dropdown_control(options: list, value: str, card_name: str, config_key: str, width: int = DROPDOWN_WIDTH, height: int = CONTROL_HEIGHT):
             """创建下拉框控件（无标签）"""
@@ -228,6 +246,8 @@ class AccountInterface:
             )
             
             card._on_state_change = make_state_change_handler(card_name, card)
+            
+            card_refs[card_name] = card
             
             account_cards.append(card)
         
