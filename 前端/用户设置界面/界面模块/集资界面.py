@@ -3,24 +3,53 @@
 模块名称：集资界面 | 层级：界面模块层
 设计思路：
     集资界面，包含集资管理、资源分配等设置卡片。
-    使用配置管理器获取和保存配置值。
+    实现主要统帅和次要统帅的联动逻辑。
 
 功能：
-    1. 小号上贡设置
-    2. 分城纳租设置
+    1. 小号上贡卡片（4个下拉框）
+    2. 分城纳租卡片（2个下拉框）
+    3. 主要统帅和次要统帅联动
+
+数据来源：
+    部分数据来自按键精灵脚本。
 
 对外接口：
     - create(): 创建集资界面
 """
 
 import flet as ft
-from typing import Callable
+from typing import Callable, List
 from 前端.配置.界面配置 import 界面配置
 from 前端.配置.配置管理器 import ConfigManager
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.组件模块.通用卡片 import UniversalCard
 from 前端.用户设置界面.组件模块.功能容器 import FunctionContainer
 from 前端.用户设置界面.单元模块.下拉框 import Dropdown
+
+
+def get_active_commanders(config_manager: ConfigManager) -> List[str]:
+    """
+    从账号配置中获取参与挂机的主帅列表
+    
+    参数:
+        config_manager: 配置管理器
+    
+    返回:
+        List[str]: 参与挂机的主帅名称列表（从输入框中提取第一个"/"前的数据段）
+    """
+    commanders = []
+    for i in range(1, 16):
+        card_name = f"{i:02d}账号"
+        account_type = config_manager.get_value(card_name, "统帅种类", "") if config_manager else ""
+        is_enabled = config_manager.get_value(card_name, "开关", False) if config_manager else False
+        input_text = config_manager.get_value(card_name, "输入框", "") if config_manager else ""
+        
+        if account_type == "主帅" and is_enabled and input_text:
+            parts = input_text.split("/")
+            if parts and parts[0].strip():
+                commanders.append(parts[0].strip())
+    
+    return commanders
 
 
 class FundraisingInterface:
@@ -45,19 +74,57 @@ class FundraisingInterface:
         except ImportError:
             config_manager = None
         
+        commander_options = get_active_commanders(config_manager)
+        
+        primary_value = config_manager.get_value("小号上贡", "主要统帅", "") if config_manager else ""
+        secondary_value = config_manager.get_value("小号上贡", "备用统帅", "") if config_manager else ""
+        
+        primary_dropdown = None
+        secondary_dropdown = None
+        
+        def update_secondary_options():
+            """更新次要统帅选项"""
+            nonlocal secondary_dropdown
+            
+            if primary_dropdown:
+                current_primary = primary_dropdown.get_value()
+                secondary_options = ["请选统帅"] + [c for c in commander_options if c != current_primary]
+                
+                if secondary_dropdown:
+                    secondary_dropdown.set_options(secondary_options)
+                    if secondary_dropdown.get_value() not in secondary_options:
+                        secondary_dropdown.set_value("请选统帅")
+                        if config_manager:
+                            config_manager.set_value("小号上贡", "备用统帅", "")
+        
+        def on_primary_change(value: str):
+            """主要统帅变化回调"""
+            if config_manager:
+                config_manager.set_value("小号上贡", "主要统帅", value)
+            update_secondary_options()
+        
+        def on_secondary_change(value: str):
+            """次要统帅变化回调"""
+            if value == "请选统帅":
+                if config_manager:
+                    config_manager.set_value("小号上贡", "备用统帅", "")
+            else:
+                if config_manager:
+                    config_manager.set_value("小号上贡", "备用统帅", value)
+        
         def on_value_change(card_name: str, config_key: str, value):
             """值变化回调 - 保存配置"""
             print(f"配置变化: {card_name}.{config_key} = {value}")
             if config_manager:
                 config_manager.set_value(card_name, config_key, value)
         
-        def create_dropdown_control(label: str, options: list, value: str, card_name: str, config_key: str, width: int = None):
+        def create_dropdown_control(label: str, options: list, value: str, card_name: str, config_key: str, width: int = None, on_change: Callable = None):
             """创建下拉框控件"""
             dropdown = Dropdown.create(
                 options=options,
                 value=value,
                 width=width,
-                on_change=lambda v: on_value_change(card_name, config_key, v),
+                on_change=on_change if on_change else lambda v: on_value_change(card_name, config_key, v),
             )
             
             label_text = ft.Text(
@@ -72,47 +139,62 @@ class FundraisingInterface:
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 spacing=8,
                 expand=True,
-            )
+            ), dropdown
         
-        小号上贡_value = config_manager.get_value("小号上贡", "上贡限级", "05级") if config_manager else "05级"
-        上贡限级_control = create_dropdown_control(
+        limit_level_options = [f"{i:02d}级" for i in range(5, 16)]
+        limit_amount_options = [f"{i}万" for i in range(2, 21)]
+        
+        上贡限级_value = config_manager.get_value("小号上贡", "上贡限级", "05级") if config_manager else "05级"
+        上贡限级_control, _ = create_dropdown_control(
             label="上贡限级:",
-            options=["05级", "06级", "07级", "08级", "09级", "10级", "11级", "12级", "13级", "14级", "15级"],
-            value=小号上贡_value,
+            options=limit_level_options,
+            value=上贡限级_value,
             card_name="小号上贡",
             config_key="上贡限级",
             width=80,
         )
         
         上贡限量_value = config_manager.get_value("小号上贡", "上贡限量", "2万") if config_manager else "2万"
-        上贡限量_control = create_dropdown_control(
+        上贡限量_control, _ = create_dropdown_control(
             label="上贡限量:",
-            options=["2万", "3万", "4万", "5万", "6万", "7万", "8万", "9万", "10万", "11万", "12万", "13万", "14万", "15万", "16万", "17万", "18万", "19万", "20万"],
+            options=limit_amount_options,
             value=上贡限量_value,
             card_name="小号上贡",
             config_key="上贡限量",
             width=80,
         )
         
-        主要统帅_value = config_manager.get_value("小号上贡", "主要统帅", "统帅A") if config_manager else "统帅A"
-        主要统帅_control = create_dropdown_control(
+        primary_options = commander_options
+        primary_display = primary_value if primary_value in primary_options else (primary_options[0] if primary_options else "")
+        
+        主要统帅_control, primary_dropdown = create_dropdown_control(
             label="主要统帅:",
-            options=["统帅A", "统帅B", "统帅C", "统帅D", "统帅E"],
-            value=主要统帅_value,
+            options=primary_options,
+            value=primary_display,
             card_name="小号上贡",
             config_key="主要统帅",
             width=80,
+            on_change=on_primary_change,
         )
         
-        备用统帅_value = config_manager.get_value("小号上贡", "备用统帅", "统帅B") if config_manager else "统帅B"
-        备用统帅_control = create_dropdown_control(
+        if config_manager:
+            config_manager.set_value("小号上贡", "主要统帅", primary_display)
+        
+        secondary_initial_options = ["请选统帅"] + commander_options
+        secondary_display = secondary_value if secondary_value in commander_options else "请选统帅"
+        
+        备用统帅_control, secondary_dropdown = create_dropdown_control(
             label="备用统帅:",
-            options=["统帅A", "统帅B", "统帅C", "统帅D", "统帅E"],
-            value=备用统帅_value,
+            options=secondary_initial_options,
+            value=secondary_display,
             card_name="小号上贡",
             config_key="备用统帅",
             width=80,
+            on_change=on_secondary_change,
         )
+        
+        if config_manager:
+            config_manager.set_value("小号上贡", "备用统帅", secondary_value if secondary_value != "请选统帅" else "")
         
         小号上贡_card = UniversalCard.create(
             title="小号上贡",
@@ -124,9 +206,9 @@ class FundraisingInterface:
         )
         
         纳租限级_value = config_manager.get_value("分城纳租", "纳租限级", "05级") if config_manager else "05级"
-        纳租限级_control = create_dropdown_control(
+        纳租限级_control, _ = create_dropdown_control(
             label="纳租限级:",
-            options=["05级", "06级", "07级", "08级", "09级", "10级", "11级", "12级", "13级", "14级", "15级"],
+            options=limit_level_options,
             value=纳租限级_value,
             card_name="分城纳租",
             config_key="纳租限级",
@@ -134,9 +216,9 @@ class FundraisingInterface:
         )
         
         纳租限量_value = config_manager.get_value("分城纳租", "纳租限量", "2万") if config_manager else "2万"
-        纳租限量_control = create_dropdown_control(
+        纳租限量_control, _ = create_dropdown_control(
             label="纳租限量:",
-            options=["2万", "3万", "4万", "5万", "6万", "7万", "8万", "9万", "10万", "11万", "12万", "13万", "14万", "15万", "16万", "17万", "18万", "19万", "20万"],
+            options=limit_amount_options,
             value=纳租限量_value,
             card_name="分城纳租",
             config_key="纳租限量",
