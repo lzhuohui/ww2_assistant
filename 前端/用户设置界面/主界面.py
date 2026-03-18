@@ -9,6 +9,7 @@ from 前端.用户设置界面.界面模块.功能通用界面 import ContentAre
 from 前端.用户设置界面.界面模块.系统界面 import SystemInterface
 from 前端.用户设置界面.界面模块.策略界面 import StrategyInterface
 from 前端.用户设置界面.界面模块.任务界面 import TaskInterface
+from 前端.用户设置界面.界面模块.建筑界面 import BuildingInterface
 
 
 # *** 用户指定变量 - AI不得修改 ***
@@ -48,6 +49,8 @@ class MainInterface:
             return StrategyInterface.create()
         elif nav_name == "任务":
             return TaskInterface.create()
+        elif nav_name == "建筑":
+            return BuildingInterface.create()
         else:
             return ft.Column(
                 [
