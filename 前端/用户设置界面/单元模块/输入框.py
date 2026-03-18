@@ -75,7 +75,7 @@ class Input:
             focused_border_color=theme_colors.get("accent"),
             border_radius=4,
             dense=True,
-            content_padding=ft.Padding(left=8, right=8, top=max(0, (current_height - 32) // 2), bottom=max(0, (current_height - 32) // 2)),
+            content_padding=ft.Padding(left=8, right=8, top=6, bottom=6),
             width=width if width is not None else 120,
             on_change=lambda e: on_change(e.control.value) if on_change else None,
             on_submit=lambda e: on_change(e.control.value) if on_change else None,
@@ -83,6 +83,13 @@ class Input:
             hint_text=hint_text,
             password=password,
             can_reveal_password=password,
+        )
+        
+        container = ft.Container(
+            content=input_control,
+            width=width if width is not None else 120,
+            height=current_height,
+            clip_behavior=ft.ClipBehavior.HARD_EDGE,
         )
         
         # 暴露控制接口

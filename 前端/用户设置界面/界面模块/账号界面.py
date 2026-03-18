@@ -31,7 +31,7 @@ from 前端.用户设置界面.单元模块.输入框 import Input
 
 
 # *** 用户指定变量 - AI不得修改 ***
-DROPDOWN_WIDTH = 60  # 下拉框宽度
+DROPDOWN_WIDTH = 80  # 下拉框宽度
 INPUT_WIDTH = 200    # 输入框宽度
 CONTROL_HEIGHT = 32  # 控件高度
 # *********************************
