@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：设置容器
+模块名称：设置面板
 设计思路及联动逻辑:
-    配置驱动的设置容器，接收卡片名称列表，自动从ConfigManager获取配置创建卡片。
+    统一的设置面板入口，支持两种模式：
+    1. 配置驱动：传入card_names，自动从ConfigManager获取配置创建卡片
+    2. 自定义卡片：传入cards，直接使用已创建的卡片
     支持多种卡片类型：switch_dropdown、color_blocks等。
 模块隔离原则:
     1. 不直接创建被调用模块的内容
@@ -30,8 +32,8 @@ DEFAULT_TITLE = "设置"
 DEFAULT_ICON = "SETTINGS"
 
 
-class SettingsContainer:
-    """设置容器 - 配置驱动，自动创建卡片"""
+class SettingsPanel:
+    """设置面板 - 统一入口，支持配置驱动和自定义卡片"""
     
     @staticmethod
     def create(
@@ -55,7 +57,7 @@ class SettingsContainer:
         
         if card_names:
             for card_name in card_names:
-                card = SettingsContainer._create_card_from_config(
+                card = SettingsPanel._create_card_from_config(
                     card_name=card_name,
                     config_manager=config_manager,
                     card_width=card_width,
@@ -93,14 +95,14 @@ class SettingsContainer:
         card_type = card_config.get("card_type", "switch_dropdown")
         
         if card_type == "switch_dropdown":
-            return SettingsContainer._create_switch_dropdown_card(
+            return SettingsPanel._create_switch_dropdown_card(
                 card_name=card_name,
                 card_config=card_config,
                 config_manager=config_manager,
                 card_width=card_width,
             )
         elif card_type == "color_blocks":
-            return SettingsContainer._create_color_blocks_card(
+            return SettingsPanel._create_color_blocks_card(
                 card_name=card_name,
                 card_config=card_config,
                 config_manager=config_manager,
@@ -215,6 +217,10 @@ class SettingsContainer:
         )
 
 
+# 兼容旧名称
+SettingsContainer = SettingsPanel
+
+
 # *** 调试逻辑 ***
 if __name__ == "__main__":
     from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
@@ -225,7 +231,7 @@ if __name__ == "__main__":
     def main(page: ft.Page):
         page.padding = 0
         page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(SettingsContainer.create(
+        page.add(SettingsPanel.create(
             config=配置,
             title="系统设置",
             icon="SETTINGS",
