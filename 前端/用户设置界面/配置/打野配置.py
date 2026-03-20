@@ -12,19 +12,24 @@
     静态配置数据。
 """
 
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
-
 # ==================== 自动打野卡片 ====================
 
 自动打野配置 = {
-    "card_name": "自动打野",
+    "card_type": "switch_dropdown",
     "title": "自动打野",
     "icon": "EXPLORE",
     "subtitle": "开启后执行自动打野任务",
-    "card_type": "switch_dropdown",
     "enabled": True,
-    "settings": [],
+    "switch_config": {
+        "config_key": "开关",
+        "default_value": True,
+    },
+    "dropdown_configs": [],
+}
+
+
+# ==================== 所有卡片配置 ====================
+
+打野卡片配置 = {
+    "自动打野": 自动打野配置,
 }

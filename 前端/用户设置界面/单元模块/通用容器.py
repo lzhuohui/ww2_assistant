@@ -21,6 +21,10 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 # （用户未指定变量）
 # *********************************
 
+# 默认值常量 - 供调用者获取
+DEFAULT_WIDTH = 800
+DEFAULT_HEIGHT = 500
+
 
 class GenericContainer:
     """通用容器 - 纯UI控件，基础容器基类"""
@@ -28,8 +32,8 @@ class GenericContainer:
     @staticmethod
     def create(
         content: ft.Control=None,
-        height: int=100,
-        width: int=200,
+        height: int=DEFAULT_HEIGHT,
+        width: int=DEFAULT_WIDTH,
         padding: int=8,
         margin: int=0,
         bgcolor: str="",

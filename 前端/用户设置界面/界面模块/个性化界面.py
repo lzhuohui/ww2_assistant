@@ -18,7 +18,7 @@ import flet as ft
 from typing import Callable
 from 前端.用户设置界面.配置.界面配置 import 界面配置
 from 前端.用户设置界面.组件模块.通用卡片 import UniversalCard
-from 前端.用户设置界面.组件模块.功能容器 import FunctionContainer
+from 前端.用户设置界面.组件模块.通用功能容器 import GenericFunctionContainer
 from 前端.用户设置界面.单元模块.主题色块 import ThemeColorBlock
 
 
@@ -133,7 +133,7 @@ class PersonalizationInterface:
             controls_per_row=1,
         )
         
-        return FunctionContainer.create(
+        return GenericFunctionContainer.create(
             config=配置,
             title="个性化设置",
             icon="PALETTE",

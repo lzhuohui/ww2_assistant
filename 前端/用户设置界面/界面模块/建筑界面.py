@@ -22,7 +22,7 @@ from 前端.用户设置界面.配置.配置管理器 import ConfigManager
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.组件模块.懒加载卡片 import LazyCard
 from 前端.用户设置界面.组件模块.懒加载状态管理器 import LazyState
-from 前端.用户设置界面.组件模块.功能容器 import FunctionContainer
+from 前端.用户设置界面.组件模块.通用功能容器 import GenericFunctionContainer
 
 
 class BuildingInterface:
@@ -70,7 +70,7 @@ class BuildingInterface:
                 )
                 lazy_cards.append(card.create())
         
-        return FunctionContainer.create(
+        return GenericFunctionContainer.create(
             config=配置,
             title="建筑设置",
             icon="DOMAIN",

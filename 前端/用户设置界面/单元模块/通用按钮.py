@@ -103,8 +103,11 @@ class Button:
         if style == "nav":
             actual_icon = None
             if icon:
-                icon_upper = icon.upper()
-                actual_icon = getattr(ft.Icons, icon_upper, ft.Icons.SETTINGS)
+                if isinstance(icon, str):
+                    icon_upper = icon.upper()
+                    actual_icon = getattr(ft.Icons, icon_upper, ft.Icons.SETTINGS)
+                else:
+                    actual_icon = icon
             
             icon_control = ft.Icon(actual_icon, size=icon_size, color=accent_color) if actual_icon else None
             text_control = ft.Text(

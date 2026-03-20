@@ -23,9 +23,13 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-USER_WIDTH = 500
-USER_HEIGHT = 150
+USER_WIDTH = 500  # 默认卡片宽度
+USER_HEIGHT = 150  # 默认卡片高度
 # *********************************
+
+# 默认值常量 - 供调用者获取
+DEFAULT_WIDTH = USER_WIDTH
+DEFAULT_HEIGHT = USER_HEIGHT
 
 
 class CardContainer:
@@ -33,13 +37,13 @@ class CardContainer:
     
     @staticmethod
     def create(
-        content: ft.Control = None,
-        config: 界面配置 = None,
-        height: int = None,
-        width: int = None,
-        expand: bool = False,
-        enabled: bool = True,
-        on_hover_enabled: bool = True,
+        content: ft.Control=None,
+        config: 界面配置=None,
+        height: int=DEFAULT_HEIGHT,
+        width: int=DEFAULT_WIDTH,
+        expand: bool=False,
+        enabled: bool=True,
+        on_hover_enabled: bool=True,
         **kwargs
     ) -> ft.Container:
         try:

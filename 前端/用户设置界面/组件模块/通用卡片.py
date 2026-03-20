@@ -1,36 +1,28 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：通用卡片 | 层级：组件模块层
-设计思路：
+模块名称：通用卡片
+设计思路及联动逻辑:
     装配模式：组合零件模块，协调交互。
-    - 不直接操作零件内部控件
-    - 通过零件暴露的接口进行控制
-    - 负责布局和协调
-    - 支持多行控件布局
-
-功能：
-    1. 组合零件模块
-    2. 协调状态切换
-    3. 布局排列
-    4. 支持多行控件
-    5. 支持副标题
-
-对外接口：
-    - create(): 创建通用卡片
-    - set_state(): 设置启用状态
-    - toggle_state(): 切换状态
-    - get_state(): 获取状态
+    1. 不直接操作零件内部控件
+    2. 通过零件暴露的接口进行控制
+    3. 支持多行控件布局和副标题
+模块隔离原则:
+    1. 不直接创建被调用模块的内容
+    2. 不覆盖被调用模块的计算结果
+    3. 用户指定变量除外
 """
 
 import flet as ft
 from typing import Callable, Optional, List
+
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-from 前端.用户设置界面.单元模块.卡片容器 import CardContainer
-from 前端.用户设置界面.组件模块.图标标题 import IconTitle
+from 前端.用户设置界面.单元模块.卡片容器 import CardContainer, DEFAULT_WIDTH, DEFAULT_HEIGHT
+from 前端.用户设置界面.组件模块.图标标题 import IconTitle, DEFAULT_TITLE, DEFAULT_ICON, DEFAULT_SUBTITLE
 from 前端.用户设置界面.配置.界面配置 import 界面配置
 
-# *** 用户指定变量 - AI不得修改 ***
-DEFAULT_CARD_WIDTH = 800
+
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
+USER_DIVIDER_LEFT = 100  # 分割线到卡片左侧的距离
 # *********************************
 
 
@@ -39,36 +31,18 @@ class UniversalCard:
     
     @staticmethod
     def create(
-        title: str,
-        icon: str = None,
-        enabled: bool = True,
-        on_state_change: Callable[[bool], None] = None,
-        help_text: str = None,
-        height: int = None,
-        width: int = None,
-        controls: List[ft.Control] = None,
-        subtitle: str = None,
-        controls_per_row: int = None,
+        title: str=DEFAULT_TITLE,
+        icon: str=DEFAULT_ICON,
+        enabled: bool=True,
+        on_state_change: Callable[[bool], None]=None,
+        help_text: str="",
+        height: int=80,
+        width: int=DEFAULT_WIDTH,
+        controls: List[ft.Control]=None,
+        subtitle: str=DEFAULT_SUBTITLE,
+        controls_per_row: int=1,
         **kwargs
     ) -> ft.Container:
-        """
-        创建通用卡片
-        
-        参数：
-            title: 标题文字
-            icon: 图标名称
-            enabled: 初始启用状态
-            on_state_change: 状态变化回调
-            help_text: 帮助提示文字
-            height: 卡片高度
-            width: 卡片宽度
-            controls: 右侧控件列表（支持多行）
-            subtitle: 副标题
-            controls_per_row: 每行控件数量
-        
-        返回：
-            ft.Container: 完整的卡片容器
-        """
         配置 = 界面配置()
         
         ui_config = 配置.定义尺寸.get("界面", {})
@@ -79,7 +53,7 @@ class UniversalCard:
         control_margin_right = spacing_config.get("spacing_lg", 20)
         
         current_enabled = enabled
-        current_controls_per_row = controls_per_row if controls_per_row is not None else 1
+        current_controls_per_row = controls_per_row
         
         min_control_height = 35
         min_card_height = min_control_height + card_padding * 2
@@ -105,7 +79,6 @@ class UniversalCard:
             if on_state_change:
                 on_state_change(new_enabled)
         
-        # 计算分割线高度，确保分割线上部离卡片上部半个边距，分割线下部离卡片下部半个边距
         divider_height = card_height - card_padding
         
         icon_title = IconTitle.create(
@@ -115,6 +88,7 @@ class UniversalCard:
             on_state_change=on_icon_title_state_change,
             subtitle=subtitle,
             divider_height=divider_height,
+            divider_left=USER_DIVIDER_LEFT,
         )
         
         def sync_controls_state(new_enabled: bool):
@@ -132,7 +106,6 @@ class UniversalCard:
                 if hasattr(control, 'set_state'):
                     control.set_state(current_enabled)
         
-        # 计算图标标题和分割线的位置，确保分割线上部离卡片上部半个边距，分割线下部离卡片下部半个边距
         left_container = ft.Container(
             content=icon_title,
             top=card_padding / 2,
@@ -174,7 +147,7 @@ class UniversalCard:
         main_stack = ft.Stack(
             stack_children,
             height=card_height,
-            width=float('inf'),
+            width=width,
             clip_behavior=ft.ClipBehavior.NONE,
         )
         
@@ -182,7 +155,7 @@ class UniversalCard:
             config=配置,
             content=main_stack,
             height=card_height,
-            width=float('inf'),
+            width=width,
             padding=card_padding,
         )
         
@@ -214,9 +187,4 @@ class UniversalCard:
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    配置 = 界面配置()
-    from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-    ThemeProvider.initialize(配置)
-    def main(page: ft.Page):
-        page.add(UniversalCard.create(title="测试卡片", icon="SETTINGS", subtitle="这是副标题"))
-    ft.run(main)
+    ft.run(lambda page: page.add(UniversalCard.create()))

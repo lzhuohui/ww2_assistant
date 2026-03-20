@@ -34,20 +34,25 @@ USER_SUBTITLE_SIZE = USER_TITLE_SIZE - 4  # 用户指定副标题文字大小
 USER_ICON_SIZE = USER_TITLE_SIZE + 10  # 用户指定图标大小
 # *********************************
 
+# 默认值常量 - 供调用者获取
+DEFAULT_TITLE = "测试标题"
+DEFAULT_ICON = "HOME"
+DEFAULT_SUBTITLE = "这是副标题"
+
 class IconTitle:
     """图标标题 - 调用单元模块实现布局"""
     
     @staticmethod
     def create(
-        title: str = "测试标题",
-        icon: str = "HOME",
-        enabled: bool = True,
-        on_state_change: Callable[[bool], None] = None,
-        on_click: Callable = None,
-        subtitle: str = "这是副标题",
-        divider_height: int = None,
-        divider_left: int = None,
-        divider: ft.Container = None
+        title: str=DEFAULT_TITLE,
+        icon: str=DEFAULT_ICON,
+        enabled: bool=True,
+        on_state_change: Callable[[bool], None]=None,
+        on_click: Callable=None,
+        subtitle: str=DEFAULT_SUBTITLE,
+        divider_height: int=None,
+        divider_left: int=None,
+        divider: ft.Container=None
     ) -> ft.Container:
         配置 = 界面配置()
         ThemeProvider.initialize(配置)
