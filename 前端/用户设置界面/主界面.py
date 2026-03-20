@@ -5,7 +5,6 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.界面模块.用户界面 import UserInfoCard
 from 前端.用户设置界面.界面模块.导航界面 import NavBar
-from 前端.用户设置界面.界面模块.功能通用界面 import ContentArea
 from 前端.用户设置界面.界面模块.系统界面 import SystemInterface
 from 前端.用户设置界面.界面模块.策略界面 import StrategyInterface
 from 前端.用户设置界面.界面模块.任务界面 import TaskInterface
@@ -21,7 +20,7 @@ from 前端.用户设置界面.单元模块.文本标签 import LabelText
 
 DEFAULT_WIDTH = 1200
 DEFAULT_HEIGHT = 540
-DEFAULT_SPACING = 5
+DEFAULT_SPACING = 10
 
 
 class MainInterface:

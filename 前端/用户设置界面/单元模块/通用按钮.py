@@ -54,6 +54,7 @@ class Button:
         bg_card = ThemeProvider.get_color("bg_card")
         bg_hover = ThemeProvider.get_color("bg_hover")
         bg_pressed = ThemeProvider.get_color("bg_pressed")
+        bg_selected = ThemeProvider.get_color("bg_selected")
         
         配置 = 界面配置()
         animate_duration = 配置.获取尺寸("动画", "duration_fast") or 300
@@ -64,7 +65,7 @@ class Button:
         padding_v = 配置.获取尺寸("按钮", "padding_vertical") or 8
         selected_color = 配置.获取尺寸("按钮", "selected_color") or "#FFFFFF"
         
-        selected_bgcolor = accent_color
+        selected_bgcolor = bg_selected
         current_selected = [selected]
         
         if style == "icon":

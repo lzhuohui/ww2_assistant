@@ -81,7 +81,7 @@ class NavBar:
             nav_buttons.append(btn)
         
         content = ft.Column(
-            nav_buttons,
+            [btn.container for btn in nav_buttons],
             spacing=nav_button_spacing,
         )
         
