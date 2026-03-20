@@ -22,7 +22,7 @@ from 前端.用户设置界面.单元模块.卡片容器 import CardContainer
 from 前端.用户设置界面.组件模块.图标标题 import IconTitle
 from 前端.用户设置界面.组件模块.通用卡片 import UniversalCard
 from 前端.用户设置界面.组件模块.懒加载资源加载器 import LazyLoader
-from 前端.配置.界面配置 import 界面配置
+from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 LAZY_HEIGHT = 60

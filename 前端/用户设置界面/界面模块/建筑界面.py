@@ -17,8 +17,8 @@
 
 import flet as ft
 from typing import Callable
-from 前端.配置.界面配置 import 界面配置
-from 前端.配置.配置管理器 import ConfigManager
+from 前端.用户设置界面.配置.界面配置 import 界面配置
+from 前端.用户设置界面.配置.配置管理器 import ConfigManager
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.组件模块.懒加载卡片 import LazyCard
 from 前端.用户设置界面.组件模块.懒加载状态管理器 import LazyState

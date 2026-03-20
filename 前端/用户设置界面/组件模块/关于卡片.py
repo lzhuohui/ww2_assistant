@@ -16,7 +16,7 @@
 import flet as ft
 from typing import Callable, List, Tuple
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-from 前端.配置.界面配置 import 界面配置
+from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 class AboutCard:

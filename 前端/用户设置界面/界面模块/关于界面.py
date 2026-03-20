@@ -17,7 +17,7 @@
 
 import flet as ft
 from typing import Callable
-from 前端.配置.界面配置 import 界面配置
+from 前端.用户设置界面.配置.界面配置 import 界面配置
 from 前端.用户设置界面.组件模块.关于卡片 import AboutCard
 from 前端.用户设置界面.组件模块.功能容器 import FunctionContainer
 

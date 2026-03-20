@@ -17,7 +17,7 @@ from typing import List, Dict, Callable
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.单元模块.通用容器 import GenericContainer
 from 前端.用户设置界面.组件模块.导航按钮 import NavButton
-from 前端.配置.界面配置 import 界面配置
+from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 # *** 用户指定变量 - AI不得修改 ***
 DEFAULT_WIDTH = 280

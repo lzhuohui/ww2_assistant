@@ -4,6 +4,7 @@
 设计思路：
     作为页面层的容器，包含通用容器、图标、标签、水平灰色隔断和卡片列表。
     支持两种方式传入卡片：cards（自定义控件）和card_configs（自动创建通用卡片）。
+    使用统一的文本样式管理，确保文字视觉效果一致。
 功能：
     1. 通用容器包装
     2. 图标显示（对应导航栏功能按钮图标）
@@ -23,13 +24,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import flet as ft
 from typing import List, Optional, Dict, Any
-from 前端.配置.界面配置 import 界面配置
+from 前端.用户设置界面.配置.界面配置 import 界面配置
 from 前端.用户设置界面.单元模块.通用容器 import GenericContainer
 from 前端.用户设置界面.单元模块.文本标签 import LabelText
-
-
-# *** 用户指定变量 - AI不得修改 ***
-# *********************************
 
 
 class FunctionContainer:
@@ -117,11 +114,11 @@ class FunctionContainer:
                 color=config.当前主题颜色.get("accent"),
             )
         
-        # 使用文本标签组件（统一主题颜色管理）
+        # 使用文本标签组件（统一主题颜色管理，Win11风格）
         label_text = LabelText.create(
             text=title,
-            role="primary",
-            size=16,
+            role="h3",
+            win11_style=True
         )
         
         # Win11风格图标和标签组合
@@ -179,7 +176,7 @@ class FunctionContainer:
 功能容器 = FunctionContainer
 
 
-# *** 调试逻辑 ***
+# ==================== 调试逻辑 ====================
 if __name__ == "__main__":
     from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
     

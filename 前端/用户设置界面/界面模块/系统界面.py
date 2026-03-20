@@ -17,12 +17,13 @@
 
 import flet as ft
 from typing import Callable
-from 前端.配置.界面配置 import 界面配置
-from 前端.配置.配置管理器 import ConfigManager
+from 前端.用户设置界面.配置.界面配置 import 界面配置
+from 前端.用户设置界面.配置.配置管理器 import ConfigManager
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.组件模块.通用卡片 import UniversalCard
 from 前端.用户设置界面.组件模块.功能容器 import FunctionContainer
 from 前端.用户设置界面.单元模块.下拉框 import Dropdown
+from 前端.用户设置界面.单元模块.文本标签 import LabelText
 
 # *** 用户指定变量 - AI不得修改 ***
 # *********************************
@@ -65,10 +66,11 @@ class SystemInterface:
                 on_change=lambda v: on_value_change(card_name, config_key, v),
             )
             
-            label_text = ft.Text(
-                label,
-                color=ThemeProvider.get_color("text_secondary"),
+            label_text = LabelText.create(
+                text=label,
+                role="secondary",
                 size=14,
+                enabled=True
             )
             
             return ft.Row(

@@ -1,23 +1,26 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：文本标签 | 层级：零件层
-设计思路：
+模块名称：文本标签
+设计思路及联动逻辑:
     提供文本显示功能，支持不同角色和样式。
-    纯UI控件，无业务逻辑。
-    通过ThemeProvider获取主题，无需传入config。
-功能列表：
-    1. 显示文本
-    2. 支持不同角色（primary/secondary/help）
-    3. 支持不同尺寸
-对外接口：
-    - create(): 创建文本标签
+    1. 通过ThemeProvider获取主题，无需传入config
+    2. 支持Win11风格和样式合并机制
+模块隔离原则:
+    1. 不直接创建被调用模块的内容
+    2. 不覆盖被调用模块的计算结果
+    3. 用户指定变量除外
 """
 
-import flet as ft
-from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-from 前端.配置.界面配置 import 界面配置
+from typing import Optional
 
-# *** 用户指定变量 - AI不得修改 ***
+import flet as ft
+
+from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
+from 前端.用户设置界面.配置.界面配置 import 界面配置
+
+
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
+# （用户未指定变量）
 # *********************************
 
 
@@ -26,55 +29,39 @@ class LabelText:
     
     @staticmethod
     def create(
-        text: str = "文本标签示例",
-        role: str = "primary",
-        size: int = 14,
-        enabled: bool = True,
+        text: str="文本标签示例",
+        role: str="body",
+        size: Optional[int]=None,
+        weight: Optional[ft.FontWeight]=None,
+        enabled: bool=True,
+        win11_style: bool=True,
+        max_lines: Optional[int]=None,
         **kwargs
     ) -> ft.Text:
-        """
-        创建文本标签
+        配置 = 界面配置()
+        ThemeProvider.initialize(配置)
         
-        参数:
-            text: 文本内容（默认为示例文本）
-            role: 文本角色（primary/secondary/help）
-            size: 文本尺寸（默认14）
-            enabled: 启用状态
-            **kwargs: 其他Text参数
-        
-        返回:
-            ft.Text: 文本控件
-        """
-        # 根据角色获取颜色
-        if role == "primary":
-            color = ThemeProvider.get_color("text_primary")
-        elif role == "secondary":
-            color = ThemeProvider.get_color("text_secondary")
-        else:  # help
-            color = ThemeProvider.get_color("text_hint")
-        
-        # Win11风格文本标签
-        # 根据角色设置字重
-        if role == "primary":
-            weight = ft.FontWeight.W_500  # 主文本使用中等字重
+        if win11_style:
+            style = ThemeProvider.get_win11_text_style(role, size, weight)
         else:
-            weight = ft.FontWeight.NORMAL  # 其他文本使用普通字重
+            style = ThemeProvider.get_default_text_style()
+            if size:
+                style["size"] = size
+            if weight:
+                style["weight"] = weight
         
         return ft.Text(
             value=text,
-            color=color,
-            size=size,
+            size=style["size"],
+            weight=style["weight"],
+            color=style["color"],
+            font_family=style["font_family"],
             opacity=1.0 if enabled else 0.4,
-            font_family="Segoe UI",  # Win11默认字体
-            weight=weight,  # 根据角色设置字重
+            max_lines=max_lines,
             **kwargs
         )
 
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    配置 = 界面配置()
-    ThemeProvider.initialize(配置)
-    def main(page: ft.Page):
-        page.add(LabelText.create())
-    ft.run(main)
+    ft.run(lambda page: page.add(LabelText.create()))

@@ -1,36 +1,29 @@
 # -*- coding: utf-8 -*-
 """
-输入框 - 单元模块
-
-设计思路:
+模块名称：输入框
+设计思路及联动逻辑:
     独立功能模块，轻量级设计。
-    只提供输入框功能，不包含标签。
-
-功能:
-    1. 输入框
-    2. 值变化回调
-    3. 统一高度控制（密码框和普通框一致）
-
-数据来源:
-    所有配置数据从配置目录获取。
-
-使用场景:
-    被组件层模块调用，也可独立使用。
-
-可独立运行调试: python 输入框.py
+    1. 提供输入框功能，不包含标签
+    2. 支持值变化回调和统一高度控制
+模块隔离原则:
+    1. 不直接创建被调用模块的内容
+    2. 不覆盖被调用模块的计算结果
+    3. 用户指定变量除外
 """
 
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-import flet as ft
 from typing import Callable, Optional
-from 前端.配置.界面配置 import 界面配置
+
+import flet as ft
+
+from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
-# *** 用户指定变量 - AI不得修改 ***
-# (用户指定的变量放在这里，用户没有指定之前就空着)
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
+# （用户未指定变量）
 # *********************************
 
 
@@ -40,33 +33,15 @@ class Input:
     @staticmethod
     def create(
         config: 界面配置,
-        value: str = "",
-        width: int = None,
-        height: int = None,
-        on_change: Callable[[str], None] = None,
-        hint_text: str = None,
-        password: bool = False,
+        value: str="",
+        width: int=120,
+        height: int=32,
+        on_change: Callable[[str], None]=None,
+        hint_text: str="",
+        password: bool=False,
         **kwargs
     ) -> ft.Container:
-        """
-        创建输入框
-        
-        参数:
-            config: 界面配置对象
-            value: 初始值
-            width: 输入框宽度（可选，默认120）
-            height: 输入框高度（可选，默认32）
-            on_change: 值变化回调
-            hint_text: 提示文本（可选）
-            password: 是否为密码输入框（可选，默认False）
-        
-        返回:
-            ft.Container: 输入框容器（精确控制高度）
-        """
         theme_colors = config.当前主题颜色
-        
-        current_width = width if width is not None else 120
-        current_height = height if height is not None else 32
         
         input_control = ft.TextField(
             value=value,
@@ -78,7 +53,7 @@ class Input:
             border_radius=6,
             dense=True,
             content_padding=ft.Padding(left=12, right=8, top=8, bottom=8),
-            width=current_width,
+            width=width,
             on_change=lambda e: on_change(e.control.value) if on_change else None,
             on_submit=lambda e: on_change(e.control.value) if on_change else None,
             on_blur=lambda e: on_change(e.control.value) if on_change else None,
@@ -89,8 +64,8 @@ class Input:
         
         container = ft.Container(
             content=input_control,
-            width=current_width,
-            height=current_height,
+            width=width,
+            height=height,
             clip_behavior=ft.ClipBehavior.HARD_EDGE,
         )
         
@@ -98,7 +73,6 @@ class Input:
         container.set_value = lambda v: setattr(input_control, "value", v) or input_control.update()
         
         def set_state(enabled: bool):
-            """设置启用状态 - 只改变透明度，不改变可操作性"""
             input_control.opacity = 1.0 if enabled else 0.4
             try:
                 if input_control.page:
@@ -111,17 +85,6 @@ class Input:
         return container
 
 
-# 兼容别名
-输入框 = Input
-
-
-# ==================== 调试逻辑 ====================
+# *** 调试逻辑 ***
 if __name__ == "__main__":
-    配置 = 界面配置()
-    
-    def main(page: ft.Page):
-        page.padding = 0
-        page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(Input.create(配置, value="3"))
-    
-    ft.run(main)
+    ft.run(lambda page: page.add(Input.create(界面配置())))

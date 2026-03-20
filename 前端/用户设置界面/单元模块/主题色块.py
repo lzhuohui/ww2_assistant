@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：主题色块 | 层级：零件层
-设计思路：
+模块名称：主题色块
+设计思路及联动逻辑:
     纯UI控件，用于主题颜色选择。
-    不包含业务逻辑，所有样式从ThemeProvider获取。
-    通过回调函数通知父组件颜色变化。
-功能列表：
-    1. 显示单个颜色块
-    2. 支持选中状态高亮
-    3. 支持点击交互
-对外接口：
-    - create(): 创建主题色块
-    - create_group(): 创建主题色块组
+    1. 通过ThemeProvider获取样式，不包含业务逻辑
+    2. 支持选中状态高亮和点击交互回调
+模块隔离原则:
+    1. 不直接创建被调用模块的内容
+    2. 不覆盖被调用模块的计算结果
+    3. 用户指定变量除外
 """
 
-import flet as ft
 from typing import Callable
-from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-from 前端.配置.界面配置 import 界面配置
 
-# *** 用户指定变量 - AI不得修改 ***
+import flet as ft
+
+from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
+from 前端.用户设置界面.配置.界面配置 import 界面配置
+
+
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
+# （用户未指定变量）
 # *********************************
 
 
@@ -28,38 +29,20 @@ class ThemeColorBlock:
     
     @staticmethod
     def create(
-        color_value: str = None,
-        color_name: str = "",
-        selected: bool = False,
-        on_click: Callable[[str], None] = None,
-        size: int = 40,
-        config: 界面配置 = None,
-        theme_name: str = None,
-        bg_color: str = None,
-        is_selected: bool = None,
+        color_value: str="#FF5722",
+        color_name: str="",
+        selected: bool=False,
+        on_click: Callable[[str], None]=None,
+        size: int=40,
+        config: 界面配置=None,
+        theme_name: str="",
+        bg_color: str="",
+        is_selected: bool=False,
         **kwargs
     ) -> ft.Container:
-        """
-        创建主题色块
-        
-        参数:
-            color_value: 颜色值（如 "#FF5722"）
-            color_name: 颜色名称（可选，用于提示）
-            selected: 是否选中
-            on_click: 点击回调，参数为颜色值或事件
-            size: 色块尺寸
-            config: 界面配置对象（可选，新思路兼容）
-            theme_name: 主题名称（可选，新思路兼容，用作color_name）
-            bg_color: 背景颜色（可选，新思路兼容，用作color_value）
-            is_selected: 是否选中（可选，新思路兼容，用作selected）
-            **kwargs: 其他Container参数
-        
-        返回:
-            ft.Container: 色块容器
-        """
         actual_color = bg_color if bg_color else color_value
         actual_name = theme_name if theme_name else color_name
-        actual_selected = is_selected if is_selected is not None else selected
+        actual_selected = is_selected if is_selected else selected
         
         border_color = ThemeProvider.get_color("primary") if actual_selected else "transparent"
         border_width = 3 if actual_selected else 0
@@ -72,7 +55,7 @@ class ThemeColorBlock:
             width=size,
             height=size,
             bgcolor=actual_color,
-            border=ft.border.all(border_width, border_color),
+            border=ft.Border.all(border_width, border_color),
             border_radius=ft.BorderRadius.all(size // 3),
             on_click=handle_click,
             tooltip=actual_name if actual_name else actual_color,
@@ -82,27 +65,13 @@ class ThemeColorBlock:
     
     @staticmethod
     def create_group(
-        colors: list = None,
-        selected_color: str = "",
-        on_select: Callable[[str], None] = None,
-        size: int = 40,
-        spacing: int = 10,
+        colors: list=None,
+        selected_color: str="",
+        on_select: Callable[[str], None]=None,
+        size: int=40,
+        spacing: int=10,
         **kwargs
     ) -> ft.Row:
-        """
-        创建主题色块组
-        
-        参数:
-            colors: 颜色列表，每项为字典 {"name": "名称", "value": "#颜色值"}
-            selected_color: 当前选中的颜色值
-            on_select: 选择回调，参数为颜色值
-            size: 色块尺寸
-            spacing: 色块间距
-            **kwargs: 其他Row参数
-        
-        返回:
-            ft.Row: 色块组容器
-        """
         if colors is None:
             colors = [
                 {"name": "红色", "value": "#FF5722"},
@@ -133,18 +102,6 @@ class ThemeColorBlock:
         )
 
 
-# 兼容别名
-主题色块 = ThemeColorBlock
-
-
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    配置 = 界面配置()
-    ThemeProvider.initialize(配置)
-    
-    def on_color_select(color):
-        print(f"选中颜色: {color}")
-    
-    def main(page: ft.Page):
-        page.add(ThemeColorBlock.create_group())
-    ft.run(main)
+    ft.run(lambda page: page.add(ThemeColorBlock.create_group()))

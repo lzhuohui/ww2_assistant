@@ -27,7 +27,7 @@ from typing import Callable, Optional, List
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.单元模块.卡片容器 import CardContainer
 from 前端.用户设置界面.组件模块.图标标题 import IconTitle
-from 前端.配置.界面配置 import 界面配置
+from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 # *** 用户指定变量 - AI不得修改 ***
 DEFAULT_CARD_WIDTH = 800

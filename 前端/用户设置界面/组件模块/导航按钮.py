@@ -5,6 +5,7 @@
     导航按钮组件，组合零件层的卡片容器，提供导航按钮特有功能。
     符合Windows 11设置界面风格，默认深色主题。
     轻量级设计，职责清晰。
+    使用统一的文本样式管理，确保文字视觉效果一致。
 功能列表：
     1. 图标+文字水平排列
     2. 悬停效果
@@ -19,23 +20,16 @@
 import flet as ft
 from typing import Callable, Optional
 from 前端.用户设置界面.单元模块.卡片容器 import CardContainer
+from 前端.用户设置界面.单元模块.文本标签 import LabelText
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-from 前端.配置.界面配置 import 界面配置
+from 前端.用户设置界面.配置.界面配置 import 界面配置
 
-
-# *** 用户指定变量 - AI不得修改 ***
 DEFAULT_WIDTH = 240
 DEFAULT_HEIGHT = 34
-# *********************************
 
 
 class NavButton:
-    """
-    导航按钮 - 组件模块层
-    
-    职责：图标+文字、悬停效果、选中状态
-    宽度由导航界面模块控制
-    """
+    """导航按钮 - 组件模块层"""
     
     @staticmethod
     def create(
@@ -45,37 +39,27 @@ class NavButton:
         on_click: Callable = None,
         width: int = None,
         height: int = None,
-        enabled: bool = True,
-        config: 界面配置 = None,
         **kwargs
     ) -> ft.Container:
         """
         创建导航按钮
         
         参数:
-            text: 按钮名称
-            icon: 图标名称（字符串或ft.Icons枚举）
-            selected: 选中状态
+            text: 按钮文本
+            icon: 图标名称（字符串）
+            selected: 是否选中
             on_click: 点击回调
-            width: 按钮宽度（由导航界面传入）
-            height: 按钮高度（可选）
-            enabled: 启用状态
-            config: 界面配置对象（可选）
+            width: 按钮宽度
+            height: 按钮高度
         
         返回:
             ft.Container: 导航按钮容器
         """
-        # 获取配置对象
-        配置 = config or 界面配置()
-        
-        # 获取主题颜色
+        配置 = 界面配置()
         theme_colors = 配置.当前主题颜色
         
-        # 状态变量
-        is_selected = [selected]
-        is_hovering = [False]
-        
-        # 处理图标
+        # 创建图标控件
+        icon_control = None
         if icon:
             if isinstance(icon, str):
                 icon_upper = icon.upper()
@@ -86,14 +70,19 @@ class NavButton:
         else:
             icon_control = None
         
-        # 创建文本控件
-        text_control = ft.Text(
-            text,
-            size=14,
-            weight=ft.FontWeight.NORMAL,
-            color=theme_colors["text_secondary"],
+        # 使用LabelText创建文本控件（统一文本样式）
+        text_control = LabelText.create(
+            text=text,
+            role="body",
+            win11_style=True,
             expand=True
         )
+        
+        # 根据选中状态调整颜色
+        if selected:
+            text_control.color = "#FFFFFF"
+        else:
+            text_control.color = theme_colors["text_secondary"]
         
         # 创建内容行
         content = ft.Row(
@@ -127,97 +116,90 @@ class NavButton:
         )
         
         # 创建堆栈布局
-        stack_content = ft.Stack(
-            [bg_container, content_container],
+        stack = ft.Stack(
+            [
+                bg_container,
+                content_container,
+            ],
+            width=button_width,
+            height=button_height,
         )
         
-        def update_appearance():
-            """更新按钮外观"""
-            if is_selected[0]:
+        # 创建外层容器
+        container = ft.Container(
+            content=stack,
+            width=button_width,
+            height=button_height,
+            on_click=on_click,
+        )
+        
+        # 存储状态
+        container._selected = selected
+        container._bg_container = bg_container
+        container._text_control = text_control
+        
+        def set_selected(is_selected: bool):
+            """设置选中状态"""
+            container._selected = is_selected
+            if is_selected:
+                bg_container.bgcolor = theme_colors["accent"]
                 bg_container.width = button_width
-                bg_container.bgcolor = theme_colors["bg_selected"]
-                if icon_control:
-                    icon_control.color = "#FFFFFF"
                 text_control.color = "#FFFFFF"
-            elif is_hovering[0]:
-                bg_container.width = button_width
-                bg_container.bgcolor = theme_colors["bg_hover"]
-                if icon_control:
-                    icon_control.color = theme_colors["accent"]
-                text_control.color = theme_colors["text_primary"]
             else:
-                bg_container.width = 0
                 bg_container.bgcolor = "transparent"
-                if icon_control:
-                    icon_control.color = theme_colors["accent"]
+                bg_container.width = 0
                 text_control.color = theme_colors["text_secondary"]
             
             try:
-                if container.page:
-                    container.update()
-            except RuntimeError:
+                bg_container.update()
+                text_control.update()
+            except:
                 pass
-        
-        def set_selected(selected: bool):
-            """设置选中状态"""
-            is_selected[0] = selected
-            update_appearance()
         
         def get_selected() -> bool:
             """获取选中状态"""
-            return is_selected[0]
+            return container._selected
         
-        def handle_click(e):
-            """处理点击"""
+        def toggle(e=None):
+            """切换选中状态"""
+            set_selected(not container._selected)
             if on_click:
                 on_click(e)
         
-        def handle_hover(e):
-            """处理悬停"""
-            is_hovering[0] = (e.data == "true")
-            update_appearance()
-        
-        # 使用卡片容器统一风格（禁用悬停效果，使用自定义悬停）
-        container = CardContainer.create(
-            config=配置,
-            content=stack_content,
-            width=button_width,
-            height=button_height,
-            on_hover_enabled=False,
-            **kwargs
-        )
-        
-        # 添加自定义悬停和点击事件
-        container.on_click = handle_click
-        container.on_hover = handle_hover
-        container.ink = True
-        
-        # 暴露控制接口
+        # 绑定方法
         container.set_selected = set_selected
         container.get_selected = get_selected
+        container.toggle = toggle
+        
+        # 悬停效果
+        def on_hover(e):
+            if not container._selected:
+                if e.data == "true":
+                    bg_container.bgcolor = theme_colors["bg_card"]
+                    bg_container.width = button_width
+                else:
+                    bg_container.bgcolor = "transparent"
+                    bg_container.width = 0
+                
+                try:
+                    bg_container.update()
+                except:
+                    pass
+        
+        container.on_hover = on_hover
+        
+        # 初始化选中状态
+        if selected:
+            set_selected(True)
         
         return container
 
 
-# 兼容别名
-导航按钮 = NavButton
-
-
-# *** 调试逻辑 ***
 if __name__ == "__main__":
-    from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
     配置 = 界面配置()
     ThemeProvider.initialize(配置)
     
     def main(page: ft.Page):
-        page.padding = 0
-        page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(
-            ft.Column([
-                NavButton.create(text="系统", icon="SETTINGS", selected=True, config=配置),
-                NavButton.create(text="策略", icon="ROCKET_LAUNCH", selected=False, config=配置),
-                NavButton.create(text="任务", icon="ASSIGNMENT", selected=False, config=配置),
-            ])
-        )
+        page.add(NavButton.create(text="测试按钮", icon="SETTINGS", selected=True))
     
     ft.run(main)

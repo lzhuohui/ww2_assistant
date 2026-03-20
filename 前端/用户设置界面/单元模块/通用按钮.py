@@ -1,29 +1,26 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：通用按钮 | 层级：零件层
-设计思路：
+模块名称：通用按钮
+设计思路及联动逻辑:
     提供通用按钮功能，支持多种按钮样式。
-    纯UI控件，无业务逻辑。
-    通过ThemeProvider获取主题，无需传入config。
-功能列表：
     1. 支持文字按钮、轮廓按钮、图标按钮
-    2. 支持自定义图标和文本
-    3. 支持点击回调
-    4. 支持选中状态
-    5. Win11风格点击变色/动画/锁定切换
-对外接口：
-    - create(): 创建按钮
-    - toggle(): 切换选中状态
-    - set_selected(): 设置选中状态
-    - get_selected(): 获取选中状态
+    2. 通过ThemeProvider获取主题，无需传入config
+模块隔离原则:
+    1. 不直接创建被调用模块的内容
+    2. 不覆盖被调用模块的计算结果
+    3. 用户指定变量除外
 """
 
-import flet as ft
 from typing import Callable
-from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-from 前端.配置.界面配置 import 界面配置
 
-# *** 用户指定变量 - AI不得修改 ***
+import flet as ft
+
+from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
+from 前端.用户设置界面.配置.界面配置 import 界面配置
+
+
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
+# （用户未指定变量）
 # *********************************
 
 
@@ -32,34 +29,17 @@ class Button:
     
     @staticmethod
     def create(
-        text: str = "按钮",
-        icon: str = None,
-        style: str = "text",
-        selected: bool = False,
-        on_click: Callable = None,
-        width: int = None,
-        height: int = None,
-        enabled: bool = True,
-        toggle_mode: bool = False,
+        text: str="按钮",
+        icon: str="",
+        style: str="text",
+        selected: bool=False,
+        on_click: Callable=None,
+        width: int=120,
+        height: int=36,
+        enabled: bool=True,
+        toggle_mode: bool=False,
         **kwargs
     ) -> ft.Control:
-        """
-        创建按钮
-        
-        参数:
-            text: 按钮文本
-            icon: 图标名称（可选）
-            style: 按钮样式（text/outlined/icon/nav）
-            selected: 选中状态
-            on_click: 点击回调
-            width: 宽度（可选）
-            height: 高度（可选）
-            enabled: 启用状态
-            toggle_mode: 是否启用切换模式（点击切换选中状态）
-        
-        返回:
-            ft.Control: 创建的按钮控件
-        """
         text_color = ThemeProvider.get_color("text_primary")
         accent_color = ThemeProvider.get_color("accent")
         bg_secondary = ThemeProvider.get_color("bg_secondary")
@@ -80,12 +60,11 @@ class Button:
         current_selected = [selected]
         
         if style == "icon":
-            # 处理字符串类型的icon参数
-            if isinstance(icon, str):
+            if isinstance(icon, str) and icon:
                 icon_upper = icon.upper()
                 actual_icon = getattr(ft.Icons, icon_upper, ft.Icons.SETTINGS)
             else:
-                actual_icon = icon
+                actual_icon = ft.Icons.SETTINGS
             
             icon_size_large = 配置.获取尺寸("图标", "size_large") or 24
             icon_btn = ft.IconButton(
@@ -138,7 +117,6 @@ class Button:
             return icon_btn
         
         def create_content(is_selected):
-            # 处理字符串类型的icon参数
             icon_control = None
             if icon:
                 if isinstance(icon, str):
@@ -146,7 +124,6 @@ class Button:
                     actual_icon = getattr(ft.Icons, icon_upper, ft.Icons.SETTINGS)
                 else:
                     actual_icon = icon
-                # 正确的Icon创建方式：第一个参数是图标，不是name参数
                 icon_control = ft.Icon(actual_icon, color=selected_color if is_selected else text_color, size=icon_size)
             
             if icon_control:
@@ -163,7 +140,6 @@ class Button:
                 return ft.Text(text, color=selected_color if is_selected else text_color, size=14, weight=ft.FontWeight.NORMAL)
         
         if style == "text" or style == "nav":
-            # Win11风格阴影：更柔和、更自然
             shadow = ft.BoxShadow(
                 spread_radius=0,
                 blur_radius=4,
@@ -176,9 +152,9 @@ class Button:
                 width=width,
                 height=height or button_height,
                 bgcolor=selected_bgcolor if current_selected[0] else bg_secondary,
-                border=ft.border.all(1, accent_color) if not current_selected[0] else None,
-                border_radius=ft.border_radius.all(button_radius),
-                padding=ft.padding.symmetric(horizontal=padding_h, vertical=padding_v),
+                border=ft.Border.all(1, accent_color) if not current_selected[0] else None,
+                border_radius=ft.BorderRadius.all(button_radius),
+                padding=ft.Padding.symmetric(horizontal=padding_h, vertical=padding_v),
                 alignment=ft.Alignment(-1, 0) if style == "nav" else ft.Alignment(0, 0),
                 ink=True,
                 animate=animate_duration,
@@ -189,7 +165,7 @@ class Button:
             def update_button_state():
                 is_selected = current_selected[0]
                 container.bgcolor = selected_bgcolor if is_selected else bg_secondary
-                container.border = None if is_selected else ft.border.all(1, accent_color)
+                container.border = None if is_selected else ft.Border.all(1, accent_color)
                 container.content = create_content(is_selected)
                 try:
                     container.update()
@@ -209,11 +185,11 @@ class Button:
                 if e.data == "true":
                     if not current_selected[0]:
                         container.bgcolor = bg_hover
-                        container.border = ft.border.all(1, accent_color)
+                        container.border = ft.Border.all(1, accent_color)
                 else:
                     if not current_selected[0]:
                         container.bgcolor = bg_secondary
-                        container.border = ft.border.all(1, accent_color)
+                        container.border = ft.Border.all(1, accent_color)
                 try:
                     container.update()
                 except:
@@ -267,7 +243,7 @@ class Button:
                     shape=ft.RoundedRectangleBorder(radius=button_radius),
                     side=ft.BorderSide(width=1, color=selected_bgcolor if current_selected[0] else accent_color),
                     bgcolor=selected_bgcolor if current_selected[0] else "transparent",
-                    padding=ft.padding.symmetric(horizontal=padding_h + 4, vertical=padding_v),
+                    padding=ft.Padding.symmetric(horizontal=padding_h + 4, vertical=padding_v),
                 ),
                 disabled=not enabled,
             )
@@ -316,8 +292,4 @@ class Button:
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    配置 = 界面配置()
-    ThemeProvider.initialize(配置)
-    def main(page: ft.Page):
-        page.add(Button.create())
-    ft.run(main)
+    ft.run(lambda page: page.add(Button.create()))

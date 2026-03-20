@@ -21,8 +21,8 @@
 
 import flet as ft
 from typing import Callable
-from 前端.配置.界面配置 import 界面配置
-from 前端.配置.配置管理器 import ConfigManager
+from 前端.用户设置界面.配置.界面配置 import 界面配置
+from 前端.用户设置界面.配置.配置管理器 import ConfigManager
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.组件模块.通用卡片 import UniversalCard
 from 前端.用户设置界面.组件模块.功能容器 import FunctionContainer
@@ -212,21 +212,21 @@ class AccountInterface:
                 value=name_value,
                 card_name=card_name,
                 config_key="名称",
-                hint_text="请输入统帅名称",
+                hint_text="输入统帅名称",
             )
             
             account_control = create_input_control(
                 value=account_value,
                 card_name=card_name,
                 config_key="账号",
-                hint_text="请输入统帅账号",
+                hint_text="输入统帅账号",
             )
             
             password_control = create_input_control(
                 value=password_value,
                 card_name=card_name,
                 config_key="密码",
-                hint_text="请输入统帅密码",
+                hint_text="输入统帅密码",
                 password=True,
             )
             

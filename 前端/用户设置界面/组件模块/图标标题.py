@@ -1,226 +1,196 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：图标标题 | 层级：组件模块层
-设计思路：
-    调用标签文本模块实现图标标题布局。
-    以分割线为基准的布局模式。
-    分割线高度可外部传入，与卡片高度联动。
-    除分割线外，所有控件自适应。
+模块名称：图标标题
 
-功能：
-    1. 图标：上方
-    2. 主标题：下方（调用标签文本模块）
-    3. 分割线：垂直分割线（可选）
-    4. 副标题：分割线左侧（可选）
-    5. 状态切换：内置切换逻辑
+设计思路及联动逻辑:
+    所有控件自适应。
+    1. 布局基准: 分割线为基准
+    2. 图标布局:
+       - 纵中线到分割线左侧距离 = 2个主题文字宽度
+       - 下部和分割线横中线对齐
+    3. 主标题布局:
+       - 纵中线与图标纵中线对齐
+       - 上部与图标下部对齐
+    4. 副标题布局: 左下角和分割线右下角对齐
 
-布局规则：
-    0. 全部控件边距为0
-    1. 除分割线外，所有控件自适应
-    2. 以分割线为基准
-    3. 图标/主标题上下布置且中间对齐，交线与分割线中点水平对齐
-    4. 副标题右侧和分割线左侧重合
-    5. 副标题下部和主标题下部水平对齐
-
-对外接口：
-    - create(): 创建图标标题
-    - set_state(): 设置状态
-    - toggle_state(): 切换状态
-    - get_state(): 获取状态
-    - set_subtitle(): 设置副标题
+模块隔离原则:
+    1. 不直接创建被调用模块的内容
+    2. 不覆盖被调用模块的计算结果
+    3. 用户指定变量除外
 """
 
 import flet as ft
-from typing import Callable, Optional
+from typing import Callable
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-from 前端.用户设置界面.单元模块.文本标签 import LabelText
-from 前端.配置.界面配置 import 界面配置
+from 前端.用户设置界面.单元模块.分割线 import Divider
+from 前端.用户设置界面.单元模块.容器图标 import ContainerIcon
+from 前端.用户设置界面.单元模块.容器标题 import ContainerTitle
+from 前端.用户设置界面.配置.界面配置 import 界面配置
 
-# *** 用户指定变量 - AI不得修改 ***
-DEFAULT_ICON_SIZE = 24
-DEFAULT_TITLE_SIZE = 14
-DEFAULT_SUBTITLE_SIZE = 12
-ICON_TITLE_SPACING = 4
-ICON_AREA_WIDTH = 98
-DEFAULT_DIVIDER_WIDTH = 2
-CONTAINER_WIDTH = 10
+
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
+USER_TITLE_SIZE = 16  # 用户指定主标题文字大小
+USER_SUBTITLE_SIZE = USER_TITLE_SIZE - 4  # 用户指定副标题文字大小
+USER_ICON_SIZE = USER_TITLE_SIZE + 10  # 用户指定图标大小
 # *********************************
 
-
 class IconTitle:
-    """图标标题 - 调用标签文本模块实现布局"""
+    """图标标题 - 调用单元模块实现布局"""
     
     @staticmethod
     def create(
-        title: str,
-        icon: str = None,
+        title: str = "测试标题",
+        icon: str = "HOME",
         enabled: bool = True,
         on_state_change: Callable[[bool], None] = None,
         on_click: Callable = None,
-        subtitle: str = None,
+        subtitle: str = "这是副标题",
         divider_height: int = None,
         divider_left: int = None,
-        **kwargs
+        divider: ft.Container = None
     ) -> ft.Container:
-        """
-        创建图标标题组件
-        
-        参数：
-            title: 标题文字
-            icon: 图标名称（字符串）
-            enabled: 初始启用状态
-            on_state_change: 状态变化回调函数
-            on_click: 点击回调函数（可选）
-            subtitle: 副标题（可选）
-            divider_height: 分割线高度（可选）
-            divider_left: 分割线左侧位置（可选）
-        
-        返回：
-            ft.Container: 包含图标标题的容器
-        """
         配置 = 界面配置()
-        theme_colors = {
-            "accent": ThemeProvider.get_color("accent"),
-            "text_primary": ThemeProvider.get_color("text_primary"),
-            "text_secondary": ThemeProvider.get_color("text_secondary"),
-            "border": ThemeProvider.get_color("border"),
-        }
-        
-        ui_config = 配置.定义尺寸.get("界面", {})
-        card_padding = ui_config.get("card_padding", 16)
+        ThemeProvider.initialize(配置)
         
         line_height = divider_height if divider_height is not None else 100
         
+        theme_colors = {
+            "accent": ThemeProvider.get_color("accent"),
+        }
+        
         icon_control = None
         if icon:
-            if isinstance(icon, str):
-                icon_name = icon.upper()
-                icon_value = getattr(ft.Icons, icon_name, ft.Icons.SETTINGS)
-            else:
-                icon_value = icon
+            icon_name = icon.upper()
+            icon_value = getattr(ft.Icons, icon_name, ft.Icons.SETTINGS)
             icon_control = ft.Icon(
                 icon_value,
-                size=DEFAULT_ICON_SIZE,
+                size=USER_ICON_SIZE,
                 color=theme_colors["accent"],
                 opacity=1.0 if enabled else 0.4,
             )
         
-        title_control = LabelText.create(
-            text=title,
-            role="primary",
+        # 创建标题容器
+        title_container_content = ContainerTitle.create(
+            title=title,
+            text_size=USER_TITLE_SIZE,
+            padding=3,
             enabled=enabled,
+            role="h3",
         )
+        title_container_width = title_container_content.width
         
+        # 创建副标题容器
         subtitle_control = None
         subtitle_actual_height = 0
+        subtitle_actual_width = 0
         if subtitle:
-            subtitle_actual_height = DEFAULT_SUBTITLE_SIZE * 1.5
-            subtitle_control = ft.Container(
-                content=ft.Text(
-                    value=subtitle,
-                    color=theme_colors["text_secondary"],
-                    size=DEFAULT_SUBTITLE_SIZE,
-                    opacity=1.0 if enabled else 0.4,
-                ),
-                height=subtitle_actual_height,
-                alignment=ft.Alignment(-1, 1),
+            subtitle_container_content = ContainerTitle.create(
+                title=subtitle,
+                text_size=USER_SUBTITLE_SIZE,
+                padding=3,
+                enabled=enabled,
+                role="caption",
             )
+            subtitle_actual_width = subtitle_container_content.width
+            subtitle_actual_height = subtitle_container_content.height
+            subtitle_control = subtitle_container_content
         
-        divider = ft.Container(
-            width=DEFAULT_DIVIDER_WIDTH,
-            height=line_height,
-            bgcolor=theme_colors["accent"],
-            opacity=0.7 if enabled else 0.2,
-            border_radius=ft.BorderRadius.all(1),
-        )
-        
-        icon_height = DEFAULT_ICON_SIZE if icon_control else 0
-        title_height = DEFAULT_TITLE_SIZE
-        subtitle_height = subtitle_actual_height if subtitle else 0
-        
-        divider_width = CONTAINER_WIDTH
-        
-        icon_title_total_height = icon_height + (ICON_TITLE_SPACING if icon_control else 0) + title_height
-        
-        icon_title_center_y = line_height / 2
-        
-        icon_title_top = icon_title_center_y - icon_title_total_height / 2
-        
-        title_top = icon_title_top + icon_height + (ICON_TITLE_SPACING if icon_control else 0)
-        
-        subtitle_top = line_height - subtitle_height
+        if divider is None:
+            divider = Divider.create(
+                config=配置,
+                height=line_height,
+                enabled=enabled
+            )
         
         stack_children = []
         
-        if divider:
-            # 计算分割线垂直居中的top位置
-            divider_top = (line_height - divider.height) / 2
-            divider_container = ft.Container(
-                content=divider,
-                left=ICON_AREA_WIDTH,
-                top=divider_top,
-            )
-            stack_children.append(divider_container)
+        divider_position = divider_left if divider_left is not None else 200
         
-        icon_title_items = [title_control]
-        icon_title_column = ft.Column(
-            icon_title_items,
-            spacing=ICON_TITLE_SPACING,
-            horizontal_alignment=ft.CrossAxisAlignment.END,
-            alignment=ft.MainAxisAlignment.START,
-            tight=True,
-        )
+        actual_divider_width = divider.width if hasattr(divider, 'width') and divider.width is not None else 100
+        actual_divider_height = divider.height if hasattr(divider, 'height') and divider.height is not None else line_height
         
-        title_center_to_divider = 50
-        title_text_width = len(title) * DEFAULT_TITLE_SIZE
-        title_container_left = ICON_AREA_WIDTH - title_text_width / 2 - title_center_to_divider
-        
-        icon_title_container = ft.Container(
-            content=icon_title_column,
-            left=title_container_left,
-            top=title_top,
-        )
-        stack_children.append(icon_title_container)
-        
+        # 创建图标容器
         if icon_control:
-            icon_center_to_divider = 50
-            icon_left = ICON_AREA_WIDTH - DEFAULT_ICON_SIZE / 2 - icon_center_to_divider
-            icon_top = title_top - DEFAULT_ICON_SIZE - ICON_TITLE_SPACING
+            icon_container_content = ContainerIcon.create(
+                icon=icon_control,
+                icon_size=USER_ICON_SIZE,
+                padding=3,
+                enabled=enabled,
+            )
+            icon_container_width = icon_container_content.width
+            icon_container_height = icon_container_content.height
+        else:
+            icon_container_width = 0
+            icon_container_height = 0
+            icon_container_content = None
+        
+        # 计算图标容器位置
+        two_char_width = 2 * USER_TITLE_SIZE
+        icon_center_x = divider_position - two_char_width
+        
+        icon_bottom_y = actual_divider_height / 2
+        icon_top_y = icon_bottom_y - icon_container_height
+        icon_left_x = icon_center_x - icon_container_width / 2
+        
+        # 计算标题容器位置
+        title_center_x = icon_center_x
+        title_left_x = title_center_x - title_container_width / 2
+        title_top_y = icon_bottom_y
+        
+        # 添加图标容器
+        if icon_container_content:
             icon_container = ft.Container(
-                content=icon_control,
-                left=icon_left,
-                top=icon_top,
+                content=icon_container_content,
+                left=icon_left_x,
+                top=icon_top_y,
             )
             stack_children.append(icon_container)
         
+        # 添加标题容器
+        title_container = ft.Container(
+            content=title_container_content,
+            left=title_left_x,
+            top=title_top_y,
+        )
+        stack_children.append(title_container)
+        
+        # 添加分割线
+        divider_container = ft.Container(
+            content=divider,
+            left=divider_position,
+            top=0,
+        )
+        stack_children.append(divider_container)
+        
+        # 添加副标题
         if subtitle_control:
             subtitle_container = ft.Container(
                 content=subtitle_control,
-                left=ICON_AREA_WIDTH + divider_width + divider_width,
-                top=subtitle_top,
+                left=divider_position + actual_divider_width,
+                top=actual_divider_height - subtitle_actual_height,
+                width=subtitle_actual_width,
+                height=subtitle_actual_height,
+                alignment=ft.Alignment(-1, 1),
             )
             stack_children.append(subtitle_container)
         
-        subtitle_width = 100 if subtitle else 0
-        overall_width = ICON_AREA_WIDTH + divider_width + divider_width + subtitle_width
-        
+        # 添加点击区域
+        click_area_width = title_container_width + 20
         click_area = ft.Container(
-            width=ICON_AREA_WIDTH,
-            height=line_height,
+            width=click_area_width,
+            height=actual_divider_height,
         )
         stack_children.append(click_area)
         
         content_stack = ft.Stack(
             stack_children,
-            width=overall_width,
-            height=line_height,
+            height=actual_divider_height,
             clip_behavior=ft.ClipBehavior.NONE,
         )
         
         container = ft.Container(
             content=content_stack,
-            height=line_height,
-            width=overall_width,
+            height=actual_divider_height,
             alignment=ft.Alignment(-1, -1),
         )
         
@@ -236,17 +206,22 @@ class IconTitle:
                 except:
                     pass
             
-            if title_control:
-                title_control.opacity = 1.0 if new_enabled else 0.4
+            if title_container_content:
+                title_container_content.content.opacity = 1.0 if new_enabled else 0.4
                 try:
-                    title_control.update()
+                    title_container_content.content.update()
                 except:
                     pass
             
             if divider:
-                divider.opacity = 0.7 if new_enabled else 0.2
                 try:
-                    divider.update()
+                    if hasattr(divider, 'content') and divider.content:
+                        if hasattr(divider.content, 'opacity'):
+                            divider.content.opacity = 0.7 if new_enabled else 0.2
+                            divider.content.update()
+                    elif hasattr(divider, 'opacity'):
+                        divider.opacity = 0.7 if new_enabled else 0.2
+                        divider.update()
                 except:
                     pass
             
@@ -290,9 +265,4 @@ class IconTitle:
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    配置 = 界面配置()
-    from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-    ThemeProvider.initialize(配置)
-    def main(page: ft.Page):
-        page.add(IconTitle.create(title="测试标题", icon="HOME", subtitle="这是副标题"))
-    ft.run(main)
+    ft.run(lambda page: page.add(IconTitle.create()))  # 只能更改此处**被测调用模块名称**
