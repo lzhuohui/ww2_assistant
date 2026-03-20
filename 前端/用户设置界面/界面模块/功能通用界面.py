@@ -1,68 +1,52 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：功能通用界面 | 层级：界面模块层
-设计思路：
+模块名称：功能通用界面
+设计思路及联动逻辑:
     通用的内容区域容器，用于承载各种具体页面。
-    使用通用容器统一风格。
-    使用统一的文本样式管理，确保文字视觉效果一致。
-功能列表：
-    1. 显示标题
-    2. 显示内容区域
-    3. 支持动态内容切换
-对外接口：
-    - create(): 创建功能通用界面
+    1. 使用通用容器统一风格
+    2. 支持动态内容切换
+模块隔离原则:
+    1. 不直接创建被调用模块的内容
+    2. 不覆盖被调用模块的计算结果
+    3. 用户指定变量除外
 """
 
-import flet as ft
 from typing import Callable
+
+import flet as ft
+
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.单元模块.通用容器 import GenericContainer
 from 前端.用户设置界面.单元模块.文本标签 import LabelText
 from 前端.用户设置界面.配置.界面配置 import 界面配置
 
-DEFAULT_WIDTH = 920
-DEFAULT_HEIGHT = 540
+
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
+USER_WIDTH = 920  # 默认宽度
+USER_HEIGHT = 540  # 默认高度
+# *********************************
 
 
 class ContentArea:
-    """功能通用界面 - 界面模块层"""
+    """功能通用界面 - 界面模块"""
     
     @staticmethod
     def create(
-        title: str = "设置",
-        icon: str = "SETTINGS",
-        content: ft.Control = None,
-        width: int = None,
-        height: int = None,
+        title: str="设置",
+        icon: str="SETTINGS",
+        content: ft.Control=None,
+        width: int=USER_WIDTH,
+        height: int=USER_HEIGHT,
         **kwargs
     ) -> ft.Container:
-        """
-        创建功能通用界面
-        
-        参数:
-            title: 标题
-            icon: 图标名称
-            content: 内容控件
-            width: 宽度
-            height: 高度
-        
-        返回:
-            ft.Container: 功能通用界面容器
-        """
         配置 = 界面配置()
         theme_colors = 配置.当前主题颜色
         sizes = 配置.定义尺寸
         
         text_primary = theme_colors.get("text_primary", "#FFFFFF")
-        text_secondary = theme_colors.get("text_secondary", "#CCCCCC")
-        
-        font_size_lg = sizes.get("字体", {}).get("font_size_lg", 16)
-        font_size_md = sizes.get("字体", {}).get("font_size_md", 14)
-        font_size_sm = sizes.get("字体", {}).get("font_size_sm", 12)
-        icon_size_medium = sizes.get("图标", {}).get("icon_size_md", 20)
         spacing_sm = sizes.get("间距", {}).get("spacing_sm", 8)
+        icon_size_medium = sizes.get("图标", {}).get("icon_size_md", 20)
         
-        # 创建标题行
         title_row = ft.Row(
             [
                 ft.Icon(ft.Icons.SETTINGS, color=text_primary, size=icon_size_medium),
@@ -103,19 +87,12 @@ class ContentArea:
         
         return GenericContainer.create(
             content=main_content,
-            width=width or DEFAULT_WIDTH,
-            height=height or DEFAULT_HEIGHT,
+            width=width,
+            height=height,
             padding=16,
         )
 
 
+# *** 调试逻辑 ***
 if __name__ == "__main__":
-    from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-    
-    配置 = 界面配置()
-    ThemeProvider.initialize(配置)
-    
-    def main(page: ft.Page):
-        page.add(ContentArea.create())
-    
-    ft.run(main)
+    ft.run(lambda page: page.add(ContentArea.create()))

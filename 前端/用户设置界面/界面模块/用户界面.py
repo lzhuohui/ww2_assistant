@@ -22,8 +22,8 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-DEFAULT_WIDTH = 280  # 默认宽度
-DEFAULT_HEIGHT = 80  # 默认高度
+USER_WIDTH = 280  # 默认宽度
+USER_HEIGHT = 80  # 默认高度
 # *********************************
 
 
@@ -37,8 +37,8 @@ class UserInfoCard:
         expire_days: int=7,
         on_click: Optional[Callable[[], None]]=None,
         on_avatar_text_change: Optional[Callable[[str], None]]=None,
-        width: int=DEFAULT_WIDTH,
-        height: int=DEFAULT_HEIGHT,
+        width: int=USER_WIDTH,
+        height: int=USER_HEIGHT,
         **kwargs
     ) -> ft.Container:
         配置 = 界面配置()

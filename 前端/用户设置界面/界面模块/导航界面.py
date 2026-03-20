@@ -1,63 +1,48 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：导航界面 | 层级：组件层
-设计思路：
+模块名称：导航界面
+设计思路及联动逻辑:
     提供导航功能，切换不同的设置页面。
-    使用通用容器统一风格。
-功能列表：
-    1. 显示导航项列表
-    2. 支持选中状态高亮
-    3. 支持点击切换
-对外接口：
-    - create(): 创建导航界面
+    1. 使用通用容器统一风格
+    2. 支持选中状态高亮和点击切换
+模块隔离原则:
+    1. 不直接创建被调用模块的内容
+    2. 不覆盖被调用模块的计算结果
+    3. 用户指定变量除外
 """
 
+from typing import Callable, Dict, List
+
 import flet as ft
-from typing import List, Dict, Callable
+
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.单元模块.通用容器 import GenericContainer
 from 前端.用户设置界面.组件模块.导航按钮 import NavButton
 from 前端.用户设置界面.配置.界面配置 import 界面配置
 
-# *** 用户指定变量 - AI不得修改 ***
-DEFAULT_WIDTH = 280
-DEFAULT_HEIGHT = 400
+
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
+USER_WIDTH = 280  # 默认宽度
+USER_HEIGHT = 400  # 默认高度
 # *********************************
 
 
 class NavBar:
-    """导航界面 - 组件层"""
+    """导航界面 - 组件模块"""
     
     @staticmethod
     def create(
-        items: List[Dict] = None,
-        selected_index: int = 0,
-        on_select: Callable[[int], None] = None,
-        width: int = None,
-        height: int = None,
+        items: List[Dict]=None,
+        selected_index: int=0,
+        on_select: Callable[[int], None]=None,
+        width: int=USER_WIDTH,
+        height: int=USER_HEIGHT,
         **kwargs
     ) -> ft.Container:
-        """
-        创建导航界面
-        
-        参数:
-            items: 导航项列表，每项为字典 {"text": "显示文字", "icon": "图标名称"}
-            selected_index: 当前选中项索引
-            on_select: 选择回调，参数为索引
-            width: 宽度（默认280）
-            height: 高度（默认390）
-        
-        返回:
-            ft.Container: 导航界面容器
-        """
         配置 = 界面配置()
-        
-        container_width = width if width is not None else DEFAULT_WIDTH
-        container_height = height if height is not None else DEFAULT_HEIGHT
         
         spacing_xs = 配置.获取尺寸("间距", "spacing_xs")
         spacing_sm = 配置.获取尺寸("间距", "spacing_sm")
-        # Win11风格：导航按钮间距更紧凑
         nav_padding = 配置.获取尺寸("间距", "spacing_sm")
         nav_button_spacing = 配置.获取尺寸("间距", "spacing_xs") or 4
         
@@ -79,8 +64,7 @@ class NavBar:
         nav_buttons = []
         
         def handle_nav_click(index: int):
-            nonlocal current_selected
-            current_selected = index
+            current_selected[0] = index
             for i, btn in enumerate(nav_buttons):
                 btn.set_selected(i == index)
             if on_select:
@@ -92,11 +76,10 @@ class NavBar:
                 icon=item.get("icon", ft.Icons.CHEVRON_RIGHT),
                 selected=(i == selected_index),
                 on_click=lambda e, idx=i: handle_nav_click(idx),
-                width=container_width - spacing_sm * 2,
+                width=width - spacing_sm * 2,
             )
             nav_buttons.append(btn)
         
-        # Win11风格：导航按钮列表，间距紧凑
         content = ft.Column(
             nav_buttons,
             spacing=nav_button_spacing,
@@ -104,8 +87,8 @@ class NavBar:
         
         container = GenericContainer.create(
             content=content,
-            width=container_width,
-            height=container_height,
+            width=width,
+            height=height,
             padding=nav_padding,
             **kwargs
         )
@@ -115,8 +98,4 @@ class NavBar:
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    配置 = 界面配置()
-    ThemeProvider.initialize(配置)
-    def main(page: ft.Page):
-        page.add(NavBar.create())
-    ft.run(main)
+    ft.run(lambda page: page.add(NavBar.create()))
