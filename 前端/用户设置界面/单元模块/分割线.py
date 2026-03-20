@@ -19,10 +19,15 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-USER_CONTAINER_WIDTH = 10
-USER_CONTAINER_HEIGHT = 100
-USER_LINE_WIDTH = 5
+USER_CONTAINER_WIDTH = 10  # 容器宽度
+USER_CONTAINER_HEIGHT = 100  # 容器高度
+USER_LINE_WIDTH = 5  # 分割线宽度
 # *********************************
+
+# 默认值常量 - 供调用者获取
+DEFAULT_CONTAINER_WIDTH = USER_CONTAINER_WIDTH
+DEFAULT_CONTAINER_HEIGHT = USER_CONTAINER_HEIGHT
+DEFAULT_LINE_WIDTH = USER_LINE_WIDTH
 
 
 class Divider:

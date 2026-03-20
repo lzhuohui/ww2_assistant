@@ -23,8 +23,14 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-# （用户未指定变量）
+USER_WIDTH = 120  # 默认输入框宽度
+USER_HEIGHT = 32  # 默认输入框高度
 # *********************************
+
+# 默认值常量 - 供调用者获取
+DEFAULT_WIDTH = USER_WIDTH
+DEFAULT_HEIGHT = USER_HEIGHT
+DEFAULT_HINT_TEXT = "请输入"
 
 
 class Input:

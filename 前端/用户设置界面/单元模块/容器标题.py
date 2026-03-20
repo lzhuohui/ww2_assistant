@@ -30,6 +30,11 @@ USER_TEXT_SIZE = 16  # 文字大小
 USER_PADDING = 3  # 边距
 # *********************************
 
+# 默认值常量 - 供调用者获取
+DEFAULT_TEXT = "标题"
+DEFAULT_TEXT_SIZE = USER_TEXT_SIZE
+DEFAULT_PADDING = USER_PADDING
+
 
 class ContainerTitle:
     """容器标题 - 标题在容器中居中"""

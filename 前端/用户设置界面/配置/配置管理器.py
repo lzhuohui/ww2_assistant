@@ -36,6 +36,10 @@ from .账号配置 import 账号卡片配置
 from .任务配置 import 任务卡片配置
 
 
+# 配置版本号
+CONFIG_VERSION = "1.0.0"
+
+
 class ConfigManager:
     """配置管理器 - 统一管理所有配置（即时保存）"""
     
@@ -203,6 +207,27 @@ class ConfigManager:
                 values[config_key] = self.get_value(card_name, config_key)
         
         return values
+    
+    def get_version(self) -> str:
+        """获取配置版本号"""
+        return self.user_config.get("__version__", "0.0.0")
+    
+    def migrate_config(self):
+        """配置迁移（版本升级时自动迁移）"""
+        current_version = self.get_version()
+        
+        if current_version == CONFIG_VERSION:
+            return
+        
+        # 版本迁移逻辑
+        if current_version < "1.0.0":
+            # 0.x -> 1.0.0 迁移
+            pass
+        
+        # 更新版本号
+        self.user_config["__version__"] = CONFIG_VERSION
+        self._save_user_config()
+        print(f"配置已从 {current_version} 迁移到 {CONFIG_VERSION}")
 
 
 配置管理器 = ConfigManager

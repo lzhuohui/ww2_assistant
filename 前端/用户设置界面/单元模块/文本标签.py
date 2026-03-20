@@ -20,8 +20,13 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-# （用户未指定变量）
+USER_SIZE = 14  # 默认字体大小
 # *********************************
+
+# 默认值常量 - 供调用者获取
+DEFAULT_TEXT = "文本标签示例"
+DEFAULT_ROLE = "body"
+DEFAULT_SIZE = USER_SIZE
 
 
 class LabelText:

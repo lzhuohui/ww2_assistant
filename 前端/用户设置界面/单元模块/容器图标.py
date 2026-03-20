@@ -23,9 +23,14 @@ import flet as ft
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-USER_ICON_SIZE = 20
-USER_PADDING = 3
+USER_ICON_SIZE = 20  # 图标大小
+USER_PADDING = 3  # 边距
 # *********************************
+
+# 默认值常量 - 供调用者获取
+DEFAULT_ICON = "HOME"
+DEFAULT_ICON_SIZE = USER_ICON_SIZE
+DEFAULT_PADDING = USER_PADDING
 
 
 class ContainerIcon:

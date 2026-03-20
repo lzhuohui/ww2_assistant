@@ -152,6 +152,35 @@ class StateProvider:
         """
         if key in cls._listeners:
             del cls._listeners[key]
+    
+    @classmethod
+    def notify_all(cls):
+        """
+        通知所有监听者（触发所有监听器）
+        """
+        for key, listeners in cls._listeners.items():
+            current_value = cls._state.get(key)
+            for listener in listeners:
+                listener(current_value, current_value)
+    
+    @classmethod
+    def batch_update(cls, updates: Dict[str, Any]):
+        """
+        批量更新状态（更新完成后统一通知）
+        
+        参数:
+            updates: 状态更新字典
+        """
+        old_values = {}
+        for key, value in updates.items():
+            old_values[key] = cls._state.get(key)
+            cls._state[key] = value
+        
+        # 批量更新完成后统一通知
+        for key in updates:
+            if key in cls._listeners:
+                for listener in cls._listeners[key]:
+                    listener(updates[key], old_values[key])
 
 
 # ==================== 调试逻辑 ====================

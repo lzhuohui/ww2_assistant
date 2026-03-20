@@ -24,6 +24,11 @@ USER_WIDTH = 150  # 默认宽度
 USER_HEIGHT = 32  # 默认高度
 # *********************************
 
+# 默认值常量 - 供调用者获取
+DEFAULT_WIDTH = USER_WIDTH
+DEFAULT_HEIGHT = USER_HEIGHT
+DEFAULT_OPTIONS = ["选项A", "选项B", "选项C"]
+
 
 class Dropdown:
     """自定义下拉框 - 使用PopupMenuButton实现"""
