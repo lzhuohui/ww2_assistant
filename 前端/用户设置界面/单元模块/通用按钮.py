@@ -3,7 +3,7 @@
 模块名称：通用按钮
 设计思路及联动逻辑:
     提供通用按钮功能，支持多种按钮样式。
-    1. 支持文字按钮、轮廓按钮、图标按钮
+    1. 支持文字按钮、轮廓按钮、图标按钮、导航按钮
     2. 通过ThemeProvider获取主题，无需传入config
 模块隔离原则:
     1. 不直接创建被调用模块的内容
@@ -41,13 +41,15 @@ class Button:
         **kwargs
     ) -> ft.Control:
         text_color = ThemeProvider.get_color("text_primary")
+        text_secondary = ThemeProvider.get_color("text_secondary")
         accent_color = ThemeProvider.get_color("accent")
         bg_secondary = ThemeProvider.get_color("bg_secondary")
+        bg_card = ThemeProvider.get_color("bg_card")
         bg_hover = ThemeProvider.get_color("bg_hover")
         bg_pressed = ThemeProvider.get_color("bg_pressed")
         
         配置 = 界面配置()
-        animate_duration = 配置.获取尺寸("动画", "duration_fast")
+        animate_duration = 配置.获取尺寸("动画", "duration_fast") or 300
         button_height = 配置.获取尺寸("按钮", "default_height") or 36
         button_radius = 配置.获取尺寸("按钮", "default_border_radius") or 8
         icon_size = 配置.获取尺寸("按钮", "icon_size") or 18
@@ -56,7 +58,6 @@ class Button:
         selected_color = 配置.获取尺寸("按钮", "selected_color") or "#FFFFFF"
         
         selected_bgcolor = accent_color
-        
         current_selected = [selected]
         
         if style == "icon":
@@ -66,7 +67,6 @@ class Button:
             else:
                 actual_icon = ft.Icons.SETTINGS
             
-            icon_size_large = 配置.获取尺寸("图标", "size_large") or 24
             icon_btn = ft.IconButton(
                 icon=actual_icon,
                 on_click=on_click,
@@ -94,27 +94,111 @@ class Button:
                     on_click(e)
             
             icon_btn.on_click = icon_toggle
+            icon_btn.set_selected = lambda v: setattr(current_selected, '__setitem__', None) or current_selected.__setitem__(0, v) or setattr(icon_btn, 'icon_color', selected_color if v else text_color) or setattr(icon_btn.style, 'bgcolor', selected_bgcolor if v else "transparent") or (icon_btn.update() if icon_btn.page else None)
+            icon_btn.get_selected = lambda: current_selected[0]
+            icon_btn.toggle = lambda: icon_btn.set_selected(not current_selected[0])
             
-            def icon_set_selected(value: bool):
-                current_selected[0] = value
-                icon_btn.icon_color = selected_color if current_selected[0] else text_color
-                icon_btn.style.bgcolor = selected_bgcolor if current_selected[0] else "transparent"
+            return icon_btn
+        
+        if style == "nav":
+            actual_icon = None
+            if icon:
+                icon_upper = icon.upper()
+                actual_icon = getattr(ft.Icons, icon_upper, ft.Icons.SETTINGS)
+            
+            icon_control = ft.Icon(actual_icon, size=icon_size, color=accent_color) if actual_icon else None
+            text_control = ft.Text(
+                text,
+                color=selected_color if current_selected[0] else text_secondary,
+                size=14,
+                weight=ft.FontWeight.NORMAL,
+                expand=True
+            )
+            
+            content_row = ft.Row(
+                [icon_control, ft.Container(width=12), text_control] if icon_control else [text_control],
+                alignment=ft.MainAxisAlignment.START,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER
+            )
+            
+            bg_container = ft.Container(
+                bgcolor=selected_bgcolor if current_selected[0] else "transparent",
+                border_radius=button_radius,
+                animate=ft.Animation(animate_duration, ft.AnimationCurve.EASE_IN_OUT),
+                width=width if current_selected[0] else 0,
+                height=height,
+            )
+            
+            content_container = ft.Container(
+                content=content_row,
+                padding=padding_v,
+                width=width,
+            )
+            
+            stack = ft.Stack(
+                [bg_container, content_container],
+                width=width,
+                height=height,
+            )
+            
+            nav_container = ft.Container(
+                content=stack,
+                width=width,
+                height=height,
+                on_click=on_click,
+            )
+            
+            nav_container._selected = current_selected[0]
+            nav_container._bg_container = bg_container
+            nav_container._text_control = text_control
+            
+            def nav_set_selected(is_selected: bool):
+                nav_container._selected = is_selected
+                current_selected[0] = is_selected
+                if is_selected:
+                    bg_container.bgcolor = selected_bgcolor
+                    bg_container.width = width
+                    text_control.color = selected_color
+                else:
+                    bg_container.bgcolor = "transparent"
+                    bg_container.width = 0
+                    text_control.color = text_secondary
                 try:
-                    icon_btn.update()
+                    bg_container.update()
+                    text_control.update()
                 except:
                     pass
             
-            def icon_get_selected() -> bool:
-                return current_selected[0]
+            def nav_get_selected() -> bool:
+                return nav_container._selected
             
-            def icon_toggle_state():
-                icon_set_selected(not current_selected[0])
+            def nav_toggle(e=None):
+                nav_set_selected(not nav_container._selected)
+                if on_click:
+                    on_click(e)
             
-            icon_btn.set_selected = icon_set_selected
-            icon_btn.get_selected = icon_get_selected
-            icon_btn.toggle = icon_toggle_state
+            def nav_hover(e):
+                if not nav_container._selected:
+                    if e.data == "true":
+                        bg_container.bgcolor = bg_card
+                        bg_container.width = width
+                    else:
+                        bg_container.bgcolor = "transparent"
+                        bg_container.width = 0
+                    try:
+                        bg_container.update()
+                    except:
+                        pass
             
-            return icon_btn
+            nav_container.set_selected = nav_set_selected
+            nav_container.get_selected = nav_get_selected
+            nav_container.toggle = nav_toggle
+            nav_container.on_hover = nav_hover
+            
+            if selected:
+                nav_set_selected(True)
+            
+            return nav_container
         
         def create_content(is_selected):
             icon_control = None
@@ -128,166 +212,96 @@ class Button:
             
             if icon_control:
                 return ft.Row(
-                    [
-                        icon_control,
-                        ft.Text(text, color=selected_color if is_selected else text_color, size=14, weight=ft.FontWeight.NORMAL, expand=True),
-                    ],
+                    [icon_control, ft.Text(text, color=selected_color if is_selected else text_color, size=14, weight=ft.FontWeight.NORMAL, expand=True)],
                     spacing=8,
-                    alignment=ft.MainAxisAlignment.START if style == "nav" else ft.MainAxisAlignment.CENTER,
+                    alignment=ft.MainAxisAlignment.CENTER,
                     expand=True,
                 )
             else:
                 return ft.Text(text, color=selected_color if is_selected else text_color, size=14, weight=ft.FontWeight.NORMAL)
         
-        if style == "text" or style == "nav":
-            shadow = ft.BoxShadow(
-                spread_radius=0,
-                blur_radius=4,
-                color=ThemeProvider.get_color("shadow"),
-                offset=ft.Offset(0, 2),
-            )
-            
-            container = ft.Container(
-                content=create_content(current_selected[0]),
-                width=width,
-                height=height or button_height,
-                bgcolor=selected_bgcolor if current_selected[0] else bg_secondary,
-                border=ft.Border.all(1, accent_color) if not current_selected[0] else None,
-                border_radius=ft.BorderRadius.all(button_radius),
-                padding=ft.Padding.symmetric(horizontal=padding_h, vertical=padding_v),
-                alignment=ft.Alignment(-1, 0) if style == "nav" else ft.Alignment(0, 0),
-                ink=True,
-                animate=animate_duration,
-                shadow=shadow,
-                disabled=not enabled,
-            )
-            
-            def update_button_state():
-                is_selected = current_selected[0]
-                container.bgcolor = selected_bgcolor if is_selected else bg_secondary
-                container.border = None if is_selected else ft.Border.all(1, accent_color)
-                container.content = create_content(is_selected)
-                try:
-                    container.update()
-                except:
-                    pass
-            
-            def handle_click(e):
-                if toggle_mode:
-                    current_selected[0] = not current_selected[0]
-                    update_button_state()
-                if on_click:
-                    on_click(e)
-            
-            container.on_click = handle_click
-            
-            def handle_hover(e):
-                if e.data == "true":
-                    if not current_selected[0]:
-                        container.bgcolor = bg_hover
-                        container.border = ft.Border.all(1, accent_color)
-                else:
-                    if not current_selected[0]:
-                        container.bgcolor = bg_secondary
-                        container.border = ft.Border.all(1, accent_color)
-                try:
-                    container.update()
-                except:
-                    pass
-            
-            container.on_hover = handle_hover
-            
-            def handle_tap_down(e):
-                if not current_selected[0]:
-                    container.bgcolor = bg_pressed
-                    try:
-                        container.update()
-                    except:
-                        pass
-            
-            container.on_tap_down = handle_tap_down
-            
-            def handle_tap_up(e):
+        shadow = ft.BoxShadow(
+            spread_radius=0,
+            blur_radius=4,
+            color=ThemeProvider.get_color("shadow"),
+            offset=ft.Offset(0, 2),
+        )
+        
+        container = ft.Container(
+            content=create_content(current_selected[0]),
+            width=width,
+            height=height or button_height,
+            bgcolor=selected_bgcolor if current_selected[0] else bg_secondary,
+            border=ft.Border.all(1, accent_color) if not current_selected[0] else None,
+            border_radius=ft.BorderRadius.all(button_radius),
+            padding=ft.Padding.symmetric(horizontal=padding_h, vertical=padding_v),
+            alignment=ft.Alignment(0, 0),
+            ink=True,
+            animate=animate_duration,
+            shadow=shadow,
+            disabled=not enabled,
+        )
+        
+        def update_button_state():
+            is_selected = current_selected[0]
+            container.bgcolor = selected_bgcolor if is_selected else bg_secondary
+            container.border = None if is_selected else ft.Border.all(1, accent_color)
+            container.content = create_content(is_selected)
+            try:
+                container.update()
+            except:
+                pass
+        
+        def handle_click(e):
+            if toggle_mode:
+                current_selected[0] = not current_selected[0]
+                update_button_state()
+            if on_click:
+                on_click(e)
+        
+        container.on_click = handle_click
+        
+        def handle_hover(e):
+            if e.data == "true":
                 if not current_selected[0]:
                     container.bgcolor = bg_hover
-                    try:
-                        container.update()
-                    except:
-                        pass
-            
-            container.on_tap_up = handle_tap_up
-            
-            def set_selected(value: bool):
-                current_selected[0] = value
-                update_button_state()
-            
-            def get_selected() -> bool:
-                return current_selected[0]
-            
-            def toggle_state():
-                set_selected(not current_selected[0])
-            
-            container.set_selected = set_selected
-            container.get_selected = get_selected
-            container.toggle = toggle_state
-            
-            return container
-        else:
-            outlined_btn = ft.OutlinedButton(
-                content=create_content(current_selected[0]),
-                on_click=on_click,
-                width=width,
-                height=height,
-                style=ft.ButtonStyle(
-                    color=selected_color if current_selected[0] else text_color,
-                    shape=ft.RoundedRectangleBorder(radius=button_radius),
-                    side=ft.BorderSide(width=1, color=selected_bgcolor if current_selected[0] else accent_color),
-                    bgcolor=selected_bgcolor if current_selected[0] else "transparent",
-                    padding=ft.Padding.symmetric(horizontal=padding_h + 4, vertical=padding_v),
-                ),
-                disabled=not enabled,
-            )
-            
-            def outlined_toggle(e):
-                if toggle_mode:
-                    current_selected[0] = not current_selected[0]
-                    is_selected = current_selected[0]
-                    outlined_btn.style.color = selected_color if is_selected else text_color
-                    outlined_btn.style.side = ft.BorderSide(width=1, color=selected_bgcolor if is_selected else accent_color)
-                    outlined_btn.style.bgcolor = selected_bgcolor if is_selected else "transparent"
-                    outlined_btn.content = create_content(is_selected)
-                    try:
-                        outlined_btn.update()
-                    except:
-                        pass
-                if on_click:
-                    on_click(e)
-            
-            outlined_btn.on_click = outlined_toggle
-            
-            def outlined_set_selected(value: bool):
-                current_selected[0] = value
-                is_selected = current_selected[0]
-                outlined_btn.style.color = selected_color if is_selected else text_color
-                outlined_btn.style.side = ft.BorderSide(width=1, color=selected_bgcolor if is_selected else accent_color)
-                outlined_btn.style.bgcolor = selected_bgcolor if is_selected else "transparent"
-                outlined_btn.content = create_content(is_selected)
+                    container.border = ft.Border.all(1, accent_color)
+            else:
+                if not current_selected[0]:
+                    container.bgcolor = bg_secondary
+                    container.border = ft.Border.all(1, accent_color)
+            try:
+                container.update()
+            except:
+                pass
+        
+        container.on_hover = handle_hover
+        
+        def handle_tap_down(e):
+            if not current_selected[0]:
+                container.bgcolor = bg_pressed
                 try:
-                    outlined_btn.update()
+                    container.update()
                 except:
                     pass
-            
-            def outlined_get_selected() -> bool:
-                return current_selected[0]
-            
-            def outlined_toggle_state():
-                outlined_set_selected(not current_selected[0])
-            
-            outlined_btn.set_selected = outlined_set_selected
-            outlined_btn.get_selected = outlined_get_selected
-            outlined_btn.toggle = outlined_toggle_state
-            
-            return outlined_btn
+        
+        container.on_tap_down = handle_tap_down
+        
+        def handle_tap_up(e):
+            if not current_selected[0]:
+                container.bgcolor = bg_hover
+                try:
+                    container.update()
+                except:
+                    pass
+        
+        container.on_tap_up = handle_tap_up
+        
+        container.set_selected = lambda v: (current_selected.__setitem__(0, v), update_button_state())
+        container.get_selected = lambda: current_selected[0]
+        container.toggle = lambda: (current_selected.__setitem__(0, not current_selected[0]), update_button_state())
+        
+        return container
 
 
 # *** 调试逻辑 ***
