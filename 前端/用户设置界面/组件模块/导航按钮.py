@@ -102,8 +102,21 @@ class NavButton:
         else:
             text_control.color = text_secondary
         
+        if icon_control:
+            row_controls = [
+                ft.Container(width=USER_CONTENT_LEFT_MARGIN),
+                icon_control,
+                ft.Container(width=12),
+                text_control,
+            ]
+        else:
+            row_controls = [
+                ft.Container(width=USER_CONTENT_LEFT_MARGIN),
+                text_control,
+            ]
+        
         content_row = ft.Row(
-            [ft.Container(width=USER_CONTENT_LEFT_MARGIN), icon_control, ft.Container(width=12), text_control] if icon_control else [ft.Container(width=USER_CONTENT_LEFT_MARGIN), text_control],
+            row_controls,
             alignment=ft.MainAxisAlignment.START,
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
             width=button_width,
