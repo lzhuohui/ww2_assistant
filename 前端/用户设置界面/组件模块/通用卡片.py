@@ -108,7 +108,7 @@ class UniversalCard:
         
         left_container = ft.Container(
             content=icon_title,
-            top=0,
+            top=card_padding / 2,
         )
         
         stack_children = [left_container]
