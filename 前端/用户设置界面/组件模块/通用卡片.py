@@ -2,7 +2,7 @@
 """
 模块名称：通用卡片
 设计思路及联动逻辑:
-    装配模式：组合零件模块，协调交互。
+    组合零件模块，协调交互。
     1. 不直接操作零件内部控件
     2. 通过零件暴露的接口进行控制
     3. 支持多行控件布局和副标题
@@ -22,7 +22,7 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-USER_DIVIDER_LEFT = 80  # 分割线到卡片左侧的距离
+USER_DIVIDER_LEFT = 70  # 分割线到卡片左侧的距离
 # *********************************
 
 
@@ -108,7 +108,7 @@ class UniversalCard:
         
         left_container = ft.Container(
             content=icon_title,
-            top=card_padding / 2,
+            top=0,
         )
         
         stack_children = [left_container]
