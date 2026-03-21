@@ -16,18 +16,18 @@ from typing import Callable, Optional
 
 import flet as ft
 
-from 前端.用户设置界面.单元模块.通用按钮 import Button
-from 前端.用户设置界面.单元模块.卡片容器 import CardContainer
+from 前端.用户设置界面.单元模块.通用按钮 import Button, DEFAULT_WIDTH as BUTTON_DEFAULT_WIDTH, DEFAULT_HEIGHT as BUTTON_DEFAULT_HEIGHT
+from 前端.用户设置界面.单元模块.卡片容器 import CardContainer, DEFAULT_WIDTH as CARD_DEFAULT_WIDTH, DEFAULT_HEIGHT as CARD_DEFAULT_HEIGHT
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-USER_WIDTH = 240  # 默认宽度
-USER_HEIGHT = 34  # 默认高度
+USER_CARD_WIDTH = 200
+USER_CARD_HEIGHT = 50
 # *********************************
 
 # 默认值常量 - 供调用者获取
-DEFAULT_WIDTH = USER_WIDTH
-DEFAULT_HEIGHT = USER_HEIGHT
+DEFAULT_CARD_WIDTH = USER_CARD_WIDTH
+DEFAULT_CARD_HEIGHT = USER_CARD_HEIGHT
 
 
 class NavButtonWrapper:
@@ -55,27 +55,31 @@ class NavButton:
         icon: str="SETTINGS",
         selected: bool=False,
         on_click: Optional[Callable]=None,
-        width: int=DEFAULT_WIDTH,
-        height: int=DEFAULT_HEIGHT,
+        card_width: int=DEFAULT_CARD_WIDTH,
+        card_height: int=DEFAULT_CARD_HEIGHT,
         **kwargs
     ) -> NavButtonWrapper:
+        card_padding = 8
+        button_width = card_width - card_padding * 2
+        button_height = card_height - card_padding * 2
+        
         button = Button.create(
             text=text,
             icon=icon,
             style="nav",
             selected=selected,
             on_click=on_click,
-            width=width,
-            height=height,
+            width=button_width,
+            height=button_height,
             toggle_mode=True,
             **kwargs
         )
         
         container = CardContainer.create(
             content=button,
-            width=width + 16,
-            height=height + 16,
-            padding=8,
+            width=card_width,
+            height=card_height,
+            padding=card_padding,
         )
         
         return NavButtonWrapper(container, button)
@@ -83,4 +87,4 @@ class NavButton:
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    ft.run(lambda page: page.add(NavButton.create()))
+    ft.run(lambda page: page.add(NavButton.create().container))
