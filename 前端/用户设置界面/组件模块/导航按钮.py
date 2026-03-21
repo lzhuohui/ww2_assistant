@@ -26,8 +26,7 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
 USER_CARD_WIDTH = 300
-USER_CARD_HEIGHT =40
-USER_CONTENT_LEFT_MARGIN = 5  # 图标+标签距离按钮左侧的距离
+USER_CARD_HEIGHT = 40
 # *********************************
 
 # 导出默认值供调用者使用

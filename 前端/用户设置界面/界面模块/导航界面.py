@@ -25,6 +25,7 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 USER_WIDTH = 200
 USER_HEIGHT = 400
 USER_BUTTON_SPACING = 3  # 导航按钮间距
+USER_NAV_PADDING = 5  # 导航按钮阵列离容器周边的距离
 # *********************************
 
 
@@ -60,7 +61,7 @@ class NavBar:
             ]
         
         button_count = len(items)
-        card_height = (height - USER_BUTTON_SPACING * (button_count - 1)) // button_count
+        card_height = (height - USER_NAV_PADDING * 2 - USER_BUTTON_SPACING * (button_count - 1)) // button_count
         
         current_selected = [selected_index]
         nav_buttons = []
@@ -78,7 +79,7 @@ class NavBar:
                 icon=item.get("icon", ft.Icons.CHEVRON_RIGHT),
                 selected=(i == selected_index),
                 on_click=lambda e, idx=i: handle_nav_click(idx),
-                card_width=width - spacing_sm * 2,
+                card_width=width - USER_NAV_PADDING * 2,
                 card_height=card_height,
             )
             nav_buttons.append(btn)
