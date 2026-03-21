@@ -20,7 +20,7 @@ from 前端.用户设置界面.单元模块.文本标签 import LabelText
 
 DEFAULT_WIDTH = 1200
 DEFAULT_HEIGHT = 540
-DEFAULT_SPACING = 10
+DEFAULT_SPACING = 20
 
 
 class MainInterface:

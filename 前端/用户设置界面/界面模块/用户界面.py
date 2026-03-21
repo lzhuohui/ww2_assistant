@@ -16,6 +16,7 @@ from typing import Callable, Optional
 import flet as ft
 
 from 前端.用户设置界面.单元模块.通用容器 import GenericContainer
+from 前端.用户设置界面.单元模块.卡片容器 import CardContainer
 from 前端.用户设置界面.单元模块.用户头像 import Avatar
 from 前端.用户设置界面.单元模块.文本标签 import LabelText
 from 前端.用户设置界面.配置.界面配置 import 界面配置
@@ -23,7 +24,8 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
 USER_WIDTH = 280  # 默认宽度
-USER_HEIGHT = 80  # 默认高度
+USER_HEIGHT = 90  # 默认高度
+USER_CARD_MARGIN =5  # 卡片容器距离通用容器的边距
 # *********************************
 
 
@@ -53,7 +55,9 @@ class UserInfoCard:
         
         container_width = width
         container_height = height
-        item_padding = spacing_md
+        card_width = container_width - USER_CARD_MARGIN * 2
+        card_height = container_height - USER_CARD_MARGIN * 2
+        item_padding = USER_CARD_MARGIN
         avatar_size_medium = 48
         
         status_text = "已注册" if is_registered else f"试用剩余 {expire_days} 天"
@@ -98,20 +102,25 @@ class UserInfoCard:
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
         )
         
-        card_container = GenericContainer.create(
+        card_container = CardContainer.create(
             content=content,
+            width=card_width,
+            height=card_height,
+            padding=item_padding,
+        )
+        
+        outer_container = GenericContainer.create(
+            content=card_container,
             width=container_width,
             height=container_height,
-            padding=item_padding,
-            bgcolor=bg_card,
-            border_radius=card_radius,
+            padding=0,
             alignment=ft.Alignment(0, 0),
         )
         
         if on_click:
-            card_container.on_click = on_click
+            outer_container.on_click = on_click
         
-        return card_container
+        return outer_container
 
 
 # *** 调试逻辑 ***

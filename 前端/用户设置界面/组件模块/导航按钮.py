@@ -78,10 +78,8 @@ class NavButton:
         if icon:
             if isinstance(icon, str):
                 icon_upper = icon.upper()
-                actual_icon = getattr(ft.Icons, icon_upper, ft.Icons.SETTINGS)
-            else:
-                actual_icon = icon
-            icon_obj = ft.Icon(actual_icon, size=ICON_DEFAULT_SIZE, color=accent_color)
+                icon = getattr(ft.Icons, icon_upper, ft.Icons.SETTINGS)
+            icon_obj = ft.Icon(icon, size=ICON_DEFAULT_SIZE, color=accent_color)
             icon_control = ContainerIcon.create(
                 icon=icon_obj,
                 icon_size=ICON_DEFAULT_SIZE,
