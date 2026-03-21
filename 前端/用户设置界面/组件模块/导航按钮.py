@@ -90,6 +90,7 @@ class NavButton:
             text=text,
             role="body",
             size=TEXT_DEFAULT_SIZE,
+            weight=ft.FontWeight.W_500,
             enabled=True,
             win11_style=True,
             expand=True,
