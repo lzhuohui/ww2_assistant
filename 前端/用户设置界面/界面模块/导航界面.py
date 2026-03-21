@@ -17,7 +17,7 @@ import flet as ft
 
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.单元模块.通用容器 import GenericContainer
-from 前端.用户设置界面.组件模块.导航按钮 import NavButton, DEFAULT_CARD_WIDTH, DEFAULT_CARD_HEIGHT
+from 前端.用户设置界面.组件模块.导航按钮 import NavButton, USER_CARD_WIDTH, USER_CARD_HEIGHT
 from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
@@ -77,7 +77,7 @@ class NavBar:
                 selected=(i == selected_index),
                 on_click=lambda e, idx=i: handle_nav_click(idx),
                 card_width=width - spacing_sm * 2,
-                card_height=DEFAULT_CARD_HEIGHT,
+                card_height=USER_CARD_HEIGHT,
             )
             nav_buttons.append(btn)
         

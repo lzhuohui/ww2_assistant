@@ -29,9 +29,8 @@ USER_CARD_WIDTH = 200
 USER_CARD_HEIGHT = 50
 # *********************************
 
-# 默认值常量 - 供调用者获取
-DEFAULT_CARD_WIDTH = USER_CARD_WIDTH
-DEFAULT_CARD_HEIGHT = USER_CARD_HEIGHT
+# 导出默认值供调用者使用
+__all__ = ['NavButton', 'NavButtonWrapper', 'USER_CARD_WIDTH', 'USER_CARD_HEIGHT']
 
 
 class NavButtonWrapper:
@@ -59,8 +58,8 @@ class NavButton:
         icon: str="SETTINGS",
         selected: bool=False,
         on_click: Optional[Callable]=None,
-        card_width: int=DEFAULT_CARD_WIDTH,
-        card_height: int=DEFAULT_CARD_HEIGHT,
+        card_width: int=USER_CARD_WIDTH,
+        card_height: int=USER_CARD_HEIGHT,
         **kwargs
     ) -> NavButtonWrapper:
         card_padding = 8
