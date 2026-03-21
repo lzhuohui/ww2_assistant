@@ -71,6 +71,7 @@ class NavButton:
         accent_color = ThemeProvider.get_color("accent")
         text_secondary = ThemeProvider.get_color("text_secondary")
         selected_color = "#FFFFFF"
+        font_weight_semibold = 配置.获取尺寸("字重", "font_weight_semibold") or ft.FontWeight.W_500
         
         icon_control = None
         if icon:
@@ -90,7 +91,7 @@ class NavButton:
             text=text,
             role="body",
             size=TEXT_DEFAULT_SIZE,
-            weight=ft.FontWeight.W_500,
+            weight=font_weight_semibold,
             enabled=True,
             win11_style=True,
             expand=True,
