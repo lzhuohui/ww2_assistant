@@ -138,18 +138,21 @@ class Button:
                 animate=ft.Animation(animate_duration, ft.AnimationCurve.EASE_IN_OUT),
                 width=width if current_selected[0] else 0,
                 height=height,
+                alignment=ft.alignment.center,
             )
             
             content_container = ft.Container(
                 content=content_row,
                 padding=padding_v,
                 width=width,
+                alignment=ft.alignment.center,
             )
             
             stack = ft.Stack(
                 [bg_container, content_container],
                 width=width,
                 height=height,
+                alignment=ft.alignment.center,
             )
             
             nav_container = ft.Container(
