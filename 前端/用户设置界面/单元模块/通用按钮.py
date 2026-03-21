@@ -45,6 +45,7 @@ class Button:
         height: int=36,
         enabled: bool=True,
         toggle_mode: bool=False,
+        content: ft.Control=None,
         **kwargs
     ) -> ft.Control:
         text_color = ThemeProvider.get_color("text_primary")
@@ -109,28 +110,31 @@ class Button:
             return icon_btn
         
         if style == "nav":
-            actual_icon = None
-            if icon:
-                if isinstance(icon, str):
-                    icon_upper = icon.upper()
-                    actual_icon = getattr(ft.Icons, icon_upper, ft.Icons.SETTINGS)
-                else:
-                    actual_icon = icon
-            
-            icon_control = ft.Icon(actual_icon, size=icon_size, color=accent_color) if actual_icon else None
-            text_control = ft.Text(
-                text,
-                color=selected_color if current_selected[0] else text_secondary,
-                size=14,
-                weight=ft.FontWeight.NORMAL,
-                expand=True
-            )
-            
-            content_row = ft.Row(
-                [icon_control, ft.Container(width=12), text_control] if icon_control else [text_control],
-                alignment=ft.MainAxisAlignment.START,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER
-            )
+            if content is None:
+                actual_icon = None
+                if icon:
+                    if isinstance(icon, str):
+                        icon_upper = icon.upper()
+                        actual_icon = getattr(ft.Icons, icon_upper, ft.Icons.SETTINGS)
+                    else:
+                        actual_icon = icon
+                
+                icon_control = ft.Icon(actual_icon, size=icon_size, color=accent_color) if actual_icon else None
+                text_control = ft.Text(
+                    text,
+                    color=selected_color if current_selected[0] else text_secondary,
+                    size=14,
+                    weight=ft.FontWeight.NORMAL,
+                    expand=True
+                )
+                
+                content_row = ft.Row(
+                    [icon_control, ft.Container(width=12), text_control] if icon_control else [text_control],
+                    alignment=ft.MainAxisAlignment.START,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER
+                )
+            else:
+                content_row = content
             
             bg_container = ft.Container(
                 bgcolor=selected_bgcolor if current_selected[0] else "transparent",
@@ -164,7 +168,7 @@ class Button:
             
             nav_container._selected = current_selected[0]
             nav_container._bg_container = bg_container
-            nav_container._text_control = text_control
+            nav_container._has_external_content = content is not None
             
             def nav_set_selected(is_selected: bool):
                 nav_container._selected = is_selected
@@ -172,14 +176,11 @@ class Button:
                 if is_selected:
                     bg_container.bgcolor = selected_bgcolor
                     bg_container.width = width
-                    text_control.color = selected_color
                 else:
                     bg_container.bgcolor = "transparent"
                     bg_container.width = 0
-                    text_control.color = text_secondary
                 try:
                     bg_container.update()
-                    text_control.update()
                 except:
                     pass
             

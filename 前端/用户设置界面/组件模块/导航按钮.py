@@ -18,6 +18,10 @@ import flet as ft
 
 from 前端.用户设置界面.单元模块.通用按钮 import Button, DEFAULT_WIDTH as BUTTON_DEFAULT_WIDTH, DEFAULT_HEIGHT as BUTTON_DEFAULT_HEIGHT
 from 前端.用户设置界面.单元模块.卡片容器 import CardContainer, DEFAULT_WIDTH as CARD_DEFAULT_WIDTH, DEFAULT_HEIGHT as CARD_DEFAULT_HEIGHT
+from 前端.用户设置界面.单元模块.容器图标 import ContainerIcon, DEFAULT_ICON_SIZE as ICON_DEFAULT_SIZE
+from 前端.用户设置界面.单元模块.文本标签 import LabelText, DEFAULT_SIZE as TEXT_DEFAULT_SIZE
+from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
+from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
@@ -47,7 +51,7 @@ class NavButtonWrapper:
 
 
 class NavButton:
-    """导航按钮 - 基于通用按钮的导航专用封装，带卡片包装"""
+    """导航按钮 - 组装图标+文本，使用通用按钮和卡片包装"""
     
     @staticmethod
     def create(
@@ -63,9 +67,47 @@ class NavButton:
         button_width = card_width - card_padding * 2
         button_height = card_height - card_padding * 2
         
-        button = Button.create(
+        配置 = 界面配置()
+        ThemeProvider.initialize(配置)
+        accent_color = ThemeProvider.get_color("accent")
+        text_secondary = ThemeProvider.get_color("text_secondary")
+        selected_color = "#FFFFFF"
+        
+        icon_control = None
+        if icon:
+            if isinstance(icon, str):
+                icon_upper = icon.upper()
+                actual_icon = getattr(ft.Icons, icon_upper, ft.Icons.SETTINGS)
+            else:
+                actual_icon = icon
+            icon_obj = ft.Icon(actual_icon, size=ICON_DEFAULT_SIZE, color=accent_color)
+            icon_control = ContainerIcon.create(
+                icon=icon_obj,
+                icon_size=ICON_DEFAULT_SIZE,
+                padding=0,
+            )
+        
+        text_control = LabelText.create(
             text=text,
-            icon=icon,
+            role="body",
+            size=TEXT_DEFAULT_SIZE,
+            enabled=True,
+            win11_style=True,
+            expand=True,
+        )
+        if selected:
+            text_control.color = selected_color
+        else:
+            text_control.color = text_secondary
+        
+        content_row = ft.Row(
+            [icon_control, ft.Container(width=12), text_control] if icon_control else [text_control],
+            alignment=ft.MainAxisAlignment.START,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER
+        )
+        
+        button = Button.create(
+            content=content_row,
             style="nav",
             selected=selected,
             on_click=on_click,
