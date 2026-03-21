@@ -57,7 +57,7 @@ class Button:
         bg_selected = ThemeProvider.get_color("bg_selected")
         
         配置 = 界面配置()
-        animate_duration = 配置.获取尺寸("动画", "duration_fast") or 300
+        animate_duration = 配置.获取尺寸("动画", "duration_fast") or 167
         button_height = 配置.获取尺寸("按钮", "default_height") or 36
         button_radius = 配置.获取尺寸("按钮", "default_border_radius") or 8
         icon_size = 配置.获取尺寸("按钮", "icon_size") or 18

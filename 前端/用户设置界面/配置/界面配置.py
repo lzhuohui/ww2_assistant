@@ -29,17 +29,19 @@ class 界面配置:
     # ==================== 尺寸定义 ====================
     定义尺寸 = {
         "字体": {
-            "font_size_xs": 10,      # 微小文本（辅助信息、标签）
-            "font_size_sm": 12,      # 小号（次要文字、描述）
-            "font_size_md": 14,      # 中号（正文、按钮）
-            "font_size_lg": 16,      # 大号（小标题）
-            "font_size_xl": 20,      # 超大号（标题）
-            "font_size_xxl": 24,     # 特大号（页面标题）
-            "font_size_title": 28,   # 标题号（大标题）
+            "font_family": "Segoe UI Variable, Segoe UI, system-ui, -apple-system, sans-serif",
+            "font_family_mono": "Cascadia Code, Consolas, monospace",
+            "font_size_caption": 12,
+            "font_size_body": 14,
+            "font_size_body_large": 18,
+            "font_size_subtitle": 20,
+            "font_size_title": 28,
+            "font_size_title_large": 40,
+            "font_size_display": 68,
         },
         "字重": {
             "font_weight_normal": ft.FontWeight.NORMAL,
-            "font_weight_medium": ft.FontWeight.W_500,
+            "font_weight_semibold": ft.FontWeight.W_500,
             "font_weight_bold": ft.FontWeight.BOLD,
         },
         "间距": {
@@ -155,10 +157,14 @@ class 界面配置:
             },
         },
         "动画": {
-            "duration_fast": 150,
-            "duration_normal": 300,
-            "duration_slow": 500,
-            "curve": "EASE_OUT",
+            "duration_instant": 83,
+            "duration_fast": 167,
+            "duration_normal": 250,
+            "duration_slow": 333,
+            "curve_direct_in": "EASE_IN",
+            "curve_direct_out": "EASE_OUT",
+            "curve_point_to_point": "EASE_IN_OUT",
+            "curve_elastic": "ELASTIC_OUT",
         },
     }
     

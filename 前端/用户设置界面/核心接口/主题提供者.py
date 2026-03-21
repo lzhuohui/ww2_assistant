@@ -57,8 +57,9 @@ class ThemeProvider:
     @classmethod
     def _init_default_text_style(cls):
         """初始化默认文本样式"""
+        font_family = cls.get_size("字体", "font_family") or "Segoe UI Variable, Segoe UI, sans-serif"
         cls._default_text_style = {
-            "font_family": "Segoe UI Variable, Segoe UI, sans-serif",
+            "font_family": font_family,
             "size": 14,
             "weight": ft.FontWeight.W_400,
             "color": cls.get_color("text_primary"),
@@ -151,32 +152,35 @@ class ThemeProvider:
         获取Win11风格文本样式
         
         参数:
-            role: 文本角色 (h1, h2, h3, body, caption, small)
+            role: 文本角色 (display, title_large, title, subtitle, body_large, body, caption)
             size: 自定义字体大小
             weight: 自定义字体粗细
         
         返回:
             Dict[str, Any]: Win11风格文本样式
         """
-        # Win11风格文字规范
+        font_family = cls.get_size("字体", "font_family") or "Segoe UI Variable, Segoe UI, sans-serif"
+        
         style_map = {
-            "h1": {"size": 24, "weight": ft.FontWeight.W_600, "color": "text_primary", "line_height": 29},
-            "h2": {"size": 20, "weight": ft.FontWeight.W_600, "color": "text_primary", "line_height": 24},
-            "h3": {"size": 16, "weight": ft.FontWeight.W_500, "color": "text_primary", "line_height": 19},
+            "display": {"size": 68, "weight": ft.FontWeight.W_600, "color": "text_primary", "line_height": 82},
+            "title_large": {"size": 40, "weight": ft.FontWeight.W_600, "color": "text_primary", "line_height": 48},
+            "title": {"size": 28, "weight": ft.FontWeight.W_600, "color": "text_primary", "line_height": 34},
+            "subtitle": {"size": 20, "weight": ft.FontWeight.W_600, "color": "text_primary", "line_height": 24},
+            "body_large": {"size": 18, "weight": ft.FontWeight.W_400, "color": "text_primary", "line_height": 22},
             "body": {"size": 14, "weight": ft.FontWeight.W_400, "color": "text_primary", "line_height": 21},
             "caption": {"size": 12, "weight": ft.FontWeight.W_400, "color": "text_secondary", "line_height": 18},
-            "small": {"size": 11, "weight": ft.FontWeight.W_400, "color": "text_tertiary", "line_height": 16},
         }
         
         style = style_map.get(role, style_map["body"])
         custom_style = {
+            "font_family": font_family,
             "size": size or style["size"],
             "weight": weight or style["weight"],
             "color": cls.get_color(style["color"]),
             "line_height": style["line_height"],
         }
         
-        return cls.merge_text_style(custom_style)
+        return custom_style
 
 
 # ==================== 调试逻辑 ====================
@@ -195,7 +199,8 @@ if __name__ == "__main__":
     
     # 4. 测试获取尺寸
     print("\n=== 测试获取尺寸 ===")
-    print(f"获取尺寸 '字体.font_size_md': {ThemeProvider.get_size('字体', 'font_size_md')}")
+    print(f"获取尺寸 '字体.font_family': {ThemeProvider.get_size('字体', 'font_family')}")
+    print(f"获取尺寸 '字体.font_size_body': {ThemeProvider.get_size('字体', 'font_size_body')}")
     print(f"获取尺寸 '间距.spacing_md': {ThemeProvider.get_size('间距', 'spacing_md')}")
     print(f"获取尺寸 '圆角.radius_md': {ThemeProvider.get_size('圆角', 'radius_md')}")
     
@@ -212,7 +217,7 @@ if __name__ == "__main__":
     
     # 7. 测试获取Win11风格文本样式
     print("\n=== 测试获取Win11风格文本样式 ===")
-    roles = ["h1", "h2", "h3", "body", "caption", "small"]
+    roles = ["display", "title_large", "title", "subtitle", "body_large", "body", "caption"]
     for role in roles:
         style = ThemeProvider.get_win11_text_style(role)
         print(f"{role}: size={style['size']}, weight={style['weight']}, color={style['color']}")

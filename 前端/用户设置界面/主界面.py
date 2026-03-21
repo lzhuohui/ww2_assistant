@@ -72,7 +72,7 @@ class MainInterface:
                 [
                     LabelText.create(
                         text=nav_name,
-                        role="h1",
+                        role="title",
                         win11_style=True
                     ),
                     ft.Container(height=24),

@@ -77,8 +77,8 @@ class CardContainer:
             animation_config = config.定义尺寸.get("动画", {}) if config else {}
         except:
             animation_config = {}
-        animation_duration = animation_config.get("duration_fast", 150)
-        animation_curve = getattr(ft.AnimationCurve, animation_config.get("curve", "EASE_OUT"), ft.AnimationCurve.EASE_OUT)
+        animation_duration = animation_config.get("duration_fast", 167)
+        animation_curve = getattr(ft.AnimationCurve, animation_config.get("curve_direct_out", "EASE_OUT"), ft.AnimationCurve.EASE_OUT)
         
         card_border_radius = ui_config.get("card_radius", 8)
         card_border_width = ui_config.get("card_border_width", 1)
