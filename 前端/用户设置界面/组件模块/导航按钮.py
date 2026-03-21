@@ -60,11 +60,12 @@ class NavButton:
         on_click: Optional[Callable]=None,
         card_width: int=USER_CARD_WIDTH,
         card_height: int=USER_CARD_HEIGHT,
+        expand: bool=False,
         **kwargs
     ) -> NavButtonWrapper:
-        card_padding = 4
+        card_padding = 5
         button_width = card_width - card_padding * 2
-        button_height = card_height - card_padding * 2
+        button_height = None if expand else card_height - card_padding * 2
         
         配置 = 界面配置()
         ThemeProvider.initialize(配置)
@@ -103,14 +104,14 @@ class NavButton:
         
         if icon_control:
             row_controls = [
-                ft.Container(width=USER_CONTENT_LEFT_MARGIN),
+                ft.Container(width=card_padding), # 内容左侧边距
                 icon_control,
-                ft.Container(width=12),
+                ft.Container(width=card_padding), # 图标+标签整体左侧距离
                 text_control,
             ]
         else:
             row_controls = [
-                ft.Container(width=USER_CONTENT_LEFT_MARGIN),
+                ft.Container(width=card_padding),
                 text_control,
             ]
         
@@ -136,8 +137,9 @@ class NavButton:
         container = CardContainer.create(
             content=button,
             width=card_width,
-            height=card_height,
+            height=None if expand else card_height,
             padding=card_padding,
+            expand=expand,
             on_hover_enabled=False,
             alignment=ft.Alignment(-1, 0),
         )

@@ -11,7 +11,7 @@
     3. 用户指定变量除外
 """
 
-from typing import Callable, Dict, List
+from typing import Any, Callable, Dict, List
 
 import flet as ft
 
@@ -22,7 +22,7 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-USER_WIDTH = 200
+USER_WIDTH = 250
 USER_HEIGHT = 400
 USER_BUTTON_SPACING = 3  # 导航按钮间距
 USER_NAV_PADDING = 5  # 导航按钮阵列离容器周边的距离
@@ -38,13 +38,9 @@ class NavBar:
         selected_index: int=0,
         on_select: Callable[[int], None]=None,
         width: int=USER_WIDTH,
-        height: int=USER_HEIGHT,
         **kwargs
     ) -> ft.Container:
         配置 = 界面配置()
-        
-        spacing_sm = 配置.获取尺寸("间距", "spacing_sm")
-        nav_padding = 配置.获取尺寸("间距", "spacing_sm")
         
         if items is None:
             items = [
@@ -60,40 +56,37 @@ class NavBar:
                 {"text": "关于", "icon": ft.Icons.INFO},
             ]
         
-        button_count = len(items)
-        card_height = (height - USER_NAV_PADDING * 2 - USER_BUTTON_SPACING * (button_count - 1)) // button_count
-        
         current_selected = [selected_index]
         nav_buttons = []
         
         def handle_nav_click(index: int):
             current_selected[0] = index
-            for i, btn in enumerate(nav_buttons):
+            for i, btn in enumerate[Any](nav_buttons):
                 btn.set_selected(i == index)
             if on_select:
                 on_select(index)
         
-        for i, item in enumerate(items):
+        for i, item in enumerate[Dict](items):
             btn = NavButton.create(
                 text=item.get("text", f"导航项{i+1}"),
                 icon=item.get("icon", ft.Icons.CHEVRON_RIGHT),
                 selected=(i == selected_index),
                 on_click=lambda e, idx=i: handle_nav_click(idx),
                 card_width=width - USER_NAV_PADDING * 2,
-                card_height=card_height,
+                expand=True,
             )
             nav_buttons.append(btn)
         
         content = ft.Column(
             [btn.container for btn in nav_buttons],
             spacing=USER_BUTTON_SPACING,
+            expand=True,
         )
         
         container = GenericContainer.create(
             content=content,
             width=width,
-            height=height,
-            padding=nav_padding,
+            padding=USER_NAV_PADDING,
             **kwargs
         )
         

@@ -137,7 +137,6 @@ class MainInterface:
         nav_top = user_bottom + DEFAULT_SPACING
         nav_left = user_left
         nav_width = user_width
-        nav_bottom = DEFAULT_SPACING
         
         content_left = user_right + DEFAULT_SPACING
         content_top = user_top
@@ -150,7 +149,7 @@ class MainInterface:
         )
         nav_interface.left = nav_left
         nav_interface.top = nav_top
-        nav_interface.bottom = nav_bottom
+        nav_interface.bottom = DEFAULT_SPACING
         
         content_container = ft.Container(
             content=MainInterface.get_page_content(MainInterface.current_nav),
