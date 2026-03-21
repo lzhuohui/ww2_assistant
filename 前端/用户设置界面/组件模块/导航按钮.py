@@ -81,6 +81,7 @@ class NavButton:
             height=card_height,
             padding=card_padding,
             on_hover_enabled=False,
+            alignment=ft.alignment.center,
         )
         
         return NavButtonWrapper(container, button)

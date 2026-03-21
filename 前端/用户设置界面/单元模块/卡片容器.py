@@ -44,6 +44,7 @@ class CardContainer:
         expand: bool=False,
         enabled: bool=True,
         on_hover_enabled: bool=True,
+        alignment: ft.Alignment=None,
         **kwargs
     ) -> ft.Container:
         try:
@@ -113,6 +114,7 @@ class CardContainer:
             ) if final_shadow_blur > 0 else None,
             animate=ft.Animation(animation_duration, animation_curve),
             clip_behavior=ft.ClipBehavior.NONE,
+            alignment=alignment,
         )
         
         if on_hover_enabled:
