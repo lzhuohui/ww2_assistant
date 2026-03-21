@@ -2,9 +2,9 @@
 """
 模块名称：导航按钮
 设计思路及联动逻辑:
-    导航按钮组件，基于通用按钮的导航专用封装。
-    1. 复用通用按钮的 style="nav" 样式
-    2. 提供导航场景的默认参数配置
+    导航按钮组件，负责组装图标+文本并包装为卡片。
+    1. 使用容器图标、文本标签单元模块组装内容
+    2. 调用通用按钮(nav样式)处理选中状态和点击交互
     3. 用卡片容器包装，增加立体感
 模块隔离原则:
     1. 不直接创建被调用模块的内容
@@ -16,8 +16,8 @@ from typing import Callable, Optional
 
 import flet as ft
 
-from 前端.用户设置界面.单元模块.通用按钮 import Button, DEFAULT_WIDTH as BUTTON_DEFAULT_WIDTH, DEFAULT_HEIGHT as BUTTON_DEFAULT_HEIGHT
-from 前端.用户设置界面.单元模块.卡片容器 import CardContainer, DEFAULT_WIDTH as CARD_DEFAULT_WIDTH, DEFAULT_HEIGHT as CARD_DEFAULT_HEIGHT
+from 前端.用户设置界面.单元模块.通用按钮 import Button, USER_WIDTH as BUTTON_USER_WIDTH, USER_HEIGHT as BUTTON_USER_HEIGHT
+from 前端.用户设置界面.单元模块.卡片容器 import CardContainer, USER_WIDTH as CARD_USER_WIDTH, USER_HEIGHT as CARD_USER_HEIGHT
 from 前端.用户设置界面.单元模块.容器图标 import ContainerIcon, DEFAULT_ICON_SIZE as ICON_DEFAULT_SIZE
 from 前端.用户设置界面.单元模块.文本标签 import LabelText, DEFAULT_SIZE as TEXT_DEFAULT_SIZE
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
@@ -25,8 +25,9 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-USER_CARD_WIDTH = 200
-USER_CARD_HEIGHT = 50
+USER_CARD_WIDTH = 300
+USER_CARD_HEIGHT =40
+USER_CONTENT_LEFT_MARGIN = 5  # 图标+标签距离点击阴影左侧的距离
 # *********************************
 
 # 导出默认值供调用者使用
@@ -62,7 +63,7 @@ class NavButton:
         card_height: int=USER_CARD_HEIGHT,
         **kwargs
     ) -> NavButtonWrapper:
-        card_padding = 8
+        card_padding = 4
         button_width = card_width - card_padding * 2
         button_height = card_height - card_padding * 2
         
@@ -102,9 +103,11 @@ class NavButton:
             text_control.color = text_secondary
         
         content_row = ft.Row(
-            [icon_control, ft.Container(width=12), text_control] if icon_control else [text_control],
+            [ft.Container(width=USER_CONTENT_LEFT_MARGIN), icon_control, ft.Container(width=12), text_control] if icon_control else [ft.Container(width=USER_CONTENT_LEFT_MARGIN), text_control],
             alignment=ft.MainAxisAlignment.START,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            width=button_width,
+            height=button_height,
         )
         
         button = Button.create(
@@ -124,7 +127,7 @@ class NavButton:
             height=card_height,
             padding=card_padding,
             on_hover_enabled=False,
-            alignment=ft.Alignment(0, 0),
+            alignment=ft.Alignment(-1, 0),
         )
         
         return NavButtonWrapper(container, button)

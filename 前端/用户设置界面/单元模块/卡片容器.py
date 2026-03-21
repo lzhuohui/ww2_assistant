@@ -27,10 +27,6 @@ USER_WIDTH = 500  # 默认卡片宽度
 USER_HEIGHT = 150  # 默认卡片高度
 # *********************************
 
-# 默认值常量 - 供调用者获取
-DEFAULT_WIDTH = USER_WIDTH
-DEFAULT_HEIGHT = USER_HEIGHT
-
 
 class CardContainer:
     """卡片容器 - 外轮廓+阴影+边框"""
@@ -39,12 +35,13 @@ class CardContainer:
     def create(
         content: ft.Control=None,
         config: 界面配置=None,
-        height: int=DEFAULT_HEIGHT,
-        width: int=DEFAULT_WIDTH,
+        height: int=USER_HEIGHT,
+        width: int=USER_WIDTH,
         expand: bool=False,
         enabled: bool=True,
         on_hover_enabled: bool=True,
         alignment: ft.Alignment=None,
+        padding: int=0,
         **kwargs
     ) -> ft.Container:
         try:
@@ -115,6 +112,7 @@ class CardContainer:
             animate=ft.Animation(animation_duration, animation_curve),
             clip_behavior=ft.ClipBehavior.NONE,
             alignment=alignment,
+            padding=padding,
         )
         
         if on_hover_enabled:

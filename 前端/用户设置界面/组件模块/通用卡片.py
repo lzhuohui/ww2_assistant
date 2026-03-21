@@ -16,7 +16,7 @@ import flet as ft
 from typing import Callable, Optional, List
 
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-from 前端.用户设置界面.单元模块.卡片容器 import CardContainer, DEFAULT_WIDTH, DEFAULT_HEIGHT
+from 前端.用户设置界面.单元模块.卡片容器 import CardContainer, USER_WIDTH, USER_HEIGHT
 from 前端.用户设置界面.组件模块.图标标题 import IconTitle, DEFAULT_TITLE, DEFAULT_ICON, DEFAULT_SUBTITLE
 from 前端.用户设置界面.配置.界面配置 import 界面配置
 
@@ -37,7 +37,7 @@ class UniversalCard:
         on_state_change: Callable[[bool], None]=None,
         help_text: str="",
         height: int=80,
-        width: int=DEFAULT_WIDTH,
+        width: int=USER_WIDTH,
         controls: List[ft.Control]=None,
         subtitle: str=DEFAULT_SUBTITLE,
         controls_per_row: int=1,

@@ -24,12 +24,6 @@ USER_WIDTH = 120  # 默认按钮宽度
 USER_HEIGHT = 36  # 默认按钮高度
 # *********************************
 
-# 默认值常量 - 供调用者获取
-DEFAULT_WIDTH = USER_WIDTH
-DEFAULT_HEIGHT = USER_HEIGHT
-DEFAULT_TEXT = "按钮"
-DEFAULT_STYLE = "text"
-
 
 class Button:
     """通用按钮 - 纯UI控件"""
@@ -41,8 +35,8 @@ class Button:
         style: str="text",
         selected: bool=False,
         on_click: Callable=None,
-        width: int=120,
-        height: int=36,
+        width: int=USER_WIDTH,
+        height: int=USER_HEIGHT,
         enabled: bool=True,
         toggle_mode: bool=False,
         content: ft.Control=None,
@@ -110,32 +104,6 @@ class Button:
             return icon_btn
         
         if style == "nav":
-            if content is None:
-                actual_icon = None
-                if icon:
-                    if isinstance(icon, str):
-                        icon_upper = icon.upper()
-                        actual_icon = getattr(ft.Icons, icon_upper, ft.Icons.SETTINGS)
-                    else:
-                        actual_icon = icon
-                
-                icon_control = ft.Icon(actual_icon, size=icon_size, color=accent_color) if actual_icon else None
-                text_control = ft.Text(
-                    text,
-                    color=selected_color if current_selected[0] else text_secondary,
-                    size=14,
-                    weight=ft.FontWeight.NORMAL,
-                    expand=True
-                )
-                
-                content_row = ft.Row(
-                    [icon_control, ft.Container(width=12), text_control] if icon_control else [text_control],
-                    alignment=ft.MainAxisAlignment.START,
-                    vertical_alignment=ft.CrossAxisAlignment.CENTER
-                )
-            else:
-                content_row = content
-            
             bg_container = ft.Container(
                 bgcolor=selected_bgcolor if current_selected[0] else "transparent",
                 border_radius=button_radius,
@@ -146,10 +114,11 @@ class Button:
             )
             
             content_container = ft.Container(
-                content=content_row,
-                padding=padding_v,
+                content=content,
+                padding=0,
                 width=width,
-                alignment=ft.Alignment(0, 0),
+                height=height,
+                alignment=ft.Alignment(-1, 0),
             )
             
             stack = ft.Stack(
@@ -163,12 +132,10 @@ class Button:
                 content=stack,
                 width=width,
                 height=height,
-                on_click=on_click,
             )
             
             nav_container._selected = current_selected[0]
             nav_container._bg_container = bg_container
-            nav_container._has_external_content = content is not None
             
             def nav_set_selected(is_selected: bool):
                 nav_container._selected = is_selected
@@ -188,7 +155,8 @@ class Button:
                 return nav_container._selected
             
             def nav_toggle(e=None):
-                nav_set_selected(not nav_container._selected)
+                if toggle_mode:
+                    nav_set_selected(not nav_container._selected)
                 if on_click:
                     on_click(e)
             
@@ -209,6 +177,7 @@ class Button:
             nav_container.get_selected = nav_get_selected
             nav_container.toggle = nav_toggle
             nav_container.on_hover = nav_hover
+            nav_container.on_click = nav_toggle
             
             if selected:
                 nav_set_selected(True)

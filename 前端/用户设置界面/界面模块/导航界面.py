@@ -17,13 +17,14 @@ import flet as ft
 
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.单元模块.通用容器 import GenericContainer
-from 前端.用户设置界面.组件模块.导航按钮 import NavButton, USER_CARD_WIDTH, USER_CARD_HEIGHT
+from 前端.用户设置界面.组件模块.导航按钮 import NavButton
 from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-USER_WIDTH = 280
+USER_WIDTH = 200
 USER_HEIGHT = 400
+USER_BUTTON_SPACING = 3  # 导航按钮间距
 # *********************************
 
 
@@ -41,10 +42,8 @@ class NavBar:
     ) -> ft.Container:
         配置 = 界面配置()
         
-        spacing_xs = 配置.获取尺寸("间距", "spacing_xs")
         spacing_sm = 配置.获取尺寸("间距", "spacing_sm")
         nav_padding = 配置.获取尺寸("间距", "spacing_sm")
-        nav_button_spacing = 配置.获取尺寸("间距", "spacing_xs") or 4
         
         if items is None:
             items = [
@@ -59,6 +58,9 @@ class NavBar:
                 {"text": "个性化", "icon": ft.Icons.PALETTE},
                 {"text": "关于", "icon": ft.Icons.INFO},
             ]
+        
+        button_count = len(items)
+        card_height = (height - USER_BUTTON_SPACING * (button_count - 1)) // button_count
         
         current_selected = [selected_index]
         nav_buttons = []
@@ -77,13 +79,13 @@ class NavBar:
                 selected=(i == selected_index),
                 on_click=lambda e, idx=i: handle_nav_click(idx),
                 card_width=width - spacing_sm * 2,
-                card_height=USER_CARD_HEIGHT,
+                card_height=card_height,
             )
             nav_buttons.append(btn)
         
         content = ft.Column(
             [btn.container for btn in nav_buttons],
-            spacing=nav_button_spacing,
+            spacing=USER_BUTTON_SPACING,
         )
         
         container = GenericContainer.create(
