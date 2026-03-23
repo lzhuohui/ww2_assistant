@@ -8,8 +8,9 @@
     2. 按默认尺寸创建容器，高度=文字大小+边距*2
     3. 容器透明，容器本身的边距=0
     4. 放入标签
-    5. 计算文字数量，确定容器宽度=文字大小*文字数量+边距*2
+    5. 计算容器宽度：文字大小*文字数量+边距*2
     6. 文字在容器中居中放置
+    7. 返回的容器可直接设置left/top属性定位，无需重新包装
 
 模块隔离原则:
     1. 不直接创建被调用模块的内容
@@ -26,14 +27,9 @@ from 前端.用户设置界面.单元模块.文本标签 import LabelText
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-USER_TEXT_SIZE = 16  # 文字大小
+USER_TEXT_SIZE = 14  # 文字大小
 USER_PADDING = 3  # 边距
 # *********************************
-
-# 默认值常量 - 供调用者获取
-DEFAULT_TEXT = "标题"
-DEFAULT_TEXT_SIZE = USER_TEXT_SIZE
-DEFAULT_PADDING = USER_PADDING
 
 
 class ContainerTitle:
@@ -46,11 +42,13 @@ class ContainerTitle:
         padding: int = USER_PADDING,
         enabled: bool = True,
         role: str = "h3",
+        weight: ft.FontWeight = None,
     ) -> ft.Container:
         title_text = LabelText.create(
             text=title,
             role=role,
             size=text_size,
+            weight=weight,
             enabled=enabled,
             win11_style=True
         )

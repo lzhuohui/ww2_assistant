@@ -20,24 +20,21 @@
 """
 
 import flet as ft
-from typing import Callable
 from 前端.用户设置界面.配置.界面配置 import 界面配置
 from 前端.用户设置界面.配置.配置管理器 import ConfigManager
-from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.组件模块.通用卡片 import UniversalCard
-from 前端.用户设置界面.组件模块.通用功能容器 import GenericFunctionContainer
+from 前端.用户设置界面.组件模块.通用功能容器 import GenericFunctionContainer, USER_WIDTH
 from 前端.用户设置界面.单元模块.下拉框 import Dropdown
 from 前端.用户设置界面.单元模块.输入框 import Input
 
 
-# *** 用户指定变量 - AI不得修改 ***
-DROPDOWN_WIDTH = 70  # 下拉框宽度
-INPUT_WIDTH = 160    # 输入框宽度
-CONTROL_HEIGHT = 32  # 控件高度
-# *********************************
-
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
+DROPDOWN_WIDTH = 70
+INPUT_WIDTH = 160
+CONTROL_HEIGHT = 32
 MAX_ACCOUNTS = 15
 DEFAULT_AUTHORIZED_COUNT = 15
+# *********************************
 
 
 class AccountInterface:
@@ -48,13 +45,12 @@ class AccountInterface:
     账号开关状态 = {}
     
     @staticmethod
-    def create(page: ft.Page = None, on_refresh: Callable[[], None] = None) -> ft.Container:
+    def create(width: int=USER_WIDTH) -> ft.Container:
         """
         创建账号界面
         
         参数：
-            page: 页面对象（可选，用于更新页面显示）
-            on_refresh: 刷新回调
+            width: 内容区域宽度
         
         返回：
             ft.Container: 账号界面容器
@@ -324,6 +320,7 @@ class AccountInterface:
         from 前端.用户设置界面.单元模块.通用容器 import GenericContainer
         return GenericContainer.create(
             content=content,
+            width=width,
             expand=True,
             padding=16,
         )
@@ -331,10 +328,4 @@ class AccountInterface:
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    配置 = 界面配置()
-    ThemeProvider.initialize(配置)
-    def main(page: ft.Page):
-        page.padding = 0
-        page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(AccountInterface.create())
-    ft.run(main)
+    ft.run(lambda page: page.add(AccountInterface.create()))

@@ -23,10 +23,6 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 USER_SIZE = 40  # 默认色块大小
 # *********************************
 
-# 默认值常量 - 供调用者获取
-DEFAULT_SIZE = USER_SIZE
-DEFAULT_COLOR = "#FF5722"
-
 
 class ThemeColorBlock:
     """主题色块 - 单个颜色选择块"""

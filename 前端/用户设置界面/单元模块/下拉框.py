@@ -1,14 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：下拉框
-设计思路及联动逻辑:
-    使用PopupMenuButton实现下拉菜单，自动处理菜单位置。
-    1. 支持自定义宽高和自动定位
-    2. 菜单宽度优化，支持值变化回调
-模块隔离原则:
-    1. 不直接创建被调用模块的内容
-    2. 不覆盖被调用模块的计算结果
-    3. 用户指定变量除外
+模块名称：下拉框 | 设计思路：延迟创建菜单项，只在打开菜单时才创建选项控件，避免初始化卡顿 | 模块隔离原则：不直接创建被调用模块的内容，不覆盖被调用模块的计算结果，用户指定变量除外
 """
 
 from typing import Callable, List
@@ -20,18 +12,13 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-USER_WIDTH = 150  # 默认宽度
-USER_HEIGHT = 32  # 默认高度
+USER_WIDTH = 150
+USER_HEIGHT = 32
 # *********************************
-
-# 默认值常量 - 供调用者获取
-DEFAULT_WIDTH = USER_WIDTH
-DEFAULT_HEIGHT = USER_HEIGHT
-DEFAULT_OPTIONS = ["选项A", "选项B", "选项C"]
 
 
 class Dropdown:
-    """自定义下拉框 - 使用PopupMenuButton实现"""
+    """自定义下拉框 - 延迟创建菜单项，优化性能"""
     
     @staticmethod
     def create(
@@ -80,7 +67,30 @@ class Dropdown:
             padding=ft.Padding(left=12, right=8, top=0, bottom=0),
         )
         
+        menu_items_created = [False]
         menu_items = []
+        
+        def create_menu_items():
+            """延迟创建菜单项"""
+            if menu_items_created[0]:
+                return
+            
+            for option in actual_options:
+                item = ft.PopupMenuItem(
+                    content=ft.Container(
+                        content=ft.Text(
+                            option,
+                            color=theme_colors["text_primary"],
+                            size=14,
+                        ),
+                        bgcolor=theme_colors["bg_card"],
+                        padding=ft.Padding(left=12, right=12, top=8, bottom=8),
+                    ),
+                    on_click=lambda e, o=option: select_option(o),
+                )
+                menu_items.append(item)
+            
+            menu_items_created[0] = True
         
         def select_option(option: str):
             nonlocal current_value
@@ -91,28 +101,21 @@ class Dropdown:
             if on_change:
                 on_change(option)
         
-        for option in actual_options:
-            item = ft.PopupMenuItem(
-                content=ft.Container(
-                    content=ft.Text(
-                        option,
-                        color=theme_colors["text_primary"],
-                        size=14,
-                    ),
-                    bgcolor=theme_colors["bg_card"],
-                    padding=ft.Padding(left=12, right=12, top=8, bottom=8),
-                ),
-                on_click=lambda e, o=option: select_option(o),
-            )
-            menu_items.append(item)
+        def on_menu_open(e):
+            """菜单打开时才创建菜单项"""
+            create_menu_items()
+            popup_button.items = menu_items
+            if popup_button.page:
+                popup_button.update()
         
         popup_button = ft.PopupMenuButton(
             content=button_container,
-            items=menu_items,
+            items=[],
             disabled=not enabled,
             tooltip="",
             menu_padding=ft.Padding.all(0),
             bgcolor=theme_colors["bg_card"],
+            on_open=on_menu_open,
         )
         
         container = ft.Container(

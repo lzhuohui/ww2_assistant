@@ -8,6 +8,7 @@
     2. 容器透明，容器本身的边距=0
     3. 容器的大小=图标大小+边距*2
     4. 图标在容器中居中放置
+    5. 返回的容器可直接设置left/top属性定位，无需重新包装
 
 模块隔离原则:
     1. 不直接创建被调用模块的内容
@@ -26,11 +27,6 @@ import flet as ft
 USER_ICON_SIZE = 20  # 图标大小
 USER_PADDING = 3  # 边距
 # *********************************
-
-# 默认值常量 - 供调用者获取
-DEFAULT_ICON = "HOME"
-DEFAULT_ICON_SIZE = USER_ICON_SIZE
-DEFAULT_PADDING = USER_PADDING
 
 
 class ContainerIcon:

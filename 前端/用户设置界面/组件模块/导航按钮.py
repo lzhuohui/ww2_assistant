@@ -18,8 +18,8 @@ import flet as ft
 
 from 前端.用户设置界面.单元模块.通用按钮 import Button, USER_WIDTH as BUTTON_USER_WIDTH, USER_HEIGHT as BUTTON_USER_HEIGHT
 from 前端.用户设置界面.单元模块.卡片容器 import CardContainer, USER_WIDTH as CARD_USER_WIDTH, USER_HEIGHT as CARD_USER_HEIGHT
-from 前端.用户设置界面.单元模块.容器图标 import ContainerIcon, DEFAULT_ICON_SIZE as ICON_DEFAULT_SIZE
-from 前端.用户设置界面.单元模块.文本标签 import LabelText, DEFAULT_SIZE as TEXT_DEFAULT_SIZE
+from 前端.用户设置界面.单元模块.容器图标 import ContainerIcon, USER_ICON_SIZE
+from 前端.用户设置界面.单元模块.文本标签 import LabelText, USER_SIZE
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 from 前端.用户设置界面.配置.界面配置 import 界面配置
 
@@ -79,17 +79,17 @@ class NavButton:
             if isinstance(icon, str):
                 icon_upper = icon.upper()
                 icon = getattr(ft.Icons, icon_upper, ft.Icons.SETTINGS)
-            icon_obj = ft.Icon(icon, size=ICON_DEFAULT_SIZE, color=accent_color)
+            icon_obj = ft.Icon(icon, size=USER_ICON_SIZE, color=accent_color)
             icon_control = ContainerIcon.create(
                 icon=icon_obj,
-                icon_size=ICON_DEFAULT_SIZE,
+                icon_size=USER_ICON_SIZE,
                 padding=0,
             )
         
         text_control = LabelText.create(
             text=text,
             role="body",
-            size=TEXT_DEFAULT_SIZE,
+            size=USER_SIZE,
             weight=font_weight_semibold,
             enabled=True,
             win11_style=True,

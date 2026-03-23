@@ -11,15 +11,13 @@
 """
 
 import flet as ft
-from typing import Callable
 
 from 前端.用户设置界面.配置.界面配置 import 界面配置
-from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-from 前端.用户设置界面.组件模块.设置面板 import SettingsPanel
+from 前端.用户设置界面.组件模块.设置面板 import SettingsPanel, USER_WIDTH
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-# （用户未指定变量）
+USER_CARD_NAMES = ["挂机模式", "指令速度", "尝试次数", "清缓限量"]
 # *********************************
 
 
@@ -27,26 +25,19 @@ class SystemInterface:
     """系统界面 - 配置驱动"""
     
     @staticmethod
-    def create(page: ft.Page=None, on_refresh: Callable[[], None]=None) -> ft.Container:
+    def create(width: int=USER_WIDTH) -> ft.Container:
         配置 = 界面配置()
         
         return SettingsPanel.create(
             config=配置,
             title="系统设置",
             icon="SETTINGS",
-            card_names=["挂机模式", "指令速度", "尝试次数", "清缓限量"],
+            card_names=USER_CARD_NAMES,
+            width=width,
             expand=True,
         )
 
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    配置 = 界面配置()
-    ThemeProvider.initialize(配置)
-    
-    def main(page: ft.Page):
-        page.padding = 0
-        page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(SystemInterface.create())
-    
-    ft.run(main)
+    ft.run(lambda page: page.add(SystemInterface.create()))

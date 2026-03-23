@@ -15,10 +15,9 @@
 """
 
 import flet as ft
-from typing import Callable
 from 前端.用户设置界面.配置.界面配置 import 界面配置
 from 前端.用户设置界面.组件模块.通用卡片 import UniversalCard
-from 前端.用户设置界面.组件模块.通用功能容器 import GenericFunctionContainer
+from 前端.用户设置界面.组件模块.通用功能容器 import GenericFunctionContainer, USER_WIDTH
 from 前端.用户设置界面.单元模块.主题色块 import ThemeColorBlock
 
 
@@ -26,19 +25,17 @@ class PersonalizationInterface:
     """个性化界面 - 界面模块层"""
     
     @staticmethod
-    def create(page: ft.Page = None, on_refresh: Callable[[], None] = None) -> ft.Container:
+    def create(width: int=USER_WIDTH) -> ft.Container:
         """
         创建个性化界面
         
         参数：
-            page: 页面对象（可选，用于更新页面显示）
-            on_refresh: 刷新回调
+            width: 内容区域宽度
         
         返回：
             ft.Container: 个性化界面容器
         """
         配置 = 界面配置()
-        theme_colors = 配置.当前主题颜色
         
         current_theme = 配置.主题名称
         current_palette = 配置.调色板名称
@@ -47,20 +44,14 @@ class PersonalizationInterface:
         def on_theme_click(theme_name: str):
             if theme_name != current_theme:
                 配置.切换主题(theme_name)
-                if on_refresh:
-                    on_refresh()
         
         def on_palette_click(palette_name: str):
             if palette_name != current_palette:
                 配置.切换调色板(palette_name)
-                if on_refresh:
-                    on_refresh()
         
         def on_style_click(style_name: str):
             if style_name != current_style:
                 配置.切换风格(style_name)
-                if on_refresh:
-                    on_refresh()
         
         theme_colors_list = [
             {"name": "浅色", "value": "#FFFFFF"},
@@ -138,16 +129,11 @@ class PersonalizationInterface:
             title="个性化设置",
             icon="PALETTE",
             cards=[theme_card, palette_card, style_card],
+            width=width,
             expand=True,
         )
 
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-    ThemeProvider.initialize(配置)
-    def main(page: ft.Page):
-        page.padding = 0
-        page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(PersonalizationInterface.create())
-    ft.run(main)
+    ft.run(lambda page: page.add(PersonalizationInterface.create()))

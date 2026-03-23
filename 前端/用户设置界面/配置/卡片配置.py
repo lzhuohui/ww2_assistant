@@ -135,7 +135,189 @@
             ],
             "selected": None,
             "config_key": "调色板模式",
-            "supports_deselect": True,  # 支持取消选择
+            "supports_deselect": True,
         }
+    },
+    "建筑速建": {
+        "card_type": "switch_dropdown",
+        "title": "建筑速建",
+        "icon": "APARTMENT",
+        "subtitle": "自动加速建筑升级，节省等待时间",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "建筑速建_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [
+            {
+                "config_key": "建筑速建",
+                "label": "加速模式:",
+                "options": ["立即完成", "等待5分钟", "等待10分钟", "等待30分钟"],
+                "default_value": "立即完成",
+            },
+        ],
+    },
+    "资源速产": {
+        "card_type": "switch_dropdown",
+        "title": "资源速产",
+        "icon": "INVENTORY_2",
+        "subtitle": "自动加速资源生产，提升产出效率",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "资源速产_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [
+            {
+                "config_key": "资源速产",
+                "label": "资源类型:",
+                "options": ["全部资源", "石油", "钢铁", "橡胶", "稀有金属"],
+                "default_value": "全部资源",
+            },
+        ],
+    },
+    "策点保留": {
+        "card_type": "switch_dropdown",
+        "title": "策点保留",
+        "icon": "SAVINGS",
+        "subtitle": "策略点数保留设置，达到阈值后停止消耗",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "策点保留_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [
+            {
+                "config_key": "策点保留",
+                "label": "保留数量:",
+                "options": ["100点", "200点", "500点", "1000点", "不保留"],
+                "default_value": "100",
+                "unit": "点",
+            },
+        ],
+    },
+    "主线任务": {
+        "card_type": "switch_dropdown",
+        "title": "主线任务",
+        "icon": "TASK",
+        "subtitle": "达到设置主城等级后,允许执行主线任务",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "主线任务_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [
+            {
+                "config_key": "主线限级",
+                "label": "主线限级:",
+                "options": ["01级", "02级", "03级", "04级", "05级", "06级", "07级", "08级", "09级", "10级", "11级", "12级", "13级", "14级", "15级"],
+                "default_value": "05",
+            },
+        ],
+    },
+    "支线任务": {
+        "card_type": "switch_dropdown",
+        "title": "支线任务",
+        "icon": "TASK_ALT",
+        "subtitle": "达到设置主城等级后,允许执行支线任务",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "支线任务_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [
+            {
+                "config_key": "支线限级",
+                "label": "支线限级:",
+                "options": ["05级", "06级", "07级", "08级", "09级", "10级", "11级", "12级", "13级", "14级", "15级"],
+                "default_value": "10",
+            },
+        ],
+    },
+    "小号上贡": {
+        "card_type": "switch_dropdown",
+        "title": "小号上贡",
+        "icon": "UPLOAD",
+        "subtitle": "设置小号上贡相关参数",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "小号上贡_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [
+            {
+                "config_key": "上贡限级",
+                "label": "上贡限级:",
+                "options": ["05级", "06级", "07级", "08级", "09级", "10级", "11级", "12级", "13级", "14级", "15级"],
+                "default_value": "05",
+            },
+            {
+                "config_key": "上贡限量",
+                "label": "上贡限量:",
+                "options": ["2万", "3万", "4万", "5万", "6万", "7万", "8万", "9万", "10万", "11万", "12万", "13万", "14万", "15万", "16万", "17万", "18万", "19万", "20万"],
+                "default_value": "2",
+            },
+        ],
+    },
+    "分城纳租": {
+        "card_type": "switch_dropdown",
+        "title": "分城纳租",
+        "icon": "ATTACH_MONEY",
+        "subtitle": "设置分城纳租相关参数",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "分城纳租_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [
+            {
+                "config_key": "纳租限级",
+                "label": "纳租限级:",
+                "options": ["05级", "06级", "07级", "08级", "09级", "10级", "11级", "12级", "13级", "14级", "15级"],
+                "default_value": "05",
+            },
+            {
+                "config_key": "纳租限量",
+                "label": "纳租限量:",
+                "options": ["2万", "3万", "4万", "5万", "6万", "7万", "8万", "9万", "10万", "11万", "12万", "13万", "14万", "15万", "16万", "17万", "18万", "19万", "20万"],
+                "default_value": "2",
+            },
+        ],
+    },
+    "打扫城区": {
+        "card_type": "switch_dropdown",
+        "title": "打扫城区",
+        "icon": "CLEANING_SERVICES",
+        "subtitle": "开启后执行打扫城区任务",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "打扫城区_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [],
+    },
+    "打扫政区": {
+        "card_type": "switch_dropdown",
+        "title": "打扫政区",
+        "icon": "LOCATION_CITY",
+        "subtitle": "开启后执行打扫政区任务",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "打扫政区_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [],
+    },
+    "自动打野": {
+        "card_type": "switch_dropdown",
+        "title": "自动打野",
+        "icon": "EXPLORE",
+        "subtitle": "开启后执行自动打野任务",
+        "enabled": True,
+        "switch_config": {
+            "config_key": "自动打野_开关",
+            "default_value": True,
+        },
+        "dropdown_configs": [],
     }
 }

@@ -17,17 +17,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 import flet as ft
 from typing import List, Optional, Dict, Any
 from 前端.用户设置界面.配置.界面配置 import 界面配置
-from 前端.用户设置界面.单元模块.通用容器 import GenericContainer, DEFAULT_WIDTH, DEFAULT_HEIGHT
+from 前端.用户设置界面.单元模块.通用容器 import GenericContainer, USER_WIDTH, USER_HEIGHT
 from 前端.用户设置界面.单元模块.文本标签 import LabelText
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-USER_MARGIN = 32  # 卡片距父容器左右两侧的边距
+# （用户未指定变量）
 # *********************************
-
-# 默认值常量 - 供调用者获取
-DEFAULT_TITLE = "功能标题"
-DEFAULT_ICON = "SETTINGS"
 
 
 class GenericFunctionContainer:
@@ -36,15 +32,21 @@ class GenericFunctionContainer:
     @staticmethod
     def create(
         config: 界面配置,
-        title: str=DEFAULT_TITLE,
-        icon: str=DEFAULT_ICON,
+        title: str="功能标题",
+        icon: str="SETTINGS",
         cards: List[ft.Control]=None,
-        width: int=DEFAULT_WIDTH,
-        height: int=DEFAULT_HEIGHT,
+        width: int=USER_WIDTH,
+        height: int=USER_HEIGHT,
         expand: bool=False,
+        card_margin: int=0,
         **kwargs
     ) -> ft.Container:
         final_cards = cards if cards else []
+        
+        content_width = width - card_margin * 2
+        for card in final_cards:
+            if hasattr(card, 'width'):
+                card.width = content_width
         
         icon_control = None
         if icon:
@@ -106,25 +108,11 @@ class GenericFunctionContainer:
             width=width,
             height=height,
             expand=expand,
-            padding=16,
+            padding=card_margin,
             **kwargs
         )
 
 
-# 兼容旧名称
-FunctionContainer = GenericFunctionContainer
-
-
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-    
-    配置 = 界面配置()
-    ThemeProvider.initialize(配置)
-    
-    def main(page: ft.Page):
-        page.padding = 0
-        page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(GenericFunctionContainer.create(config=配置))
-    
-    ft.run(main)
+    ft.run(lambda page: page.add(GenericFunctionContainer.create(config=界面配置())))

@@ -18,12 +18,9 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-# （用户未指定变量）
+USER_WIDTH = 800  # 默认宽度
+USER_HEIGHT = 500  # 默认高度
 # *********************************
-
-# 默认值常量 - 供调用者获取
-DEFAULT_WIDTH = 800
-DEFAULT_HEIGHT = 500
 
 
 class GenericContainer:
@@ -32,8 +29,8 @@ class GenericContainer:
     @staticmethod
     def create(
         content: ft.Control=None,
-        height: int=DEFAULT_HEIGHT,
-        width: int=DEFAULT_WIDTH,
+        height: int=USER_HEIGHT,
+        width: int=USER_WIDTH,
         padding: int=8,
         margin: int=0,
         bgcolor: str="",

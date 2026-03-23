@@ -24,7 +24,8 @@ from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
 USER_WIDTH = 500  # 默认卡片宽度
-USER_HEIGHT = 150  # 默认卡片高度
+USER_HEIGHT = 200  # 默认卡片高度
+USER_PADDING = 20  # 默认卡片内边距
 # *********************************
 
 
@@ -38,11 +39,9 @@ class CardContainer:
         height: int=USER_HEIGHT,
         width: int=USER_WIDTH,
         expand: bool=False,
-        enabled: bool=True,
         on_hover_enabled: bool=True,
         alignment: ft.Alignment=None,
-        padding: int=0,
-        **kwargs
+        padding: int=USER_PADDING
     ) -> ft.Container:
         try:
             if config is None:

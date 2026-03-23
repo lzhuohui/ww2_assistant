@@ -27,11 +27,6 @@ USER_WIDTH = 120  # 默认输入框宽度
 USER_HEIGHT = 32  # 默认输入框高度
 # *********************************
 
-# 默认值常量 - 供调用者获取
-DEFAULT_WIDTH = USER_WIDTH
-DEFAULT_HEIGHT = USER_HEIGHT
-DEFAULT_HINT_TEXT = "请输入"
-
 
 class Input:
     """输入框 - 独立功能模块"""

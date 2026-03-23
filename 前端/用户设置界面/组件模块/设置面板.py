@@ -1,241 +1,123 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：设置面板
-设计思路及联动逻辑:
-    统一的设置面板入口，支持两种模式：
-    1. 配置驱动：传入card_names，自动从ConfigManager获取配置创建卡片
-    2. 自定义卡片：传入cards，直接使用已创建的卡片
-    支持多种卡片类型：switch_dropdown、color_blocks等。
-模块隔离原则:
-    1. 不直接创建被调用模块的内容
-    2. 不覆盖被调用模块的计算结果
-    3. 用户指定变量除外
+模块名称：设置面板 | 设计思路：通用模块，接收卡片配置列表，动态创建卡片 | 模块隔离原则：不直接创建被调用模块的内容，不覆盖被调用模块的计算结果，用户指定变量除外
 """
 
 import flet as ft
-from typing import List, Optional, Dict, Any, Callable
 
 from 前端.用户设置界面.配置.界面配置 import 界面配置
-from 前端.用户设置界面.配置.配置管理器 import ConfigManager
-from 前端.用户设置界面.组件模块.通用功能容器 import GenericFunctionContainer, DEFAULT_WIDTH, DEFAULT_HEIGHT, USER_MARGIN
+from 前端.用户设置界面.组件模块.通用功能容器 import GenericFunctionContainer, USER_WIDTH
 from 前端.用户设置界面.组件模块.通用卡片 import UniversalCard
 from 前端.用户设置界面.单元模块.下拉框 import Dropdown
-from 前端.用户设置界面.单元模块.文本标签 import LabelText
+from 前端.用户设置界面.配置.卡片配置 import 卡片配置
+from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
 
 
 # *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-# （用户未指定变量）
+USER_CARD_MARGIN = 5  # 卡片边缘到容器边缘的边距
 # *********************************
-
-# 默认值常量 - 供调用者获取
-DEFAULT_TITLE = "设置"
-DEFAULT_ICON = "SETTINGS"
 
 
 class SettingsPanel:
-    """设置面板 - 统一入口，支持配置驱动和自定义卡片"""
+    """设置面板 - 通用模块"""
     
     @staticmethod
     def create(
-        config: 界面配置,
-        title: str=DEFAULT_TITLE,
-        icon: str=DEFAULT_ICON,
-        card_names: List[str]=None,
-        cards: List[ft.Control]=None,
-        width: int=DEFAULT_WIDTH,
-        height: int=DEFAULT_HEIGHT,
-        expand: bool=False,
-        **kwargs
+        config: 界面配置=None,
+        title: str="设置",
+        icon: str="SETTINGS",
+        card_names: list=None,
+        width: int=USER_WIDTH,
+        expand: bool=False
     ) -> ft.Container:
-        final_cards = []
-        card_width = width - USER_MARGIN * 2
+        if config is None:
+            config = 界面配置()
         
-        try:
-            config_manager = ConfigManager()
-        except:
-            config_manager = None
+        if card_names is None:
+            card_names = ["挂机模式", "指令速度"]
         
-        if card_names:
-            for card_name in card_names:
-                card = SettingsPanel._create_card_from_config(
-                    card_name=card_name,
-                    config_manager=config_manager,
-                    card_width=card_width,
-                )
-                if card:
-                    final_cards.append(card)
+        配置 = config
         
-        if cards:
-            final_cards.extend(cards)
+        cards = []
+        for card_name in card_names:
+            card_config = 卡片配置.get(card_name)
+            if card_config:
+                card = SettingsPanel._create_card(配置, card_config)
+                cards.append(card)
         
         return GenericFunctionContainer.create(
-            config=config,
+            config=配置,
             title=title,
             icon=icon,
-            cards=final_cards,
+            cards=cards,
             width=width,
-            height=height,
+            card_margin=USER_CARD_MARGIN,
             expand=expand,
-            **kwargs
         )
     
     @staticmethod
-    def _create_card_from_config(
-        card_name: str,
-        config_manager: ConfigManager,
-        card_width: int,
-    ) -> Optional[ft.Container]:
-        if not config_manager:
-            return None
-        
-        card_config = config_manager.get_card_config(card_name)
-        if not card_config:
-            return None
-        
+    def _create_card(配置: 界面配置, card_config: dict) -> ft.Container:
         card_type = card_config.get("card_type", "switch_dropdown")
         
         if card_type == "switch_dropdown":
-            return SettingsPanel._create_switch_dropdown_card(
-                card_name=card_name,
-                card_config=card_config,
-                config_manager=config_manager,
-                card_width=card_width,
-            )
+            return SettingsPanel._create_switch_dropdown_card(配置, card_config)
         elif card_type == "color_blocks":
-            return SettingsPanel._create_color_blocks_card(
-                card_name=card_name,
-                card_config=card_config,
-                config_manager=config_manager,
-                card_width=card_width,
+            return SettingsPanel._create_color_blocks_card(配置, card_config)
+        else:
+            return UniversalCard.create(
+                title=card_config.get("title", "未知卡片"),
+                icon=card_config.get("icon", "HELP"),
+                subtitle=card_config.get("subtitle", ""),
             )
-        
-        return None
     
     @staticmethod
-    def _create_switch_dropdown_card(
-        card_name: str,
-        card_config: Dict[str, Any],
-        config_manager: ConfigManager,
-        card_width: int,
-    ) -> ft.Container:
-        controls = []
+    def _create_switch_dropdown_card(配置: 界面配置, card_config: dict) -> ft.Container:
         dropdown_configs = card_config.get("dropdown_configs", [])
-        controls_per_row = card_config.get("controls_per_row", 1)
         
-        for dd_config in dropdown_configs:
-            config_key = dd_config.get("config_key")
-            label = dd_config.get("label", "")
-            options = dd_config.get("options", [])
-            default_value = dd_config.get("default_value", "")
-            unit = dd_config.get("unit", "")
-            
-            value = config_manager.get_value(card_name, config_key, default_value)
-            if unit and not value.endswith(unit):
-                value = f"{value}{unit}"
-            
-            def make_on_change(cn, ck):
-                def on_change(v):
-                    config_manager.set_value(cn, ck, v)
-                return on_change
+        controls = []
+        for dropdown_config in dropdown_configs:
+            options = dropdown_config.get("options", [])
+            default_value = dropdown_config.get("default_value", options[0] if options else "")
+            label = dropdown_config.get("label", "")
             
             dropdown = Dropdown.create(
                 options=options,
-                value=value,
-                width=120,
-                on_change=make_on_change(card_name, config_key),
+                value=default_value,
             )
             
-            label_text = LabelText.create(
-                text=label,
-                role="secondary",
-                size=14,
-                enabled=True
-            )
-            
-            control_row = ft.Row(
-                [label_text, dropdown],
-                alignment=ft.MainAxisAlignment.END,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                spacing=8,
-                expand=True,
-            )
-            controls.append(control_row)
-        
-        switch_config = card_config.get("switch_config", {})
-        switch_key = switch_config.get("config_key")
-        enabled = config_manager.get_value(card_name, switch_key, card_config.get("enabled", True)) if switch_key else card_config.get("enabled", True)
-        
-        def make_on_state_change(cn, sk):
-            def on_state_change(new_enabled: bool):
-                if sk:
-                    config_manager.set_value(cn, sk, new_enabled)
-            return on_state_change
+            if label:
+                label_text = ft.Text(
+                    label,
+                    size=14,
+                    color=ThemeProvider.get_color("text_secondary"),
+                )
+                row = ft.Row(
+                    [label_text, dropdown],
+                    spacing=8,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                )
+                row.height = 32
+                controls.append(row)
+            else:
+                controls.append(dropdown)
         
         return UniversalCard.create(
-            title=card_config.get("title", card_name),
+            title=card_config.get("title", ""),
             icon=card_config.get("icon", "SETTINGS"),
-            enabled=enabled,
-            on_state_change=make_on_state_change(card_name, switch_key) if switch_key else None,
             subtitle=card_config.get("subtitle", ""),
-            controls=controls if controls else None,
-            controls_per_row=controls_per_row,
-            width=card_width,
+            enabled=card_config.get("enabled", True),
+            controls=controls,
         )
     
     @staticmethod
-    def _create_color_blocks_card(
-        card_name: str,
-        card_config: Dict[str, Any],
-        config_manager: ConfigManager,
-        card_width: int,
-    ) -> ft.Container:
-        from 前端.用户设置界面.组件模块.主题色块 import ThemeColorBlock
-        
-        blocks_config = card_config.get("blocks_config", {})
-        items = blocks_config.get("items", [])
-        selected = config_manager.get_value(card_name, blocks_config.get("config_key"), blocks_config.get("selected"))
-        supports_deselect = blocks_config.get("supports_deselect", False)
-        
-        def on_select(name: str):
-            config_manager.set_value(card_name, blocks_config.get("config_key"), name)
-        
+    def _create_color_blocks_card(配置: 界面配置, card_config: dict) -> ft.Container:
         return UniversalCard.create(
-            title=card_config.get("title", card_name),
+            title=card_config.get("title", ""),
             icon=card_config.get("icon", "PALETTE"),
-            enabled=True,
             subtitle=card_config.get("subtitle", ""),
-            controls=[
-                ThemeColorBlock.create(
-                    items=items,
-                    selected=selected,
-                    on_select=on_select,
-                    supports_deselect=supports_deselect,
-                )
-            ],
-            controls_per_row=card_config.get("controls_per_row", 4),
-            width=card_width,
         )
-
-
-# 兼容旧名称
-SettingsContainer = SettingsPanel
 
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-    
-    配置 = 界面配置()
-    ThemeProvider.initialize(配置)
-    
-    def main(page: ft.Page):
-        page.padding = 0
-        page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(SettingsPanel.create(
-            config=配置,
-            title="系统设置",
-            icon="SETTINGS",
-            card_names=["挂机模式", "指令速度"],
-        ))
-    
-    ft.run(main)
+    ft.run(lambda page: page.add(SettingsPanel.create()))

@@ -2,22 +2,24 @@
 """
 模块名称：通用卡片
 设计思路及联动逻辑:
-    组合零件模块，协调交互。
-    1. 不直接操作零件内部控件
-    2. 通过零件暴露的接口进行控制
-    3. 支持多行控件布局和副标题
+    1. 分割线定位: 上部到卡片外缘=0.5*边距, 高度=卡片高度-1*边距
+    2. 通过divider_height/divider_top参数传递给图标标题模块实现联动
+    3. 卡片高度根据控件数量自动计算
 模块隔离原则:
     1. 不直接创建被调用模块的内容
     2. 不覆盖被调用模块的计算结果
     3. 用户指定变量除外
 """
 
+from flet.controls.control import Control
+
+
 import flet as ft
-from typing import Callable, Optional, List
+from typing import Callable, List
 
 from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-from 前端.用户设置界面.单元模块.卡片容器 import CardContainer, USER_WIDTH, USER_HEIGHT
-from 前端.用户设置界面.组件模块.图标标题 import IconTitle, DEFAULT_TITLE, DEFAULT_ICON, DEFAULT_SUBTITLE
+from 前端.用户设置界面.单元模块.卡片容器 import CardContainer, USER_WIDTH, USER_HEIGHT, USER_PADDING
+from 前端.用户设置界面.组件模块.图标标题 import IconTitle
 from 前端.用户设置界面.配置.界面配置 import 界面配置
 
 
@@ -27,26 +29,22 @@ USER_DIVIDER_LEFT = 70  # 分割线到卡片左侧的距离
 
 
 class UniversalCard:
-    """通用卡片 - 装配模式，组合零件模块，支持多行控件"""
+    """通用卡片 - 组合零件模块，支持多行控件"""
     
     @staticmethod
     def create(
-        title: str=DEFAULT_TITLE,
-        icon: str=DEFAULT_ICON,
+        title: str="测试标题",
+        icon: str="HOME",
         enabled: bool=True,
         on_state_change: Callable[[bool], None]=None,
-        help_text: str="",
-        height: int=80,
         width: int=USER_WIDTH,
         controls: List[ft.Control]=None,
-        subtitle: str=DEFAULT_SUBTITLE,
-        controls_per_row: int=1,
-        **kwargs
+        subtitle: str="这是副标题",
+        controls_per_row: int=1
     ) -> ft.Container:
         配置 = 界面配置()
         
-        ui_config = 配置.定义尺寸.get("界面", {})
-        card_padding = ui_config.get("card_padding", 16)
+        card_padding = USER_PADDING
         spacing_config = 配置.定义尺寸.get("间距", {})
         control_h_spacing = spacing_config.get("spacing_md", 16)
         control_v_spacing = spacing_config.get("spacing_sm", 8)
@@ -55,7 +53,7 @@ class UniversalCard:
         current_enabled = enabled
         current_controls_per_row = controls_per_row
         
-        min_control_height = 35
+        min_control_height = 50
         min_card_height = min_control_height + card_padding * 2
         card_height = min_card_height
         
@@ -64,7 +62,7 @@ class UniversalCard:
             num_rows = (num_controls + current_controls_per_row - 1) // current_controls_per_row
             
             total_controls_height = 0
-            for i, control in enumerate(controls):
+            for i, control in enumerate[Control](controls):
                 control_height = getattr(control, 'height', 35) or 35
                 if i % current_controls_per_row == 0:
                     total_controls_height += control_height
@@ -80,6 +78,7 @@ class UniversalCard:
                 on_state_change(new_enabled)
         
         divider_height = card_height - card_padding
+        divider_top = -int(card_padding / 2)
         
         icon_title = IconTitle.create(
             title=title,
@@ -89,6 +88,7 @@ class UniversalCard:
             subtitle=subtitle,
             divider_height=divider_height,
             divider_left=USER_DIVIDER_LEFT,
+            divider_top=divider_top,
         )
         
         def sync_controls_state(new_enabled: bool):
@@ -108,7 +108,6 @@ class UniversalCard:
         
         left_container = ft.Container(
             content=icon_title,
-            top=card_padding / 2,
         )
         
         stack_children = [left_container]

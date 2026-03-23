@@ -20,7 +20,7 @@ from 前端.用户设置界面.单元模块.文本标签 import LabelText
 
 DEFAULT_WIDTH = 1200
 DEFAULT_HEIGHT = 540
-DEFAULT_SPACING = 20
+DEFAULT_SPACING = 5
 
 
 class MainInterface:
@@ -45,28 +45,28 @@ class MainInterface:
         page.padding = 0
     
     @staticmethod
-    def get_page_content(nav_name: str) -> ft.Control:
+    def get_page_content(nav_name: str, width: int) -> ft.Control:
         """获取页面内容"""
         if nav_name == "系统":
-            return SystemInterface.create()
+            return SystemInterface.create(width=width)
         elif nav_name == "策略":
-            return StrategyInterface.create()
+            return StrategyInterface.create(width=width)
         elif nav_name == "任务":
-            return TaskInterface.create()
+            return TaskInterface.create(width=width)
         elif nav_name == "建筑":
-            return BuildingInterface.create()
+            return BuildingInterface.create(width=width)
         elif nav_name == "集资":
-            return FundraisingInterface.create()
+            return FundraisingInterface.create(width=width)
         elif nav_name == "账号":
-            return AccountInterface.create()
+            return AccountInterface.create(width=width)
         elif nav_name == "打扫":
-            return CleaningInterface.create()
+            return CleaningInterface.create(width=width)
         elif nav_name == "打野":
-            return WildInterface.create()
+            return WildInterface.create(width=width)
         elif nav_name == "个性化":
-            return PersonalizationInterface.create()
+            return PersonalizationInterface.create(width=width)
         elif nav_name == "关于":
-            return AboutInterface.create()
+            return AboutInterface.create(width=width)
         else:
             return ft.Column(
                 [
@@ -91,7 +91,13 @@ class MainInterface:
         """处理导航切换"""
         MainInterface.current_nav = nav_name
         if MainInterface.content_area:
-            MainInterface.content_area.content = MainInterface.get_page_content(nav_name)
+            content_left = 205 + DEFAULT_SPACING
+            content_right = DEFAULT_SPACING
+            content_width = DEFAULT_WIDTH - content_left - content_right
+            
+            content = MainInterface.get_page_content(nav_name, width=content_width)
+            MainInterface.content_area.content = content
+            
             try:
                 MainInterface.content_area.update()
             except:
@@ -142,6 +148,7 @@ class MainInterface:
         content_top = user_top
         content_bottom = DEFAULT_SPACING
         content_right = DEFAULT_SPACING
+        content_width = DEFAULT_WIDTH - content_left - content_right
         
         nav_interface = NavBar.create(
             width=nav_width,
@@ -152,12 +159,13 @@ class MainInterface:
         nav_interface.bottom = DEFAULT_SPACING
         
         content_container = ft.Container(
-            content=MainInterface.get_page_content(MainInterface.current_nav),
+            content=MainInterface.get_page_content(MainInterface.current_nav, width=content_width),
             left=content_left,
             top=content_top,
             right=content_right,
             bottom=content_bottom,
         )
+        
         MainInterface.content_area = content_container
         
         layout_stack = ft.Stack(

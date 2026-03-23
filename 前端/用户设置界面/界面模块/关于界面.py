@@ -16,10 +16,9 @@
 """
 
 import flet as ft
-from typing import Callable
 from 前端.用户设置界面.配置.界面配置 import 界面配置
 from 前端.用户设置界面.组件模块.关于卡片 import AboutCard
-from 前端.用户设置界面.组件模块.通用功能容器 import GenericFunctionContainer
+from 前端.用户设置界面.组件模块.通用功能容器 import GenericFunctionContainer, USER_WIDTH
 
 
 class AboutInterface:
@@ -37,37 +36,17 @@ class AboutInterface:
     PRICE_YEAR = "280"
     
     @staticmethod
-    def create(page: ft.Page = None, on_refresh: Callable[[], None] = None) -> ft.Container:
+    def create(width: int=USER_WIDTH) -> ft.Container:
         """
         创建关于界面
         
         参数：
-            page: 页面对象（可选，用于更新页面显示）
-            on_refresh: 刷新回调
+            width: 内容区域宽度
         
         返回：
             ft.Container: 关于界面容器
         """
         配置 = 界面配置()
-        
-        def copy_to_clipboard(text: str, label: str):
-            if page:
-                page.set_clipboard(text)
-                page.snack_bar = ft.SnackBar(
-                    content=ft.Text(f"{label}已复制: {text}"),
-                    duration=2000,
-                )
-                page.snack_bar.open = True
-                page.update()
-        
-        def on_qq_click(e):
-            copy_to_clipboard(AboutInterface.QQ_GROUP, "QQ群")
-        
-        def on_wechat_click(e):
-            copy_to_clipboard(AboutInterface.WECHAT, "微信")
-        
-        def on_email_click(e):
-            copy_to_clipboard(AboutInterface.EMAIL, "邮箱")
         
         version_card = AboutCard.create(
             config=配置,
@@ -85,9 +64,9 @@ class AboutInterface:
             title="联系方式",
             icon="CONTACTS",
             content_items=[
-                ("QQ群", AboutInterface.QQ_GROUP, on_qq_click),
-                ("微信", AboutInterface.WECHAT, on_wechat_click),
-                ("邮箱", AboutInterface.EMAIL, on_email_click),
+                ("QQ群", AboutInterface.QQ_GROUP, None),
+                ("微信", AboutInterface.WECHAT, None),
+                ("邮箱", AboutInterface.EMAIL, None),
             ],
         )
         
@@ -123,16 +102,11 @@ class AboutInterface:
             title="关于",
             icon="INFO",
             cards=[version_card, contact_card, payment_card, disclaimer_card],
+            width=width,
             expand=True,
         )
 
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    from 前端.用户设置界面.核心接口.主题提供者 import ThemeProvider
-    ThemeProvider.initialize(配置)
-    def main(page: ft.Page):
-        page.padding = 0
-        page.bgcolor = 配置.当前主题颜色["bg_primary"]
-        page.add(AboutInterface.create(page))
-    ft.run(main)
+    ft.run(lambda page: page.add(AboutInterface.create()))
