@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：主界面
+模块名称：MainInterface
 设计思路: 应用入口，组装各层模块
 模块隔离: 入口层依赖所有层，不被任何层依赖
 """
@@ -8,205 +8,223 @@
 import flet as ft
 from typing import Dict, Any, Callable, Optional
 
-from 前端.新界面_v2.核心.配置.界面配置 import 界面配置
-from 前端.新界面_v2.核心.常量.全局常量 import 全局常量
-from 前端.新界面_v2.业务层.服务.配置服务 import 配置服务
-from 前端.新界面_v2.业务层.事件.事件总线 import 事件总线
-from 前端.新界面_v2.表示层.界面.系统界面 import 系统界面
-from 前端.新界面_v2.表示层.界面.策略界面 import 策略界面
-from 前端.新界面_v2.表示层.界面.任务界面 import 任务界面
-from 前端.新界面_v2.表示层.界面.建筑界面 import 建筑界面
-from 前端.新界面_v2.表示层.界面.集资界面 import 集资界面
-from 前端.新界面_v2.表示层.界面.账号界面 import 账号界面
-from 前端.新界面_v2.表示层.界面.打扫界面 import 打扫界面
-from 前端.新界面_v2.表示层.界面.打野界面 import 打野界面
-from 前端.新界面_v2.表示层.界面.个性化界面 import 个性化界面
-from 前端.新界面_v2.表示层.界面.关于界面 import 关于界面
-from 前端.新界面_v2.表示层.组件.基础.卡片容器 import 卡片容器, USER_PADDING, USER_HEIGHT
-from 前端.新界面_v2.表示层.组件.复合.用户信息卡片 import 用户信息卡片
-from 前端.新界面_v2.表示层.组件.复合.导航按钮 import 导航按钮
+from 前端.新界面_v2.核心.配置.界面配置 import UIConfig
+from 前端.新界面_v2.核心.常量.全局常量 import GlobalConstants
+from 前端.新界面_v2.业务层.服务.配置服务 import ConfigService
+from 前端.新界面_v2.业务层.事件.事件总线 import EventBus
+from 前端.新界面_v2.表示层.界面.系统界面 import SystemPage
+from 前端.新界面_v2.表示层.界面.策略界面 import StrategyPage
+from 前端.新界面_v2.表示层.界面.任务界面 import TaskPage
+from 前端.新界面_v2.表示层.界面.建筑界面 import BuildingPage
+from 前端.新界面_v2.表示层.界面.集资界面 import FundingPage
+from 前端.新界面_v2.表示层.界面.账号界面 import AccountPage
+from 前端.新界面_v2.表示层.界面.打扫界面 import CleaningPage
+from 前端.新界面_v2.表示层.界面.打野界面 import HuntingPage
+from 前端.新界面_v2.表示层.界面.个性化界面 import PersonalizationPage
+from 前端.新界面_v2.表示层.界面.关于界面 import AboutPage
+from 前端.新界面_v2.表示层.组件.基础.卡片容器 import CardContainer, USER_PADDING, USER_HEIGHT
+from 前端.新界面_v2.表示层.组件.复合.用户信息卡片 import UserInfoCard
+from 前端.新界面_v2.表示层.组件.复合.导航按钮 import NavigationButton
 
 
-# *** 用户指定变量 - AI不得修改 ***
-USER_WINDOW_WIDTH = 1200
-USER_WINDOW_HEIGHT = 540
-USER_NAV_WIDTH = 280
-USER_SPACING = 10
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
+USER_WINDOW_WIDTH = 1200  # 窗口宽度
+USER_WINDOW_HEIGHT = 540  # 窗口高度
+USER_NAV_WIDTH = 280  # 导航栏宽度
+USER_SPACING = 10  # 默认间距
 # *********************************
 
 
-class 主界面:
+class MainInterface:
     """主界面 - 应用入口"""
     
-    当前导航 = "系统"
-    内容区域 = None
-    配置服务实例: Optional[配置服务] = None
-    事件总线实例: Optional[事件总线] = None
+    current_nav = "系统"
+    content_area = None
+    current_page_content = None
+    config_service: Optional[ConfigService] = None
+    event_bus: Optional[EventBus] = None
     
     @staticmethod
-    def 设置窗口(页面: ft.Page, 配置: 界面配置=None) -> None:
-        if 配置 is None:
-            配置 = 界面配置()
+    def setup_window(page: ft.Page, config: UIConfig=None) -> None:
+        if config is None:
+            config = UIConfig()
         
-        主题颜色 = 配置.当前主题颜色
+        theme_colors = config.当前主题颜色
         
-        页面.title = 全局常量.APP_NAME
-        页面.window.width = USER_WINDOW_WIDTH
-        页面.window.height = USER_WINDOW_HEIGHT
-        页面.window.resizable = False
-        页面.bgcolor = 主题颜色.get("bg_primary")
-        页面.padding = 0
+        page.title = GlobalConstants.APP_NAME
+        # 使用与旧版相同的API设置窗口尺寸
+        page.window.width = USER_WINDOW_WIDTH
+        page.window.height = USER_WINDOW_HEIGHT
+        page.window.resizable = False
+        
+        page.bgcolor = theme_colors.get("bg_primary")
+        page.padding = 0
     
     @staticmethod
-    def 获取页面内容(导航名称: str, 配置: 界面配置, 配置服务实例: 配置服务) -> ft.Control:
+    def get_page_content(nav_name: str, config: UIConfig, config_service: ConfigService) -> ft.Control:
         """获取页面内容"""
-        主题颜色 = 配置.当前主题颜色
+        theme_colors = config.当前主题颜色
         
-        def 保存回调(卡片ID: str, 配置键: str, 值: str):
-            配置服务实例.设置值(导航名称, 卡片ID, 配置键, 值)
+        def save_callback(card_id: str, config_key: str, value: str):
+            config_service.set_value(nav_name, card_id, config_key, value)
         
-        if 导航名称 == "系统":
-            return 系统界面.创建(配置=配置, 保存回调=保存回调)
-        elif 导航名称 == "策略":
-            return 策略界面.创建(配置=配置, 保存回调=保存回调)
-        elif 导航名称 == "任务":
-            return 任务界面.创建(配置=配置, 保存回调=保存回调)
-        elif 导航名称 == "建筑":
-            return 建筑界面.创建(配置=配置, 保存回调=保存回调)
-        elif 导航名称 == "集资":
-            return 集资界面.创建(配置=配置, 保存回调=保存回调)
-        elif 导航名称 == "账号":
-            return 账号界面.创建(配置=配置, 保存回调=保存回调)
-        elif 导航名称 == "打扫":
-            return 打扫界面.创建(配置=配置, 保存回调=保存回调)
-        elif 导航名称 == "打野":
-            return 打野界面.创建(配置=配置, 保存回调=保存回调)
-        elif 导航名称 == "个性化":
-            return 个性化界面.创建(配置=配置, 保存回调=保存回调)
-        elif 导航名称 == "关于":
-            return 关于界面.创建(配置=配置, 保存回调=保存回调)
+        if nav_name == "系统":
+            return SystemPage.create(config=config, save_callback=save_callback)
+        elif nav_name == "策略":
+            return StrategyPage.create(config=config, save_callback=save_callback)
+        elif nav_name == "任务":
+            return TaskPage.create(config=config, save_callback=save_callback)
+        elif nav_name == "建筑":
+            return BuildingPage.create(config=config, save_callback=save_callback)
+        elif nav_name == "集资":
+            return FundingPage.create(config=config, save_callback=save_callback)
+        elif nav_name == "账号":
+            return AccountPage.create(config=config, save_callback=save_callback)
+        elif nav_name == "打扫":
+            return CleaningPage.create(config=config, save_callback=save_callback)
+        elif nav_name == "打野":
+            return HuntingPage.create(config=config, save_callback=save_callback)
+        elif nav_name == "个性化":
+            return PersonalizationPage.create(config=config, save_callback=save_callback)
+        elif nav_name == "关于":
+            return AboutPage.create(config=config, save_callback=save_callback)
         else:
             return ft.Column([
-                ft.Text(导航名称, size=20, weight=ft.FontWeight.BOLD, color=主题颜色.get("text_primary")),
+                ft.Text(nav_name, size=20, weight=ft.FontWeight.BOLD, color=theme_colors.get("text_primary")),
                 ft.Container(height=24),
-                ft.Text(f"{导航名称}页面开发中...", size=14, color=主题颜色.get("text_secondary")),
+                ft.Text(f"{nav_name}页面开发中...", size=14, color=theme_colors.get("text_secondary")),
             ], spacing=0, expand=True)
     
     @staticmethod
-    def 处理功能点击(功能ID: str, 配置: 界面配置, 配置服务实例: 配置服务, 容器: ft.Container):
+    def handle_function_click(function_id: str, config: UIConfig, config_service: ConfigService, container: ft.Container):
         """处理功能按钮点击"""
-        主题颜色 = 配置.当前主题颜色
-        页面 = 容器.page if 容器 else None
+        theme_colors = config.当前主题颜色
+        page = container.page if container else None
         
-        if 功能ID == "导出配置":
+        if function_id == "导出配置":
             try:
-                文件路径 = 配置服务实例.保存游戏配置()
-                提示 = ft.SnackBar(
-                    content=ft.Text(f"配置已导出: {文件路径}", color=主题颜色.get("text_primary")),
-                    bgcolor=主题颜色.get("success"),
+                file_path = config_service_instance.save_game_config()
+                snackbar = ft.SnackBar(
+                    content=ft.Text(f"配置已导出: {file_path}", color=theme_colors.get("text_primary")),
+                    bgcolor=theme_colors.get("success"),
                 )
-                if 页面:
-                    页面.snack_bar = 提示
-                    提示.open = True
-                    页面.update()
-            except Exception as 异常:
-                提示 = ft.SnackBar(
-                    content=ft.Text(f"导出失败: {str(异常)}", color=主题颜色.get("text_primary")),
-                    bgcolor=主题颜色.get("error"),
+                if page:
+                    page.snack_bar = snackbar
+                    snackbar.open = True
+                    page.update()
+            except Exception as e:
+                snackbar = ft.SnackBar(
+                    content=ft.Text(f"导出失败: {str(e)}", color=theme_colors.get("text_primary")),
+                    bgcolor=theme_colors.get("error"),
                 )
-                if 页面:
-                    页面.snack_bar = 提示
-                    提示.open = True
-                    页面.update()
-        elif 功能ID == "恢复默认":
+                if page:
+                    page.snack_bar = snackbar
+                    snackbar.open = True
+                    page.update()
+        elif function_id == "恢复默认":
             pass
-        elif 功能ID == "配置方案":
+        elif function_id == "配置方案":
             pass
     
     @staticmethod
-    def 创建(
-        配置: 界面配置=None,
+    def create(
+        config: UIConfig=None,
+        page: ft.Page=None,
     ) -> ft.Container:
-        if 配置 is None:
-            配置 = 界面配置()
+        if config is None:
+            config = UIConfig()
         
-        主题颜色 = 配置.当前主题颜色
+        # 如果提供了page对象，直接设置窗口尺寸
+        if page:
+            MainInterface.setup_window(page, config)
         
-        主界面.配置服务实例 = 配置服务()
-        主界面.事件总线实例 = 事件总线()
+        theme_colors = config.当前主题颜色
         
-        导航项列表 = 全局常量.NAV_ITEMS
+        MainInterface.config_service_instance = ConfigService()
+        MainInterface.config_service_instance.load_config()  # 加载配置
+        MainInterface.event_bus_instance = EventBus()
         
-        导航按钮列表 = []
-        当前选中 = [0]
+        nav_items = GlobalConstants.NAV_ITEMS
         
-        def 处理导航点击(索引: int):
-            当前选中[0] = 索引
-            导航名称 = 导航项列表[索引]["id"]
-            主界面.当前导航 = 导航名称
+        nav_buttons = []
+        current_selection = [0]
+        
+        def destroy_current_page_card():
+            if MainInterface.current_page_content is not None:
+                content = MainInterface.current_page_content.content
+                if content and hasattr(content, 'destroy_loaded_card'):
+                    content.destroy_loaded_card()
+        
+        def handle_nav_click(index: int):
+            current_selection[0] = index
+            nav_name = nav_items[index]["id"]
+            MainInterface.current_nav = nav_name
             
-            for i, 按钮 in enumerate(导航按钮列表):
-                导航按钮.更新选中状态(按钮, i == 索引, 配置)
+            for i, button in enumerate(nav_buttons):
+                NavigationButton.update_selection(button, i == index, config)
             
-            if 主界面.内容区域:
-                内容 = 主界面.获取页面内容(导航名称, 配置, 主界面.配置服务实例)
-                主界面.内容区域.content = 内容
+            if MainInterface.content_area:
+                destroy_current_page_card()
+                
+                new_content = MainInterface.get_page_content(nav_name, config, MainInterface.config_service_instance)
+                MainInterface.current_page_content = new_content
+                MainInterface.content_area.content = new_content
                 
                 try:
-                    主界面.内容区域.update()
+                    MainInterface.content_area.update()
                 except Exception as e:
                     print(f"更新内容区域失败: {e}")
             
-            主界面.事件总线实例.发布界面切换(导航名称)
+            MainInterface.event_bus_instance.publish_page_switch(nav_name)
         
-        for i, 项 in enumerate(导航项列表):
-            按钮 = 导航按钮.创建(
-                配置=配置,
-                项=项,
-                索引=i,
-                当前选中=当前选中,
-                处理导航点击=处理导航点击,
-                选中状态=(i == 0),
-                自适应高度=True,
+        for i, item in enumerate(nav_items):
+            button = NavigationButton.create(
+                config=config,
+                item=item,
+                index=i,
+                current_selection=current_selection,
+                on_navigate=handle_nav_click,
+                selected=(i == 0),
+                auto_height=True,
             )
-            导航按钮列表.append(按钮)
+            nav_buttons.append(button)
         
-        用户信息 = 用户信息卡片.创建(配置=配置)
+        user_info = UserInfoCard.create(config=config)
         
-        功能项列表 = [
+        function_items = [
             {"id": "导出配置", "icon": "SAVE"},
         ]
         
-        功能按钮列表 = []
-        for 功能项 in 功能项列表:
-            def 创建功能点击回调(fid=功能项.get("id")):
-                def 回调(idx):
-                    主界面.处理功能点击(fid, 配置, 主界面.配置服务实例, 容器)
-                return 回调
+        function_buttons = []
+        for function_item in function_items:
+            def create_function_callback(fid=function_item.get("id")):
+                def callback(idx):
+                    MainInterface.handle_function_click(fid, config, MainInterface.config_service_instance, container)
+                return callback
             
-            按钮 = 导航按钮.创建(
-                配置=配置,
-                项=功能项,
-                索引=-1,
-                处理导航点击=创建功能点击回调(),
-                选中状态=False,
-                自适应高度=True,
+            button = NavigationButton.create(
+                config=config,
+                item=function_item,
+                index=-1,
+                on_navigate=create_function_callback(),
+                selected=False,
+                auto_height=True,
             )
-            功能按钮列表.append(按钮)
+            function_buttons.append(button)
         
-        所有按钮列表 = 导航按钮列表 + 功能按钮列表
+        all_buttons = nav_buttons + function_buttons
         
-        导航列 = ft.Column(
-            controls=所有按钮列表,
-            spacing=USER_SPACING // 4,
+        nav_column = ft.Column(
+            controls=all_buttons,
+            spacing=USER_SPACING // 2, # 导航按钮间距  
             expand=True,
         )
         
-        导航面板 = ft.Container(
+        nav_panel = ft.Container(
             content=ft.Column([
-                用户信息,
+                user_info,
                 ft.Container(height=USER_SPACING),
-                导航列,
+                nav_column,
             ], spacing=0),
             width=USER_NAV_WIDTH,
             padding=ft.Padding(
@@ -215,65 +233,66 @@ class 主界面:
                 right=USER_SPACING * 2,
                 bottom=USER_SPACING,
             ),
-            bgcolor=主题颜色.get("bg_primary"),
+            bgcolor=theme_colors.get("bg_primary"),
         )
         
-        右侧内容 = 主界面.获取页面内容(主界面.当前导航, 配置, 主界面.配置服务实例)
+        initial_content = MainInterface.get_page_content(MainInterface.current_nav, config, MainInterface.config_service_instance)
+        MainInterface.current_page_content = initial_content
         
-        内容列 = ft.Column(
-            controls=[右侧内容],
+        content_column = ft.Column(
+            controls=[initial_content],
             spacing=0,
             expand=True,
         )
         
-        内容容器 = ft.Container(
-            content=内容列,
+        content_container = ft.Container(
+            content=content_column,
             padding=ft.Padding(
                 left=USER_SPACING * 2,
-                top=USER_SPACING + USER_PADDING,
+                top=USER_SPACING,  # 修复：改为USER_SPACING，与左侧导航面板对齐
                 right=USER_SPACING,
                 bottom=USER_SPACING * 2,
             ),
             expand=True,
         )
         
-        主界面.内容区域 = 内容容器
+        MainInterface.content_area = content_container
         
-        主行 = ft.Row([
-            导航面板,
-            ft.VerticalDivider(width=1, color=主题颜色.get("border")),
-            内容容器,
+        main_row = ft.Row([
+            nav_panel,
+            ft.VerticalDivider(width=1, color=theme_colors.get("border")),
+            content_container,
         ], expand=True, spacing=0)
         
-        容器 = ft.Container(
-            content=主行,
-            bgcolor=主题颜色.get("bg_primary"),
+        container = ft.Container(
+            content=main_row,
+            bgcolor=theme_colors.get("bg_primary"),
             expand=True,
         )
         
-        def 处理挂载(e):
-            if 容器.page:
-                主界面.设置窗口(容器.page, 配置)
+        def handle_mount(e):
+            if container.page:
+                MainInterface.setup_window(container.page, config)
         
-        容器.on_mount = 处理挂载
+        container.on_mount = handle_mount
         
-        return 容器
+        return container
     
     @staticmethod
-    def 获取游戏配置() -> Dict[str, Any]:
+    def get_game_config() -> Dict[str, Any]:
         """获取游戏控制配置（供外部调用）"""
-        if 主界面.配置服务实例:
-            return 主界面.配置服务实例.导出游戏配置()
+        if MainInterface.config_service_instance:
+            return MainInterface.config_service_instance.export_game_config()
         return {}
     
     @staticmethod
-    def 保存游戏配置() -> str:
+    def save_game_config() -> str:
         """保存游戏控制配置（供外部调用）"""
-        if 主界面.配置服务实例:
-            return 主界面.配置服务实例.保存游戏配置()
+        if MainInterface.config_service_instance:
+            return MainInterface.config_service_instance.save_game_config()
         return ""
 
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    ft.run(lambda page: page.add(主界面.创建()))
+    ft.run(lambda page: page.add(MainInterface.create(page=page)))

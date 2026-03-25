@@ -1,117 +1,135 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：集资界面
+模块名称：FundingPage
 设计思路: 集资配置界面，使用折叠卡片模式
 模块隔离: 界面层依赖组件层和业务层
 """
 
 import flet as ft
-from typing import Dict, Any, List, Callable
+from typing import Dict, Any, List, Callable, Optional
 
-from 前端.新界面_v2.核心.配置.界面配置 import 界面配置
-from 前端.新界面_v2.表示层.组件.复合.折叠卡片 import 折叠卡片
+from 前端.新界面_v2.核心.配置.界面配置 import UIConfig
+from 前端.新界面_v2.表示层.组件.复合.折叠卡片 import CollapsibleCard
 from 前端.新界面_v2.核心.常量.全局常量 import USER_SPACING, USER_CARD_SPACING
 
 
-# *** 用户指定变量 - AI不得修改 ***
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
 # （用户未指定变量）
 # *********************************
 
 
-class 集资界面:
+class FundingPage:
     """集资配置界面"""
     
+    current_loaded_card: Optional[ft.Container] = None
+    
     @staticmethod
-    def 创建(
-        配置: 界面配置=None,
-        保存回调: Callable[[str, str, str], None]=None,
+    def create(
+        config: UIConfig=None,
+        save_callback: Callable[[str, str, str], None]=None,
     ) -> ft.Container:
-        if 配置 is None:
-            配置 = 界面配置()
+        if config is None:
+            config = UIConfig()
         
-        主题颜色 = 配置.当前主题颜色
-        卡片列表: List[ft.Control] = []
-        卡片数据: Dict[str, Dict[str, Any]] = {}
+        theme_colors = config.当前主题颜色
+        card_list: List[ft.Control] = []
+        card_data: Dict[str, Dict[str, Any]] = {}
+        current_loaded_card = [None]
         
-        def 创建卡片(
-            卡片ID: str,
-            标题: str,
-            图标: str,
-            副标题: str,
-            控件配置: List[Dict[str, Any]],
-            启用: bool=True,
+        def destroy_loaded_card():
+            if current_loaded_card[0] and hasattr(current_loaded_card[0], 'is_loaded'):
+                if current_loaded_card[0].is_loaded():
+                    current_loaded_card[0].destroy_controls()
+            current_loaded_card[0] = None
+        
+        def create_card(
+            card_id: str,
+            title: str,
+            icon: str,
+            subtitle: str,
+            controls_config: List[Dict[str, Any]],
+            enabled: bool=True,
         ) -> ft.Container:
-            def 处理保存(配置键: str, 值: str):
-                if 卡片ID not in 卡片数据:
-                    卡片数据[卡片ID] = {}
-                卡片数据[卡片ID][配置键] = 值
-                if 保存回调:
-                    保存回调(卡片ID, 配置键, 值)
+            def handle_save(config_key: str, value: str):
+                if card_id not in card_data:
+                    card_data[card_id] = {}
+                card_data[card_id][config_key] = value
+                if save_callback:
+                    save_callback(card_id, config_key, value)
             
-            卡片 = 折叠卡片.创建(
-                标题=标题,
-                图标=图标,
-                副标题=副标题,
-                启用=启用,
-                控件配置=控件配置,
-                每行控件数=4,
-                保存回调=处理保存,
-                配置=配置,
+            def handle_expand():
+                if current_loaded_card[0] and current_loaded_card[0] != card:
+                    if current_loaded_card[0].is_loaded():
+                        current_loaded_card[0].destroy_controls()
+                current_loaded_card[0] = card
+            
+            card = CollapsibleCard.create(
+                title=title,
+                icon=icon,
+                subtitle=subtitle,
+                enabled=enabled,
+                controls_config=controls_config,
+                controls_per_row=1,
+                on_save=handle_save,
+                on_expand=handle_expand,
+                config=config,
             )
-            卡片列表.append(卡片)
-            return 卡片
+            card_list.append(card)
+            return card
         
-        创建卡片(
-            卡片ID="small_account_tribute",
-            标题="小号上贡",
-            图标="PAYMENTS",
-            副标题="小号达到等级后上贡资源",
-            控件配置=[
-                {"type": "dropdown", "config_key": "上贡限级", "label": "限级:", "value": "05", "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"]},
-                {"type": "dropdown", "config_key": "上贡限量", "label": "限量:", "value": "2", "options": [str(i) for i in range(2, 21)]},
+        create_card(
+            card_id="small_account_tribute",
+            title="小号上贡",
+            icon="PAYMENTS",
+            subtitle="小号达到等级后上贡资源",
+            controls_config=[
+                {"type": "dropdown", "config_key": "上贡限级", "label": "限级选择:", "value": "05", "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"]},
+                {"type": "dropdown", "config_key": "上贡限量", "label": "限量选择:", "value": "2", "options": [str(i) for i in range(2, 21)]},
             ],
         )
         
-        创建卡片(
-            卡片ID="sub_city_rent",
-            标题="分城纳租",
-            图标="ACCOUNT_BALANCE_WALLET",
-            副标题="分城达到等级后纳租",
-            控件配置=[
-                {"type": "dropdown", "config_key": "分城等级", "label": "等级:", "value": "05", "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"]},
-                {"type": "dropdown", "config_key": "纳租限量", "label": "限量:", "value": "2", "options": [str(i) for i in range(2, 21)]},
+        create_card(
+            card_id="sub_city_rent",
+            title="分城纳租",
+            icon="ACCOUNT_BALANCE_WALLET",
+            subtitle="分城达到等级后纳租",
+            controls_config=[
+                {"type": "dropdown", "config_key": "分城等级", "label": "等级选择:", "value": "05", "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"]},
+                {"type": "dropdown", "config_key": "纳租限量", "label": "限量选择:", "value": "2", "options": [str(i) for i in range(2, 21)]},
             ],
         )
         
-        标题栏 = ft.Row([
-            ft.Icon(ft.Icons.SHOPPING_CART, size=20, color=主题颜色.get("accent")),
+        title_bar = ft.Row([
+            ft.Icon(ft.Icons.SHOPPING_CART, size=20, color=theme_colors.get("accent")),
             ft.Container(width=6),
-            ft.Text("集资设置", size=16, weight=ft.FontWeight.BOLD, color=主题颜色.get("text_primary")),
+            ft.Text("集资设置", size=16, weight=ft.FontWeight.BOLD, color=theme_colors.get("text_primary")),
         ], alignment=ft.MainAxisAlignment.START, vertical_alignment=ft.CrossAxisAlignment.CENTER)
         
-        卡片列 = ft.Column(
-            controls=卡片列表,
+        card_column = ft.Column(
+            controls=card_list,
             spacing=USER_CARD_SPACING,
             scroll=ft.ScrollMode.HIDDEN,
             expand=True,
         )
         
-        内容列 = ft.Column(
+        content_column = ft.Column(
             controls=[
-                标题栏,
+                title_bar,
                 ft.Container(height=USER_SPACING),
-                卡片列,
+                card_column,
             ],
             spacing=0,
             expand=True,
         )
         
+        content_column.destroy_loaded_card = destroy_loaded_card
+        
         return ft.Container(
-            content=内容列,
+            content=content_column,
             expand=True,
         )
 
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    ft.run(lambda page: page.add(集资界面.创建()))
+    ft.run(lambda page: page.add(FundingPage.create()))

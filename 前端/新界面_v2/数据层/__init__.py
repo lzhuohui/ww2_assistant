@@ -5,10 +5,10 @@
 模块隔离: 数据层只依赖核心层，被业务层依赖
 """
 
-from .模型 import 用户配置模型, 账号配置, 系统配置, 策略配置
-from .仓库 import 配置仓库, 导出仓库
+from .模型 import UserConfigModel, AccountConfig, SystemConfig, StrategyConfig
+from .仓库 import ConfigRepository, ExportRepository
 
 __all__ = [
-    "用户配置模型", "账号配置", "系统配置", "策略配置",
-    "配置仓库", "导出仓库"
+    "UserConfigModel", "AccountConfig", "SystemConfig", "StrategyConfig",
+    "ConfigRepository", "ExportRepository"
 ]

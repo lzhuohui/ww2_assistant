@@ -5,8 +5,8 @@
 模块隔离: 核心层不依赖其他层，被所有层依赖
 """
 
-from .配置 import 主题配置, 界面配置
-from .常量 import 全局常量
-from .工具 import 通用工具
+from .配置 import ThemeConfig, UIConfig
+from .常量 import GlobalConstants
+from .工具 import CommonUtils
 
-__all__ = ["主题配置", "界面配置", "全局常量", "通用工具"]
+__all__ = ["ThemeConfig", "UIConfig", "GlobalConstants", "CommonUtils"]

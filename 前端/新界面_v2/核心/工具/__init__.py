@@ -5,6 +5,6 @@
 模块隔离: 工具层独立，无业务依赖
 """
 
-from .通用工具 import 通用工具
+from .通用工具 import CommonUtils
 
-__all__ = ["通用工具"]
+__all__ = ["CommonUtils"]

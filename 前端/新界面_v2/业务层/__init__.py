@@ -5,10 +5,10 @@
 模块隔离: 业务层依赖数据层和核心层，被表示层依赖
 """
 
-from .服务 import 配置服务, 导出服务
-from .事件 import 事件总线, 事件, 事件类型
+from .服务 import ConfigService, ExportService
+from .事件 import EventBus, Event, EventType
 
 __all__ = [
-    "配置服务", "导出服务",
-    "事件总线", "事件", "事件类型"
+    "ConfigService", "ExportService",
+    "EventBus", "Event", "EventType"
 ]

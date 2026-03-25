@@ -5,7 +5,7 @@
 模块隔离: 服务层依赖数据层和核心层，不依赖表示层
 """
 
-from .配置服务 import 配置服务
-from .导出服务 import 导出服务
+from .配置服务 import ConfigService
+from .导出服务 import ExportService
 
-__all__ = ["配置服务", "导出服务"]
+__all__ = ["ConfigService", "ExportService"]

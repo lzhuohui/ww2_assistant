@@ -5,6 +5,6 @@
 模块隔离: 事件层独立，支持松耦合通信
 """
 
-from .事件总线 import 事件总线, 事件, 事件类型
+from .事件总线 import EventBus, Event, EventType
 
-__all__ = ["事件总线", "事件", "事件类型"]
+__all__ = ["EventBus", "Event", "EventType"]

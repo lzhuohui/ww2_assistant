@@ -1,205 +1,229 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：导出服务
+模块名称：ExportService
 设计思路: 提供数据转换和导出的业务逻辑
 模块隔离: 服务层依赖数据层和核心层，不依赖表示层
 """
 
+import json
 from typing import Dict, Any, List
 from datetime import datetime
-from 前端.新界面_v2.数据层.模型.用户配置模型 import 用户配置模型, 账号配置
+from 前端.新界面_v2.核心.配置.配置映射 import ConfigMapping
 
 
-# *** 用户指定变量 - AI不得修改 ***
-# （用户未指定变量）
-# *********************************
-
-
-class 导出服务:
+class ExportService:
     """导出服务 - 数据转换和导出的业务逻辑"""
     
-    def 生成游戏配置(self, 用户配置: Dict[str, Any]) -> Dict[str, Any]:
-        """生成完整的游戏控制配置"""
-        return {
-            "__version__": "1.0.0",
-            "__timestamp__": datetime.now().isoformat(),
-            "系统设置": self._转换系统配置(用户配置),
-            "策略设置": self._转换策略配置(用户配置),
-            "任务设置": self._转换任务配置(用户配置),
-            "集资设置": self._转换集资配置(用户配置),
-            "账号设置": self._转换账号配置(用户配置),
-            "打扫设置": self._转换打扫配置(用户配置),
-            "打野设置": self._转换打野配置(用户配置),
-            "建筑设置": self._转换建筑配置(用户配置),
-            "挂机统帅信息": self._生成统帅信息(用户配置),
-        }
+    def generate_game_config(self, user_config: Dict[str, Any]) -> Dict[str, Any]:
+        """生成按键精灵格式的游戏控制配置"""
+        result = {}
+        
+        for i in range(1, 22):
+            result[f"控制{i}"] = ""
+        
+        result.update(self._convert_system_config(user_config))
+        result.update(self._convert_strategy_config(user_config))
+        result.update(self._convert_task_config(user_config))
+        result.update(self._convert_funding_config(user_config))
+        result.update(self._convert_cleaning_config(user_config))
+        result.update(self._convert_hunting_config(user_config))
+        result.update(self._convert_building_config(user_config))
+        result.update(self._convert_accounts(user_config))
+        
+        result["挂机统帅信息"] = self._generate_commander_info(user_config)
+        
+        return result
     
-    def _转换系统配置(self, 用户配置: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_system_config(self, user_config: Dict[str, Any]) -> Dict[str, Any]:
         """转换系统配置"""
-        模式映射 = {"自动": "自动挂机", "手动": "手动控制"}
-        结果 = {}
+        result = {}
         
-        模式 = 用户配置.get("挂机模式.挂机模式", "自动")
-        结果["挂机模式"] = 模式映射.get(模式, 模式)
+        mode = user_config.get("hangup_mode.挂机模式", "全自动")
+        mode_index = "0" if mode == "全自动" else "1"
+        result["控制1"] = mode_index
+        result["挂机模式"] = "自动挂机" if mode == "全自动" else "手动控制"
         
-        速度字符串 = 用户配置.get("指令速度.指令速度", "100毫秒")
-        结果["挂机速度"] = int(速度字符串.replace("毫秒", "")) if "毫秒" in 速度字符串 else 100
+        speed = user_config.get("command_speed.指令速度", "100")
+        result["控制3"] = "0"
+        result["挂机速度"] = speed
         
-        重试字符串 = 用户配置.get("尝试次数.尝试次数", "10次")
-        结果["尝试次数"] = int(重试字符串.replace("次", "")) if "次" in 重试字符串 else 10
+        retry = user_config.get("retry_count.尝试次数", "15")
+        retry_index = str(int(retry) // 5 - 2) if retry.isdigit() else "2"
+        result["控制4"] = retry_index
+        result["尝试次数"] = retry
         
-        缓存字符串 = 用户配置.get("清缓限量.清缓限量", "1.0M")
-        结果["缓存限制"] = float(缓存字符串.replace("M", "")) * 1024 * 1024 if "M" in 缓存字符串 else 1048576.0
+        cache = user_config.get("cache_limit.清缓限量", "1.0")
+        cache_value = int(float(cache) * 1000)
+        result["控制5"] = "0"
+        result["缓存限制"] = str(cache_value)
         
-        return 结果
+        return result
     
-    def _转换策略配置(self, 用户配置: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_strategy_config(self, user_config: Dict[str, Any]) -> Dict[str, Any]:
         """转换策略配置"""
-        类型映射 = {"城市建筑": "城市", "资源建筑": "资源", "城资建筑": "城资"}
-        策略映射 = {"平衡资源": "自动平衡", "战时经济": "战时经济"}
+        result = {}
         
-        结果 = {}
+        build_level = user_config.get("quick_build.速建限级", "08")
+        result["控制6"] = str(int(build_level) - 5)
+        result["速建限级"] = build_level
         
-        等级字符串 = 用户配置.get("建筑速建.速建限级", "08")
-        结果["速建限级"] = int(等级字符串.replace("级", "")) if "级" in 等级字符串 else int(等级字符串)
+        build_type = user_config.get("quick_build.速建类型", "城资建筑")
+        type_index = {"城市建筑": "0", "资源建筑": "1", "城资建筑": "2"}.get(build_type, "2")
+        result["控制7"] = type_index
+        result["速建类别"] = {"城市建筑": "城市", "资源建筑": "资源", "城资建筑": "城资"}.get(build_type, "城资")
         
-        类型字符串 = 用户配置.get("建筑速建.速建类型", "城资建筑")
-        结果["速建类别"] = 类型映射.get(类型字符串, 类型字符串)
+        prod_level = user_config.get("quick_produce.速产限级", "07")
+        result["控制8"] = str(int(prod_level) - 5)
+        result["速产限级"] = prod_level
         
-        结果["速建开关"] = 用户配置.get("建筑速建.速建开关", True)
+        prod_type = user_config.get("quick_produce.速产类型", "平衡资源")
+        strategy_index = {"平衡资源": "0", "战时经济": "1", "钢铁熔炉": "2", "橡胶采集": "3", "石油开采": "4"}.get(prod_type, "0")
+        result["控制9"] = strategy_index
+        result["速产策略"] = prod_type
         
-        产限字符串 = 用户配置.get("资源速产.速产限级", "07")
-        结果["速产限级"] = int(产限字符串.replace("级", "")) if "级" in 产限字符串 else int(产限字符串)
+        points = user_config.get("point_reserve.保留点数", "60")
+        points_index = str(int(points) // 30 - 1)
+        result["控制10"] = points_index
+        result["保留策点"] = points
         
-        策略字符串 = 用户配置.get("资源速产.速产类型", "平衡资源")
-        结果["速产策略"] = 策略映射.get(策略字符串, 策略字符串)
-        
-        结果["速产开关"] = 用户配置.get("资源速产.速产开关", True)
-        
-        点数字符串 = 用户配置.get("策点保留.保留点数", "60")
-        结果["保留策点"] = int(点数字符串)
-        
-        结果["保留开关"] = 用户配置.get("策点保留.保留开关", True)
-        
-        return 结果
+        return result
     
-    def _转换任务配置(self, 用户配置: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_task_config(self, user_config: Dict[str, Any]) -> Dict[str, Any]:
         """转换任务配置"""
-        结果 = {}
+        result = {}
         
-        主线等级 = 用户配置.get("主线任务.主线限级", "05")
-        结果["主线限级"] = int(主线等级.replace("级", "")) if "级" in 主线等级 else int(主线等级)
+        side_level = user_config.get("main_task.支线限级", "10")
+        result["控制11"] = str(int(side_level) - 5)
+        result["支线限级"] = side_level
         
-        支线等级 = 用户配置.get("支线任务.支线限级", "10")
-        结果["支线限级"] = int(支线等级.replace("级", "")) if "级" in 支线等级 else int(支线等级)
+        side_enabled = user_config.get("main_task.enabled", False)
+        result["控制12"] = "True" if side_enabled else "False"
+        result["支线状态"] = "开启" if side_enabled else "关闭"
         
-        结果["支线状态"] = "开启"
-        
-        return 结果
+        return result
     
-    def _转换集资配置(self, 用户配置: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_funding_config(self, user_config: Dict[str, Any]) -> Dict[str, Any]:
         """转换集资配置"""
-        结果 = {}
+        result = {}
         
-        等级字符串 = 用户配置.get("小号上贡.小号上贡_上贡限级", "05")
-        结果["集资限级"] = int(等级字符串.replace("级", "")) if "级" in 等级字符串 else int(等级字符串)
+        result["控制17"] = "0"
+        result["集资限级"] = "10"
         
-        限量字符串 = 用户配置.get("小号上贡.小号上贡_上贡限量", "2")
-        结果["集资限量"] = int(限量字符串) * 10000
+        result["控制18"] = "0"
+        result["集资限量"] = "20000"
         
-        结果["主帅集资"] = "开启"
-        结果["附城集资"] = "关闭"
-        结果["集资统帅"] = 用户配置.get("小号上贡.主要统帅", "默认主帅")
+        result["控制19"] = "False"
+        result["主帅集资"] = "关闭"
         
-        return 结果
+        result["控制20"] = "False"
+        result["附城集资"] = "关闭"
+        
+        result["控制21"] = ""
+        result["集资统帅"] = ""
+        
+        return result
     
-    def _转换账号配置(self, 用户配置: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _convert_cleaning_config(self, user_config: Dict[str, Any]) -> Dict[str, Any]:
+        """转换打扫配置"""
+        result = {}
+        
+        clean_type = user_config.get("cleaning.打扫类型", "城区战场")
+        type_index = {"城区战场": "0", "城政战场": "1"}.get(clean_type, "0")
+        result["控制13"] = type_index
+        result["打扫战场类型"] = clean_type
+        
+        return result
+    
+    def _convert_hunting_config(self, user_config: Dict[str, Any]) -> Dict[str, Any]:
+        """转换打野配置"""
+        result = {}
+        
+        hunting_enabled = user_config.get("auto_hunting.enabled", False)
+        result["控制14"] = "True" if hunting_enabled else "False"
+        result["自动打野模式"] = "自动攻占" if hunting_enabled else "停止攻占"
+        
+        result["控制15"] = "0"
+        result["打野战场限级"] = "10"
+        
+        result["控制16"] = "2"
+        result["打野叛军限级"] = "3"
+        
+        return result
+    
+    def _convert_building_config(self, user_config: Dict[str, Any]) -> Dict[str, Any]:
+        """转换建筑配置"""
+        result = {}
+        
+        for i in range(1, 47):
+            result[f"建筑{i}"] = ""
+        
+        result["建筑1"] = "26"
+        result["建筑2"] = "25"
+        result["建筑3"] = "25"
+        result["建筑4"] = "8"
+        result["建筑5"] = "5"
+        result["建筑6"] = "5"
+        result["建筑7"] = "5"
+        result["建筑8"] = "5"
+        result["建筑9"] = "5"
+        result["建筑10"] = "3"
+        result["建筑11"] = "3"
+        result["建筑12"] = "5"
+        
+        result["主帅主城城市建筑设置"] = "|城市/26|兵工厂/25|陆军基地/25|空军基地/8|商业区/5|补给品厂/5|高产农场/6|高产铁矿/6|高产橡胶厂/6|高产油井/6|岸防炮/5|炮塔/5"
+        result["主帅主城村庄建筑设置"] = "|农场/6|村庄/5|狙击塔/5"
+        result["主帅主城资源区建筑设置"] = "|铁矿/6|橡胶厂/6|油井/6|资源区/5|狙击塔/5"
+        result["主帅主城军事区建筑设置"] = "|军事区/3|岸防炮/5|炮塔/5"
+        result["主帅主城海港建筑设置"] = "|海军基地/15|海港/3|岸防炮/5|炮塔/5"
+        
+        return result
+    
+    def _convert_accounts(self, user_config: Dict[str, Any]) -> Dict[str, Any]:
         """转换账号配置"""
-        账号列表 = []
+        result = {}
         
         for i in range(1, 16):
-            账号ID = f"{i:02d}账号"
+            account_num = f"{i:02d}"
+            base_index = (i - 1) * 4 + 1
             
-            if not 用户配置.get(f"{账号ID}.开关", False):
+            account_type = user_config.get(f"account_{account_num}.类型", "副帅")
+            type_index = "0" if account_type == "主帅" else "1"
+            result[f"统帅{base_index}"] = type_index
+            
+            name = user_config.get(f"account_{account_num}.名称", "")
+            account = user_config.get(f"account_{account_num}.账号", "")
+            password = user_config.get(f"account_{account_num}.密码", "")
+            result[f"统帅{base_index + 1}"] = f"{name}/{account}/{password}" if name else ""
+            
+            platform = user_config.get(f"account_{account_num}.平台", "Tap")
+            platform_index = {"Tap": "0", "九游": "1", "Fan": "2", "小7": "3", "Vivo": "4", "Opop": "5"}.get(platform, "0")
+            result[f"统帅{base_index + 2}"] = platform_index
+            
+            enabled = user_config.get(f"account_{account_num}.开关", False)
+            result[f"统帅{base_index + 3}"] = "True" if enabled else "False"
+        
+        return result
+    
+    def _generate_commander_info(self, user_config: Dict[str, Any]) -> str:
+        """生成挂机统帅信息"""
+        info_list = []
+        
+        for i in range(1, 16):
+            account_num = f"{i:02d}"
+            
+            enabled = user_config.get(f"account_{account_num}.开关", False)
+            if not enabled:
                 continue
             
-            账号 = {
-                "序号": i,
-                "帅类": 用户配置.get(f"{账号ID}.统帅种类", "副帅"),
-                "名称": 用户配置.get(f"{账号ID}.名称", ""),
-                "账号": 用户配置.get(f"{账号ID}.账号", ""),
-                "密码": 用户配置.get(f"{账号ID}.密码", ""),
-                "平台": 用户配置.get(f"{账号ID}.平台", "Tap"),
-                "挂机": 用户配置.get(f"{账号ID}.开关", False),
-            }
+            name = user_config.get(f"account_{account_num}.名称", "")
+            if not name:
+                continue
             
-            账号列表.append(账号)
+            account_type = user_config.get(f"account_{account_num}.类型", "副帅")
+            account = user_config.get(f"account_{account_num}.账号", "")
+            password = user_config.get(f"account_{account_num}.密码", "")
+            platform = user_config.get(f"account_{account_num}.平台", "Tap")
+            
+            info_list.append(f"{account_type}/{name}/{account}/{password}/{platform}")
         
-        return 账号列表
-    
-    def _转换打扫配置(self, 用户配置: Dict[str, Any]) -> Dict[str, Any]:
-        """转换打扫配置"""
-        结果 = {}
-        
-        打扫城区 = 用户配置.get("打扫城区.开关", False)
-        打扫政区 = 用户配置.get("打扫政区.开关", False)
-        
-        if 打扫城区 and 打扫政区:
-            结果["打扫战场类型"] = "城政战场"
-        elif 打扫城区:
-            结果["打扫战场类型"] = "城区战场"
-        elif 打扫政区:
-            结果["打扫战场类型"] = "政区战场"
-        else:
-            结果["打扫战场类型"] = "关闭"
-        
-        结果["打扫城区"] = "开启" if 打扫城区 else "关闭"
-        结果["打扫政区"] = "开启" if 打扫政区 else "关闭"
-        
-        return 结果
-    
-    def _转换打野配置(self, 用户配置: Dict[str, Any]) -> Dict[str, Any]:
-        """转换打野配置"""
-        结果 = {}
-        
-        打野开关 = 用户配置.get("自动打野.开关", False)
-        结果["自动打野模式"] = "自动攻占" if 打野开关 else "停止攻占"
-        结果["打野战场限级"] = 10
-        结果["打野叛军限级"] = 1
-        
-        return 结果
-    
-    def _转换建筑配置(self, 用户配置: Dict[str, Any]) -> Dict[str, Any]:
-        """转换建筑配置"""
-        结果 = {}
-        
-        结果["主帅主城"] = {
-            "城市": 17, "兵工厂": 17, "陆军基地": 14,
-            "空军基地": 3, "商业区": 4, "补给品厂": 3,
-        }
-        
-        结果["付帅主城"] = {
-            "城市": 15, "兵工厂": 10, "陆军基地": 10,
-            "空军基地": 3, "商业区": 4, "补给品厂": 3,
-        }
-        
-        结果["附城"] = {
-            "城市": 15, "兵工厂": 10, "陆军基地": 10,
-            "空军基地": 3, "商业区": 4, "补给品厂": 3,
-        }
-        
-        return 结果
-    
-    def _生成统帅信息(self, 用户配置: Dict[str, Any]) -> str:
-        """生成挂机统帅信息"""
-        账号列表 = self._转换账号配置(用户配置)
-        
-        if 账号列表:
-            信息列表 = [
-                f"{账号['帅类']}/{账号['名称']}/{账号['平台']}"
-                for 账号 in 账号列表
-                if 账号.get("挂机") and 账号.get("名称")
-            ]
-            return "/".join(信息列表)
-        
-        return ""
+        return "/".join(info_list)

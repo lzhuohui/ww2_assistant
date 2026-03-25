@@ -5,7 +5,7 @@
 模块隔离: 表示层依赖业务层和数据层，不被其他层依赖
 """
 
-from .组件 import 文本标签, 卡片容器, 下拉框, 折叠卡片
-from .界面 import 系统界面
+from .组件 import TextLabel, CardContainer, Dropdown, CollapsibleCard
+from .界面 import SystemPage
 
-__all__ = ["文本标签", "卡片容器", "下拉框", "折叠卡片", "系统界面"]
+__all__ = ["TextLabel", "CardContainer", "Dropdown", "CollapsibleCard", "SystemPage"]

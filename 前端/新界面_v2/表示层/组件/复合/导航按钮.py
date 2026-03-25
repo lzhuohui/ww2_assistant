@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：导航按钮
+模块名称：NavigationButton
 设计思路: 可点击的导航按钮，支持选中状态，Win11风格背景块
 模块隔离: 复合组件，依赖基础组件
 """
@@ -8,142 +8,141 @@
 import flet as ft
 from typing import Dict, Any, Callable
 
-from 前端.新界面_v2.核心.配置.界面配置 import 界面配置
-from 前端.新界面_v2.表示层.组件.基础.卡片容器 import 卡片容器
+from 前端.新界面_v2.核心.配置.界面配置 import UIConfig
 
 
-# *** 用户指定变量 - AI不得修改 ***
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
 # （用户未指定变量）
 # *********************************
 
 
-class 导航按钮:
+class NavigationButton:
     """导航按钮 - 可点击的导航按钮，支持选中状态，Win11风格背景块"""
     
     @staticmethod
-    def 创建(
-        配置: 界面配置=None,
-        项: Dict[str, Any]=None,
-        索引: int=0,
-        当前选中: list=None,
-        处理导航点击: Callable=None,
-        选中状态: bool=False,
-        自适应高度: bool=False,
+    def create(
+        config: UIConfig=None,
+        item: Dict[str, Any]=None,
+        index: int=0,
+        current_selection: list=None,
+        on_navigate: Callable=None,
+        selected: bool=False,
+        auto_height: bool=False,
     ) -> ft.Container:
-        if 配置 is None:
-            配置 = 界面配置()
+        if config is None:
+            config = UIConfig()
         
-        if 项 is None:
-            项 = {"id": "未命名", "icon": "INFO"}
+        if item is None:
+            item = {"id": "未命名", "icon": "INFO"}
         
-        if 当前选中 is None:
-            当前选中 = [0]
+        if current_selection is None:
+            current_selection = [0]
         
-        主题颜色 = 配置.当前主题颜色
-        图标名称 = 项.get("icon", "INFO")
+        theme_colors = config.当前主题颜色
+        icon_name = item.get("icon", "INFO")
         
-        选中颜色 = 主题颜色.get("text_primary")
-        未选中颜色 = 主题颜色.get("text_secondary")
-        选中背景色 = 主题颜色.get("accent")
-        悬停背景色 = 主题颜色.get("bg_card")
+        selected_color = theme_colors.get("text_primary")
+        unselected_color = theme_colors.get("text_secondary")
+        selected_bg = theme_colors.get("accent")
+        hover_bg = theme_colors.get("bg_card")
         
-        图标控件 = ft.Icon(
-            getattr(ft.Icons, 图标名称, ft.Icons.INFO),
+        icon_control = ft.Icon(
+            getattr(ft.Icons, icon_name, ft.Icons.INFO),
             size=18,
-            color=选中颜色 if 选中状态 else 未选中颜色,
+            color=selected_color if selected else unselected_color,
         )
         
-        文本控件 = ft.Text(
-            项["id"],
+        text_control = ft.Text(
+            item["id"],
             size=13,
-            color=选中颜色 if 选中状态 else 未选中颜色,
+            color=selected_color if selected else unselected_color,
         )
         
-        按钮内容 = ft.Row([
-            图标控件,
+        button_content = ft.Row([
+            icon_control,
             ft.Container(width=8),
-            文本控件,
+            text_control,
         ], spacing=0, vertical_alignment=ft.CrossAxisAlignment.CENTER)
         
-        背景块 = ft.Container(
-            bgcolor=选中背景色 if 选中状态 else "transparent",
+        background_block = ft.Container(
+            bgcolor=selected_bg if selected else "transparent",
             border_radius=6,
             animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
-            width=float("inf") if 选中状态 else 0,
+            width=float("inf") if selected else 0,
             height=float("inf"),
         )
         
-        内容容器 = ft.Container(
-            content=按钮内容,
+        content_container = ft.Container(
+            content=button_content,
             padding=ft.Padding(left=12, right=12, top=8, bottom=8),
             alignment=ft.Alignment(-1, 0),
         )
         
-        堆栈 = ft.Stack([
-            背景块,
-            内容容器,
+        stack = ft.Stack([
+            background_block,
+            content_container,
         ], alignment=ft.Alignment(-1, 0))
         
-        按钮 = ft.Container(
-            content=堆栈,
-            bgcolor=主题颜色.get("bg_secondary"),
+        button = ft.Container(
+            content=stack,
+            bgcolor=theme_colors.get("bg_secondary"),
             border_radius=6,
             clip_behavior=ft.ClipBehavior.HARD_EDGE,
         )
         
-        if 自适应高度:
-            按钮.expand = True
+        if auto_height:
+            button.expand = True
         
-        选中状态存储 = [选中状态]
+        selected_state = [selected]
         
-        def 更新选中(选中: bool):
-            选中状态存储[0] = 选中
-            if 选中:
-                背景块.bgcolor = 选中背景色
-                背景块.width = float("inf")
-                图标控件.color = 选中颜色
-                文本控件.color = 选中颜色
+        def update_selected(is_selected: bool):
+            selected_state[0] = is_selected
+            if is_selected:
+                background_block.bgcolor = selected_bg
+                background_block.width = float("inf")
+                icon_control.color = selected_color
+                text_control.color = selected_color
             else:
-                背景块.bgcolor = "transparent"
-                背景块.width = 0
-                图标控件.color = 未选中颜色
-                文本控件.color = 未选中颜色
+                background_block.bgcolor = "transparent"
+                background_block.width = 0
+                icon_control.color = unselected_color
+                text_control.color = unselected_color
             try:
-                if 按钮.page:
-                    按钮.update()
+                if button.page:
+                    button.update()
             except:
                 pass
         
-        def 处理悬停(e):
-            if not 选中状态存储[0]:
+        def handle_hover(e):
+            if not selected_state[0]:
                 if e.data == "true":
-                    背景块.bgcolor = 悬停背景色
-                    背景块.width = float("inf")
+                    background_block.bgcolor = hover_bg
+                    background_block.width = float("inf")
                 else:
-                    背景块.bgcolor = "transparent"
-                    背景块.width = 0
+                    background_block.bgcolor = "transparent"
+                    background_block.width = 0
                 try:
-                    if 按钮.page:
-                        按钮.update()
+                    if button.page:
+                        button.update()
                 except:
                     pass
         
-        按钮.on_hover = 处理悬停
+        button.on_hover = handle_hover
         
-        if 处理导航点击:
-            按钮.on_click = lambda e, idx=索引: 处理导航点击(idx)
+        if on_navigate:
+            button.on_click = lambda e, idx=index: on_navigate(idx)
         
-        按钮.更新选中 = 更新选中
+        button.update_selected = update_selected
         
-        return 按钮
+        return button
     
     @staticmethod
-    def 更新选中状态(按钮: ft.Container, 选中: bool, 配置: 界面配置=None) -> None:
+    def update_selection(button: ft.Container, selected: bool, config: UIConfig=None) -> None:
         """更新按钮的选中状态"""
-        if hasattr(按钮, '更新选中'):
-            按钮.更新选中(选中)
+        if hasattr(button, 'update_selected'):
+            button.update_selected(selected)
 
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    ft.run(lambda page: page.add(导航按钮.创建()))
+    ft.run(lambda page: page.add(NavigationButton.create()))

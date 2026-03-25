@@ -1,87 +1,91 @@
 # -*- coding: utf-8 -*-
 """
 模块名称：卡片容器
-设计思路: Win11风格卡片，支持阴影、圆角、悬停效果
-模块隔离: 基础组件，不依赖其他业务组件
+模块功能：Win11风格卡片容器，支持阴影、圆角、悬停效果
+实现步骤：
+- 创建Container组件
+- 设置默认阴影和悬停阴影
+- 绑定悬停事件实现动态效果
 """
 
 import flet as ft
 from typing import Optional
 
-from 前端.新界面_v2.核心.配置.界面配置 import 界面配置
+from 前端.新界面_v2.核心.配置.界面配置 import UIConfig
 
-
-# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
-USER_WIDTH = 500  # 默认卡片宽度
-USER_HEIGHT = 200  # 默认卡片高度
-USER_PADDING = 20  # 默认卡片内边距
+# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
+USER_WIDTH = 500       # 默认卡片宽度
+USER_HEIGHT = 100      # 默认卡片高度
+USER_PADDING = 5       # 默认卡片内边距
 # *********************************
 
-
-class 卡片容器:
+class CardContainer:
     """Win11风格卡片容器"""
     
     @staticmethod
-    def 创建(
-        内容: ft.Control=None,
-        配置: 界面配置=None,
-        宽度: Optional[int]=None,
-        高度: Optional[int]=USER_HEIGHT,
-        内边距: int=USER_PADDING,
-        圆角: int=8,
-        悬停效果: bool=False,
-        阴影效果: bool=True,
+    def create(
+        content: ft.Control = None,
+        config: UIConfig = None,
+        width: Optional[int] = USER_WIDTH,
+        height: Optional[int] = USER_HEIGHT,
+        padding: int = USER_PADDING,
+        radius: int = 8,
+        hover_effect: bool = False,
+        shadow_effect: bool = True,
     ) -> ft.Container:
-        if 配置 is None:
-            配置 = 界面配置()
+        if config is None:
+            config = UIConfig()
         
-        if 内容 is None:
-            内容 = ft.Text("卡片内容示例", size=14)
+        if content is None:
+            content = ft.Text("卡片内容示例", size=14)
         
-        主题颜色 = 配置.当前主题颜色
+        theme_colors = config.当前主题颜色
         
-        默认阴影 = ft.BoxShadow(
+        default_shadow = ft.BoxShadow(
             spread_radius=0,
             blur_radius=4,
             color="rgba(0, 0, 0, 0.25)",
             offset=ft.Offset(0, 2),
-        ) if 阴影效果 else None
+        ) if shadow_effect else None
         
-        悬停阴影 = ft.BoxShadow(
+        hover_shadow = ft.BoxShadow(
             spread_radius=0,
             blur_radius=8,
             color="rgba(0, 0, 0, 0.3)",
             offset=ft.Offset(0, 4),
-        ) if 阴影效果 else None
+        ) if shadow_effect else None
         
-        容器 = ft.Container(
-            content=内容,
-            width=宽度,
-            height=高度,
-            padding=内边距,
-            bgcolor=主题颜色.get("bg_card"),
-            border_radius=圆角,
-            shadow=默认阴影,
-            animate=ft.Animation(167, ft.AnimationCurve.EASE_OUT) if 悬停效果 else None,
+        container = ft.Container(
+            content=content,
+            width=width,
+            height=height,
+            padding=padding,
+            bgcolor=theme_colors.get("bg_card"),
+            border_radius=radius,
+            shadow=default_shadow,
+            animate=ft.Animation(167, ft.AnimationCurve.EASE_OUT) if hover_effect else None,
         )
         
-        if 悬停效果:
-            def 处理悬停(e):
+        if hover_effect:
+            def handle_hover(e):
                 if e.data == "true":
-                    容器.shadow = 悬停阴影
+                    container.shadow = hover_shadow
                 else:
-                    容器.shadow = 默认阴影
+                    container.shadow = default_shadow
                 try:
-                    if 容器.page:
-                        容器.update()
+                    if container.page:
+                        container.update()
                 except:
                     pass
             
-            容器.on_hover = 处理悬停
+            container.on_hover = handle_hover
         
-        return 容器
+        return container
 
 
-# *** 调试逻辑 ***
+# *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
 if __name__ == "__main__":
-    ft.run(lambda page: page.add(卡片容器.创建()))
+    def main(page: ft.Page):
+        page.add(CardContainer.create())
+    
+    ft.app(target=main)

@@ -5,6 +5,6 @@
 模块隔离: 入口层依赖所有层，不被任何层依赖
 """
 
-from .主界面 import 主界面
+from .主界面 import MainInterface
 
-__all__ = ["主界面"]
+__all__ = ["MainInterface"]

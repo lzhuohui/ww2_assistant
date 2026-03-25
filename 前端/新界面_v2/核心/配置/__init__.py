@@ -5,7 +5,7 @@
 模块隔离: 配置层独立，不依赖其他业务模块
 """
 
-from .主题配置 import 主题配置
-from .界面配置 import 界面配置
+from .主题配置 import ThemeConfig
+from .界面配置 import UIConfig
 
-__all__ = ["主题配置", "界面配置"]
+__all__ = ["ThemeConfig", "UIConfig"]

@@ -5,6 +5,6 @@
 模块隔离: 常量层独立，无外部依赖
 """
 
-from .全局常量 import 全局常量
+from .全局常量 import GlobalConstants
 
-__all__ = ["全局常量"]
+__all__ = ["GlobalConstants"]

@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：全局常量
+模块名称：GlobalConstants
 设计思路: 定义全局使用的常量
 模块隔离: 纯常量模块，无依赖
 """
 
-# *** 用户指定变量 - AI不得修改 ***
-USER_APP_NAME = "二战风云辅助"
-USER_APP_VERSION = "1.0.0"
-USER_SPACING = 10
-USER_CARD_HEIGHT = 70
-USER_CARD_SPACING = USER_SPACING // 2
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
+USER_APP_NAME = "二战风云辅助"  # 应用名称
+USER_APP_VERSION = "1.0.0"  # 应用版本
+USER_SPACING = 10  # 默认间距
+USER_CARD_HEIGHT = 70  # 默认卡片高度
+USER_CARD_SPACING = USER_SPACING // 2  # 卡片间距
 # *********************************
 
 
-class 全局常量:
+class GlobalConstants:
     """全局常量定义"""
     
     APP_NAME = USER_APP_NAME
@@ -38,4 +38,10 @@ class 全局常量:
     
     MAX_ACCOUNTS = 15
     DEFAULT_ANIMATION_DURATION = 200
-    DEFAULT_DESTROY_DELAY = 30
+
+
+# *** 调试逻辑 ***
+if __name__ == "__main__":
+    print(f"应用名称: {GlobalConstants.APP_NAME}")
+    print(f"应用版本: {GlobalConstants.APP_VERSION}")
+    print(f"导航项数量: {len(GlobalConstants.NAV_ITEMS)}")

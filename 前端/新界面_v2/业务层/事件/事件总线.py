@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：事件总线
+模块名称：EventBus
 设计思路: 提供模块间通信的事件机制
 模块隔离: 事件层独立，支持松耦合通信
 """
@@ -10,35 +10,35 @@ from dataclasses import dataclass
 from enum import Enum
 
 
-# *** 用户指定变量 - AI不得修改 ***
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
 # （用户未指定变量）
 # *********************************
 
 
-class 事件类型(Enum):
+class EventType(Enum):
     """事件类型枚举"""
-    配置变更 = "config_changed"
-    主题变更 = "theme_changed"
-    界面切换 = "page_switched"
-    导出完成 = "export_completed"
-    错误发生 = "error_occurred"
+    CONFIG_CHANGED = "config_changed"
+    THEME_CHANGED = "theme_changed"
+    PAGE_SWITCHED = "page_switched"
+    EXPORT_COMPLETED = "export_completed"
+    ERROR_OCCURRED = "error_occurred"
 
 
 @dataclass
-class 事件:
+class Event:
     """事件数据类"""
-    类型: 事件类型
-    数据: Dict[str, Any]
-    来源: str = ""
+    event_type: EventType
+    data: Dict[str, Any]
+    source: str = ""
 
 
-class 事件总线:
+class EventBus:
     """事件总线 - 模块间通信"""
     
     _instance = None
     
     @classmethod
-    def 重置实例(cls):
+    def reset_instance(cls):
         """重置单例实例（用于测试或内存释放）"""
         cls._instance = None
     
@@ -51,62 +51,62 @@ class 事件总线:
         if hasattr(self, '_initialized') and self._initialized:
             return
         
-        self._监听器: Dict[事件类型, List[Callable]] = {}
+        self._listeners: Dict[EventType, List[Callable]] = {}
         self._initialized = True
     
-    def 订阅(self, 事件类型: 事件类型, 监听器: Callable) -> None:
+    def subscribe(self, event_type: EventType, listener: Callable) -> None:
         """订阅事件"""
-        if 事件类型 not in self._监听器:
-            self._监听器[事件类型] = []
-        self._监听器[事件类型].append(监听器)
+        if event_type not in self._listeners:
+            self._listeners[event_type] = []
+        self._listeners[event_type].append(listener)
     
-    def 取消订阅(self, 事件类型: 事件类型, 监听器: Callable) -> None:
+    def unsubscribe(self, event_type: EventType, listener: Callable) -> None:
         """取消订阅"""
-        if 事件类型 in self._监听器:
-            if 监听器 in self._监听器[事件类型]:
-                self._监听器[事件类型].remove(监听器)
+        if event_type in self._listeners:
+            if listener in self._listeners[event_type]:
+                self._listeners[event_type].remove(listener)
     
-    def 清理所有监听器(self) -> None:
+    def clear_all_listeners(self) -> None:
         """清理所有监听器（用于内存释放）"""
-        self._监听器.clear()
+        self._listeners.clear()
     
-    def 发布(self, 事件: 事件) -> None:
+    def publish(self, event: Event) -> None:
         """发布事件"""
-        if 事件.类型 in self._监听器:
-            for 监听器 in self._监听器[事件.类型]:
+        if event.event_type in self._listeners:
+            for listener in self._listeners[event.event_type]:
                 try:
-                    监听器(事件)
+                    listener(event)
                 except Exception as e:
                     print(f"事件处理失败: {e}")
     
-    def 发布配置变更(self, 界面ID: str, 卡片ID: str, 配置键: str, 值: Any) -> None:
+    def publish_config_changed(self, page_id: str, card_id: str, config_key: str, value: Any) -> None:
         """发布配置变更事件"""
-        事件对象 = 事件(
-            类型=事件类型.配置变更,
-            数据={
-                "界面ID": 界面ID,
-                "卡片ID": 卡片ID,
-                "配置键": 配置键,
-                "值": 值,
+        event = Event(
+            event_type=EventType.CONFIG_CHANGED,
+            data={
+                "page_id": page_id,
+                "card_id": card_id,
+                "config_key": config_key,
+                "value": value,
             },
-            来源="配置服务",
+            source="ConfigService",
         )
-        self.发布(事件对象)
+        self.publish(event)
     
-    def 发布主题变更(self, 主题名称: str) -> None:
+    def publish_theme_changed(self, theme_name: str) -> None:
         """发布主题变更事件"""
-        事件对象 = 事件(
-            类型=事件类型.主题变更,
-            数据={"主题名称": 主题名称},
-            来源="主题服务",
+        event = Event(
+            event_type=EventType.THEME_CHANGED,
+            data={"theme_name": theme_name},
+            source="ThemeService",
         )
-        self.发布(事件对象)
+        self.publish(event)
     
-    def 发布界面切换(self, 界面名称: str) -> None:
+    def publish_page_switch(self, page_name: str) -> None:
         """发布界面切换事件"""
-        事件对象 = 事件(
-            类型=事件类型.界面切换,
-            数据={"界面名称": 界面名称},
-            来源="主界面",
+        event = Event(
+            event_type=EventType.PAGE_SWITCHED,
+            data={"page_name": page_name},
+            source="MainInterface",
         )
-        self.发布(事件对象)
+        self.publish(event)

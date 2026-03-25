@@ -5,7 +5,7 @@
 模块隔离: 仓库层只负责数据读写，不包含业务逻辑
 """
 
-from .配置仓库 import 配置仓库
-from .导出仓库 import 导出仓库
+from .配置仓库 import ConfigRepository
+from .导出仓库 import ExportRepository
 
-__all__ = ["配置仓库", "导出仓库"]
+__all__ = ["ConfigRepository", "ExportRepository"]

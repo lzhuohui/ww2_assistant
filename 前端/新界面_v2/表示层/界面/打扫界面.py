@@ -1,99 +1,112 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：打扫界面
+模块名称：CleaningPage
 设计思路: 打扫配置界面，使用折叠卡片模式
 模块隔离: 界面层依赖组件层和业务层
 """
 
 import flet as ft
-from typing import Dict, Any, List, Callable
+from typing import Dict, Any, List, Callable, Optional
 
-from 前端.新界面_v2.核心.配置.界面配置 import 界面配置
-from 前端.新界面_v2.表示层.组件.复合.折叠卡片 import 折叠卡片
+from 前端.新界面_v2.核心.配置.界面配置 import UIConfig
+from 前端.新界面_v2.表示层.组件.复合.折叠卡片 import CollapsibleCard
 from 前端.新界面_v2.核心.常量.全局常量 import USER_SPACING, USER_CARD_SPACING
 
 
-# *** 用户指定变量 - AI不得修改 ***
+# *** 用户指定变量 - AI不得修改, 变量值必须生效 ***
 # （用户未指定变量）
 # *********************************
 
 
-class 打扫界面:
+class CleaningPage:
     """打扫配置界面"""
     
+    current_loaded_card: Optional[ft.Container] = None
+    
     @staticmethod
-    def 创建(
-        配置: 界面配置=None,
-        保存回调: Callable[[str, str, str], None]=None,
+    def create(
+        config: UIConfig=None,
+        save_callback: Callable[[str, str, str], None]=None,
     ) -> ft.Container:
-        if 配置 is None:
-            配置 = 界面配置()
+        if config is None:
+            config = UIConfig()
         
-        主题颜色 = 配置.当前主题颜色
-        卡片列表: List[ft.Control] = []
-        卡片数据: Dict[str, Dict[str, Any]] = {}
+        theme_colors = config.当前主题颜色
+        card_list: List[ft.Control] = []
+        card_data: Dict[str, Dict[str, Any]] = {}
+        current_loaded_card = [None]
         
-        def 创建卡片(
-            卡片ID: str,
-            标题: str,
-            图标: str,
-            信息文本: str,
+        def destroy_loaded_card():
+            if current_loaded_card[0] and hasattr(current_loaded_card[0], 'is_loaded'):
+                if current_loaded_card[0].is_loaded():
+                    current_loaded_card[0].destroy_controls()
+            current_loaded_card[0] = None
+        
+        def create_card(
+            card_id: str,
+            title: str,
+            icon: str,
+            info_text: str,
+            enabled: bool=True,
         ) -> ft.Container:
-            信息行 = ft.Text(信息文本, size=14, color=主题颜色.get("text_secondary"))
+            info_row = ft.Text(info_text, size=14, color=theme_colors.get("text_secondary"))
             
-            卡片 = 折叠卡片.创建(
-                标题=标题,
-                图标=图标,
-                只读模式=True,
-                控件=[信息行],
-                配置=配置,
+            card = CollapsibleCard.create(
+                title=title,
+                icon=icon,
+                subtitle=info_text,
+                enabled=enabled,
+                controls=[info_row],
+                config=config,
             )
-            卡片列表.append(卡片)
-            return 卡片
+            card_list.append(card)
+            return card
         
-        创建卡片(
-            卡片ID="city_cleaning",
-            标题="打扫城区战场",
-            图标="CLEANING_SERVICES",
-            信息文本="自动打扫城区战场战利品",
+        create_card(
+            card_id="city_cleaning",
+            title="打扫城区",
+            icon="CLEANING_SERVICES",
+            info_text="自动打扫城区战场战利品",
         )
         
-        创建卡片(
-            卡片ID="district_cleaning",
-            标题="打扫政区战场",
-            图标="DELETE_SWEEP",
-            信息文本="自动打扫政区战场战利品",
+        create_card(
+            card_id="district_cleaning",
+            title="打扫政区",
+            icon="DELETE_SWEEP",
+            info_text="自动打扫政区战场战利品",
         )
         
-        标题栏 = ft.Row([
-            ft.Icon(ft.Icons.CLEANING_SERVICES, size=20, color=主题颜色.get("accent")),
+        title_bar = ft.Row([
+            ft.Icon(ft.Icons.CLEANING_SERVICES, size=20, color=theme_colors.get("accent")),
             ft.Container(width=6),
-            ft.Text("打扫设置", size=16, weight=ft.FontWeight.BOLD, color=主题颜色.get("text_primary")),
+            ft.Text("打扫设置", size=16, weight=ft.FontWeight.BOLD, color=theme_colors.get("text_primary")),
         ], alignment=ft.MainAxisAlignment.START, vertical_alignment=ft.CrossAxisAlignment.CENTER)
         
-        卡片列 = ft.Column(
-            controls=卡片列表,
+        card_column = ft.Column(
+            controls=card_list,
             spacing=USER_CARD_SPACING,
             scroll=ft.ScrollMode.HIDDEN,
             expand=True,
         )
         
-        内容列 = ft.Column(
+        content_column = ft.Column(
             controls=[
-                标题栏,
+                title_bar,
                 ft.Container(height=USER_SPACING),
-                卡片列,
+                card_column,
             ],
             spacing=0,
             expand=True,
         )
         
+        content_column.destroy_loaded_card = destroy_loaded_card
+        
         return ft.Container(
-            content=内容列,
+            content=content_column,
             expand=True,
         )
 
 
 # *** 调试逻辑 ***
 if __name__ == "__main__":
-    ft.run(lambda page: page.add(打扫界面.创建()))
+    ft.run(lambda page: page.add(CleaningPage.create()))

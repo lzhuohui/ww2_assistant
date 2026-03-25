@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：折叠卡片
+模块名称：CollapsibleCard
 设计思路: 卡片高度固定，支持配置模式和只读模式
 模块隔离: 复合组件，依赖基础组件
 """
@@ -8,355 +8,429 @@
 import flet as ft
 from typing import Callable, Dict, Any, List, Optional
 
-from 前端.新界面_v2.核心.配置.界面配置 import 界面配置
-from 前端.新界面_v2.表示层.组件.基础.卡片容器 import 卡片容器, USER_WIDTH, USER_PADDING, USER_HEIGHT
-from 前端.新界面_v2.表示层.组件.基础.下拉框 import 下拉框, USER_WIDTH as DROPDOWN_WIDTH
+from 前端.新界面_v2.核心.配置.界面配置 import UIConfig
+from 前端.新界面_v2.表示层.组件.基础.卡片容器 import CardContainer, USER_WIDTH, USER_PADDING, USER_HEIGHT
+from 前端.新界面_v2.表示层.组件.基础.下拉框 import Dropdown, USER_WIDTH as DROPDOWN_WIDTH
 
 
-# *** 用户指定变量 - AI不得修改 ***
-USER_ANIMATION_DURATION = 150
-USER_DESTROY_DELAY_SECONDS = 30
-USER_ICON_SIZE = 22
-USER_TITLE_SIZE = 14
-USER_SUBTITLE_SIZE = 12
+# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
+USER_ANIMATION_DURATION = 150   # 动画时长(毫秒)
+USER_DIVIDER_LEFT = 70          # 分割线到卡片左侧距离
+USER_ICON_SIZE = 22             # 图标大小
+USER_TITLE_SIZE = 14            # 标题大小
+USER_SUBTITLE_SIZE = 10         # 副标题大小
 # *********************************
 
 
-class 折叠卡片:
+class CollapsibleCard:
     """折叠卡片 - 支持配置模式和只读模式"""
     
     @staticmethod
-    def 创建(
-        标题: str="卡片标题",
-        图标: str="HOME",
-        副标题: str="",
-        启用: bool=True,
-        只读模式: bool=False,
-        控件: List[ft.Control]=None,
-        控件配置: List[Dict[str, Any]]=None,
-        每行控件数: int=6,
-        宽度: int=None,
-        值变更回调: Callable[[str, Any], None]=None,
-        保存回调: Callable[[str, str], None]=None,
-        配置: 界面配置=None,
+    def create(
+        title: str = "卡片标题",
+        icon: str = "HOME",
+        subtitle: str = "",
+        enabled: bool = True,
+        read_only: bool = False,
+        controls: List[ft.Control] = None,
+        controls_config: List[Dict[str, Any]] = None,
+        controls_per_row: int = 6,
+        width: int = None,
+        on_value_change: Callable[[str, Any], None] = None,
+        on_save: Callable[[str, str], None] = None,
+        on_expand: Callable[[], None] = None,
+        on_collapse: Callable[[], None] = None,
+        config: UIConfig = None,
     ) -> ft.Container:
-        if 配置 is None:
-            配置 = 界面配置()
+        if config is None:
+            config = UIConfig()
         
-        主题颜色 = 配置.当前主题颜色
-        间距配置 = 配置.定义尺寸.get("间距", {})
-        控件水平间距 = 间距配置.get("spacing_md", 12)
-        控件垂直间距 = 间距配置.get("spacing_sm", 8)
-        控件右边距 = 间距配置.get("spacing_xl", 20)
+        theme_colors = config.当前主题颜色
+        control_h_spacing = config.get_size("spacing", "spacing_md") or 12
+        control_v_spacing = config.get_size("spacing", "spacing_sm") or 8
+        control_right_margin = config.get_size("spacing", "spacing_lg") or 16
         
-        卡片高度 = USER_HEIGHT
-        卡片内边距 = USER_PADDING
+        card_height = USER_HEIGHT
+        card_padding = USER_PADDING
         
-        已加载 = [False]
-        已启用 = [启用]
-        开关状态 = [启用]
-        控件字典: Dict[str, ft.Control] = {}
-        当前值: Dict[str, str] = {}
-        初始值: Dict[str, str] = {}
+        loaded = [False]
+        is_enabled = [enabled]
+        switch_state = [enabled]
+        control_dict: Dict[str, ft.Control] = {}
+        current_values: Dict[str, str] = {}
+        initial_values: Dict[str, str] = {}
         
-        图标控件 = ft.Icon(
-            getattr(ft.Icons, 图标.upper(), ft.Icons.HOME),
+        icon_control = ft.Icon(
+            getattr(ft.Icons, icon.upper(), ft.Icons.HOME),
             size=USER_ICON_SIZE,
-            color=主题颜色.get("accent"),
-            opacity=1.0 if 启用 else 0.4,
+            color=theme_colors.get("accent"),
+            opacity=1.0 if enabled else 0.4,
         )
         
-        标题文本 = ft.Text(
-            标题,
+        title_text = ft.Text(
+            title,
             size=USER_TITLE_SIZE,
             weight=ft.FontWeight.BOLD,
-            color=主题颜色.get("text_primary"),
-            opacity=1.0 if 启用 else 0.4,
+            color=theme_colors.get("text_primary"),
+            opacity=1.0 if enabled else 0.4,
         )
         
-        加载图标 = ft.Icon(
-            ft.Icons.PLAY_ARROW,
-            size=18,
-            color=主题颜色.get("text_secondary"),
-        )
-        
-        副标题文本 = ft.Text(
-            副标题,
+        original_subtitle = subtitle
+        subtitle_text = ft.Text(
+            subtitle + " >>" if not read_only else subtitle,
             size=USER_SUBTITLE_SIZE,
-            color=主题颜色.get("text_secondary"),
+            color=theme_colors.get("text_secondary"),
         )
         
-        控件列 = ft.Column([], spacing=控件垂直间距, alignment=ft.MainAxisAlignment.CENTER)
+        controls_column = ft.Column([], spacing=control_v_spacing, alignment=ft.MainAxisAlignment.CENTER)
         
-        控件容器 = ft.Container(
-            content=控件列,
-            opacity=0.0 if not 只读模式 else 1.0,
-            animate=ft.Animation(USER_ANIMATION_DURATION, ft.AnimationCurve.EASE_OUT) if not 只读模式 else None,
-            right=控件右边距,
+        controls_container = ft.Container(
+            content=controls_column,
+            opacity=0.0 if not read_only else 1.0,
+            animate=ft.Animation(USER_ANIMATION_DURATION, ft.AnimationCurve.EASE_OUT) if not read_only else None,
+            right=control_right_margin,
             top=0,
             bottom=0,
             alignment=ft.alignment.Alignment(1.0, 0.5),
             clip_behavior=ft.ClipBehavior.NONE,
         )
         
-        副标题容器 = ft.Container(
-            content=ft.Row([
-                副标题文本,
-                ft.Container(width=8) if not 只读模式 else ft.Container(),
-                加载图标 if not 只读模式 else ft.Container(),
-            ], alignment=ft.MainAxisAlignment.START, vertical_alignment=ft.CrossAxisAlignment.CENTER),
-            opacity=1.0 if not 只读模式 else 0.0,
-            animate=ft.Animation(USER_ANIMATION_DURATION, ft.AnimationCurve.EASE_OUT) if not 只读模式 else None,
-            alignment=ft.Alignment(0, 0.5),
+        subtitle_container = ft.Container(
+            content=subtitle_text,
+            left=0,
+            top=0,
+            bottom=0,
+            right=0,
+            opacity=1.0 if not read_only else 0.0,
+            animate=ft.Animation(USER_ANIMATION_DURATION, ft.AnimationCurve.EASE_OUT) if not read_only else None,
+            alignment=ft.Alignment(-1.0, 0.0),
         )
         
-        右侧堆栈 = ft.Stack([
-            副标题容器,
-            控件容器,
+        right_stack = ft.Stack([
+            subtitle_container,
+            controls_container,
         ], clip_behavior=ft.ClipBehavior.NONE)
         
-        右侧容器 = ft.Container(
-            content=右侧堆栈,
+        right_container = ft.Container(
+            content=right_stack,
             expand=True,
             clip_behavior=ft.ClipBehavior.NONE,
         )
         
-        左侧内容 = ft.Column([
-            图标控件,
+        left_content = ft.Column([
+            icon_control,
             ft.Container(height=4),
-            标题文本,
+            title_text,
         ], spacing=0, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
         
-        左侧容器 = ft.Container(
-            content=左侧内容,
-            padding=ft.Padding(left=卡片内边距, top=0, right=卡片内边距, bottom=0),
+        left_container = ft.Container(
+            content=left_content,
+            padding=ft.Padding(left=card_padding, top=0, right=card_padding, bottom=0),
             expand=False,
         )
         
-        分割线 = ft.Container(
+        # 计算左侧内容容器的宽度，确保分割线位置固定
+        left_width = USER_DIVIDER_LEFT - 2  # 减去分割线宽度
+        
+        divider = ft.Container(
             width=2,
-            bgcolor=主题颜色.get("accent", "#0078d4"),
-            height=卡片高度 - 卡片内边距,
-            margin=ft.Margin(0, 卡片内边距 / 2, 0, 卡片内边距 / 2)
+            bgcolor=theme_colors.get("accent", "#0078d4"),
+            height=card_height - card_padding,
+            margin=ft.Margin(0, card_padding / 2, 0, card_padding / 2)
         )
         
-        主行 = ft.Row([
-            ft.Container(
-                content=ft.Row([
-                    左侧容器,
-                    分割线,
-                ], spacing=0, vertical_alignment=ft.CrossAxisAlignment.CENTER),
-                alignment=ft.Alignment(0, 0),
-                expand=False,
-            ),
-            右侧容器,
-        ], height=卡片高度, spacing=0, vertical_alignment=ft.CrossAxisAlignment.CENTER, expand=True if 宽度 is None else False)
-        
-        容器 = 卡片容器.创建(
-            配置=配置,
-            内容=主行,
-            高度=卡片高度,
-            宽度=宽度,
-            内边距=卡片内边距,
+        # 创建左侧内容容器
+        left_container = ft.Container(
+            content=left_content,
+            padding=ft.Padding(left=card_padding, top=0, right=card_padding, bottom=0),
+            width=left_width,
+            expand=False,
+            alignment=ft.Alignment(0, 0.5),
         )
-        容器.clip_behavior = ft.ClipBehavior.NONE
         
-        def 处理开关切换():
-            if 只读模式:
-                return
-            新状态 = not 开关状态[0]
-            开关状态[0] = 新状态
-            已启用[0] = 新状态
-            
-            if 保存回调:
-                保存回调("enabled", 新状态)
-            
-            更新卡片状态()
+        main_row = ft.Row([
+            left_container,
+            divider,
+            right_container,
+        ], height=card_height, spacing=0, vertical_alignment=ft.CrossAxisAlignment.CENTER, expand=True if width is None else False)
         
-        def 更新卡片状态():
-            if 只读模式:
-                容器.opacity = 1.0
-                图标控件.opacity = 1.0
-                标题文本.opacity = 1.0
+        container = CardContainer.create(
+            config=config,
+            content=main_row,
+            height=card_height,
+            width=width,
+            padding=card_padding,
+        )
+        container.clip_behavior = ft.ClipBehavior.NONE
+        
+        def handle_switch_toggle():
+            if read_only:
+                return
+            new_state = not switch_state[0]
+            switch_state[0] = new_state
+            is_enabled[0] = new_state
+            
+            if on_save:
+                on_save("enabled", new_state)
+            
+            update_card_state()
+        
+        def update_card_state():
+            if read_only:
+                container.opacity = 1.0
+                icon_control.opacity = 1.0
+                title_text.opacity = 1.0
                 return
             
-            if 开关状态[0]:
-                容器.opacity = 1.0
-                右侧容器.on_click = lambda e: 加载控件()
-                加载图标.color = 主题颜色.get("text_secondary")
-                副标题文本.color = 主题颜色.get("text_secondary")
-                图标控件.opacity = 1.0
-                标题文本.opacity = 1.0
+            if switch_state[0]:
+                container.opacity = 1.0
+                if not loaded[0]:
+                    right_container.on_click = lambda e: load_controls()
+                else:
+                    right_container.on_click = None
+                subtitle_text.color = theme_colors.get("text_secondary")
+                icon_control.opacity = 1.0
+                title_text.opacity = 1.0
                 
-                if 已加载[0]:
-                    for 控件实例 in 控件字典.values():
-                        if hasattr(控件实例, '设置启用'):
-                            控件实例.设置启用(True)
+                if loaded[0]:
+                    for control_instance in control_dict.values():
+                        if hasattr(control_instance, 'set_enabled'):
+                            control_instance.set_enabled(True)
             else:
-                容器.opacity = 0.5
-                右侧容器.on_click = None
-                加载图标.color = 主题颜色.get("text_disabled", "#888888")
-                副标题文本.color = 主题颜色.get("text_disabled", "#888888")
-                图标控件.opacity = 0.4
-                标题文本.opacity = 0.4
+                container.opacity = 0.5
+                right_container.on_click = None
+                subtitle_text.color = theme_colors.get("text_disabled", "#888888")
+                icon_control.opacity = 0.4
+                title_text.opacity = 0.4
                 
-                if 已加载[0]:
-                    for 控件实例 in 控件字典.values():
-                        if hasattr(控件实例, '设置启用'):
-                            控件实例.设置启用(False)
+                if loaded[0]:
+                    for control_instance in control_dict.values():
+                        if hasattr(control_instance, 'set_enabled'):
+                            control_instance.set_enabled(False)
             
             try:
-                if 容器.page:
-                    容器.page.update()
+                if container.page:
+                    container.page.update()
             except:
                 pass
         
-        if not 只读模式:
-            左侧容器.on_click = lambda e: 处理开关切换()
+        if not read_only:
+            left_container.on_click = lambda e: handle_switch_toggle()
         
-        def 从配置创建控件() -> List[ft.Control]:
-            创建的控件 = []
+        def create_controls_from_config() -> List[ft.Control]:
+            created_controls = []
             
-            for 控件配置项 in 控件配置:
-                if 控件配置项.get("type") == "dropdown":
-                    配置键 = 控件配置项.get("config_key", "")
-                    标签 = 控件配置项.get("label", "")
-                    选项列表 = 控件配置项.get("options", [])
-                    值 = 控件配置项.get("value", 选项列表[0] if 选项列表 else "")
-                    控件宽度 = 控件配置项.get("width", DROPDOWN_WIDTH)
+            for control_config_item in controls_config:
+                if control_config_item.get("type") == "dropdown":
+                    config_key = control_config_item.get("config_key", "")
+                    label = control_config_item.get("label", "")
+                    options = control_config_item.get("options", [])
+                    value = control_config_item.get("value", options[0] if options else "")
+                    control_width = control_config_item.get("width", DROPDOWN_WIDTH)
                     
-                    当前值[配置键] = 值
-                    初始值[配置键] = 值
+                    current_values[config_key] = value
+                    initial_values[config_key] = value
                     
-                    标签文本 = ft.Text(
-                        标签,
+                    label_text = ft.Text(
+                        label,
                         size=14,
-                        color=主题颜色.get("text_secondary"),
+                        color=theme_colors.get("text_secondary"),
                     )
                     
-                    下拉框实例 = 下拉框.创建(
-                        选项列表=选项列表,
-                        当前值=值,
-                        宽度=控件宽度,
-                        启用=已启用[0] if not 只读模式 else True,
-                        变更回调=lambda v, k=配置键: 处理值变更(k, v),
-                        配置=配置,
+                    dropdown_instance = Dropdown.create(
+                        options=options,
+                        current_value=value,
+                        width=control_width,
+                        enabled=is_enabled[0] if not read_only else True,
+                        on_change=lambda v, k=config_key: handle_value_change(k, v),
+                        config=config,
                     )
-                    控件字典[配置键] = 下拉框实例
+                    control_dict[config_key] = dropdown_instance
                     
-                    单个控件 = ft.Row([
-                        标签文本,
-                        下拉框实例,
+                    single_control = ft.Row([
+                        label_text,
+                        dropdown_instance,
                     ], spacing=4, vertical_alignment=ft.CrossAxisAlignment.CENTER)
                     
-                    创建的控件.append(单个控件)
+                    created_controls.append(single_control)
             
-            return 创建的控件
+            return created_controls
         
-        def 布局控件(控件列表: List[ft.Control]):
-            行列表 = []
-            当前行控件 = []
-            当前行控件数 = 0
+        def layout_controls(control_list: List[ft.Control]):
+            row_list = []
+            current_row_controls = []
+            current_row_count = 0
             
-            for 单个控件 in 控件列表:
-                if 当前行控件数 >= 每行控件数 and 当前行控件:
-                    行列表.append(ft.Row(
-                        当前行控件,
-                        spacing=控件水平间距,
+            for single_control in control_list:
+                if current_row_count >= controls_per_row and current_row_controls:
+                    row_list.append(ft.Row(
+                        current_row_controls,
+                        spacing=control_h_spacing,
                         vertical_alignment=ft.CrossAxisAlignment.CENTER,
                         alignment=ft.MainAxisAlignment.END,
                     ))
-                    当前行控件 = []
-                    当前行控件数 = 0
+                    current_row_controls = []
+                    current_row_count = 0
                 
-                当前行控件.append(单个控件)
-                当前行控件数 += 1
+                current_row_controls.append(single_control)
+                current_row_count += 1
             
-            if 当前行控件:
-                行列表.append(ft.Row(
-                    当前行控件,
-                    spacing=控件水平间距,
+            if current_row_controls:
+                row_list.append(ft.Row(
+                    current_row_controls,
+                    spacing=control_h_spacing,
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     alignment=ft.MainAxisAlignment.END,
                 ))
             
-            控件列.controls = 行列表
-            已加载[0] = True
+            controls_column.controls = row_list
+            loaded[0] = True
         
-        def 处理值变更(配置键: str, 值: Any):
-            当前值[配置键] = 值
+        def handle_value_change(config_key: str, value: Any):
+            current_values[config_key] = value
             
-            if 初始值.get(配置键) != 值:
-                if 值变更回调:
-                    值变更回调(配置键, 值)
+            if initial_values.get(config_key) != value:
+                if on_value_change:
+                    on_value_change(config_key, value)
                 
-                if 保存回调:
-                    保存回调(配置键, 值)
+                if on_save:
+                    on_save(config_key, value)
         
-        def 加载控件():
-            if 已加载[0] or (not 开关状态[0] and not 只读模式):
+        def load_controls():
+            if loaded[0] or (not switch_state[0] and not read_only):
                 return
             
-            最终控件列表 = []
+            if on_expand:
+                on_expand()
             
-            if 控件 is not None:
-                最终控件列表 = 控件
-            elif 控件配置 is not None:
-                最终控件列表 = 从配置创建控件()
+            final_control_list = []
             
-            if 最终控件列表:
-                布局控件(最终控件列表)
+            if controls is not None:
+                final_control_list = controls
+            elif controls_config is not None:
+                final_control_list = create_controls_from_config()
             
-            if not 只读模式:
-                副标题容器.opacity = 0.0
-                控件容器.opacity = 1.0
-                
-                try:
-                    if 容器.page:
-                        容器.page.update()
-                except:
-                    pass
+            if final_control_list:
+                layout_controls(final_control_list)
+            
+            # 设置加载标识
+            loaded[0] = True
+            
+            # 展开后移除点击事件，让子控件可以正常响应
+            right_container.on_click = None
+            
+            # 展开时不显示 >>
+            subtitle_text.value = original_subtitle
+            subtitle_container.top = 0
+            subtitle_container.bottom = 0
+            subtitle_container.left = 0
+            subtitle_container.right = 0
+            subtitle_container.alignment = ft.Alignment(-1.0, 1.0)
+            subtitle_container.opacity = 1.0
+            controls_container.opacity = 1.0
+            
+            try:
+                if container.page:
+                    container.page.update()
+            except:
+                pass
         
-        def 获取值() -> Dict[str, str]:
-            for 键, 控件实例 in 控件字典.items():
-                if hasattr(控件实例, '获取值'):
-                    当前值[键] = 控件实例.获取值()
-            return 当前值.copy()
+        def get_values() -> Dict[str, str]:
+            for key, control_instance in control_dict.items():
+                if hasattr(control_instance, 'get_value'):
+                    current_values[key] = control_instance.get_value()
+            return current_values.copy()
         
-        def 设置值(值字典: Dict[str, str]):
-            for 键, 值 in 值字典.items():
-                if 键 in 控件字典:
-                    控件实例 = 控件字典[键]
-                    if hasattr(控件实例, '设置值'):
-                        控件实例.设置值(值)
-                    当前值[键] = 值
-                    初始值[键] = 值
+        def set_values(value_dict: Dict[str, str]):
+            for key, value in value_dict.items():
+                if key in control_dict:
+                    control_instance = control_dict[key]
+                    if hasattr(control_instance, 'set_value'):
+                        control_instance.set_value(value)
+                    current_values[key] = value
+                    initial_values[key] = value
         
-        def 获取开关状态() -> bool:
-            return 开关状态[0]
+        def get_switch_state() -> bool:
+            return switch_state[0]
         
-        def 设置开关状态(状态: bool):
-            if 只读模式:
+        def set_switch_state(state: bool):
+            if read_only:
                 return
-            开关状态[0] = 状态
-            已启用[0] = 状态
-            更新卡片状态()
+            switch_state[0] = state
+            is_enabled[0] = state
+            update_card_state()
         
-        容器.获取值 = 获取值
-        容器.设置值 = 设置值
-        容器.加载控件 = 加载控件
-        容器.是否已加载 = lambda: 已加载[0]
-        容器.获取开关状态 = 获取开关状态
-        容器.设置开关状态 = 设置开关状态
+        def destroy_controls():
+            if not loaded[0]:
+                return
+            controls_column.controls = []
+            control_dict.clear()
+            loaded[0] = False
         
-        if 只读模式 and (控件 is not None or 控件配置 is not None):
-            加载控件()
+        def unload_options_only():
+            if not loaded[0]:
+                return
+            for control_instance in control_dict.values():
+                if hasattr(control_instance, 'unload_options'):
+                    control_instance.unload_options()
         
-        更新卡片状态()
+        def collapse():
+            if read_only:
+                return
+            destroy_controls()
+            # 折叠时显示 >>
+            subtitle_text.value = original_subtitle + " >>"
+            subtitle_container.top = 0
+            subtitle_container.bottom = 0
+            subtitle_container.left = 0
+            subtitle_container.right = 0
+            subtitle_container.alignment = ft.Alignment(-1.0, 0.0)
+            subtitle_container.opacity = 1.0
+            controls_container.opacity = 0.0
+            if on_collapse:
+                on_collapse()
+            try:
+                if container.page:
+                    container.page.update()
+            except:
+                pass
         
-        return 容器
+        container.get_values = get_values
+        container.set_values = set_values
+        container.load_controls = load_controls
+        container.is_loaded = lambda: loaded[0]
+        container.get_switch_state = get_switch_state
+        container.set_switch_state = set_switch_state
+        container.destroy_controls = destroy_controls
+        container.unload_options_only = unload_options_only
+        container.collapse = collapse
+        
+        def set_subtitle(new_subtitle: str, is_expanded: bool = None):
+            nonlocal original_subtitle
+            original_subtitle = new_subtitle
+            if is_expanded is None:
+                is_expanded = loaded[0]
+            # 根据展开状态决定是否添加 " >>"
+            subtitle_text.value = new_subtitle if is_expanded else new_subtitle + " >>"
+            try:
+                if container.page:
+                    container.page.update()
+            except:
+                pass
+        
+        container.set_subtitle = set_subtitle
+        
+        if read_only and (controls is not None or controls_config is not None):
+            load_controls()
+        
+        update_card_state()
+        
+        return container
 
 
-# *** 调试逻辑 ***
+# *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
 if __name__ == "__main__":
-    ft.run(lambda page: page.add(折叠卡片.创建()))
+    def main(page: ft.Page):
+        page.add(CollapsibleCard.create())
+    
+    ft.app(target=main)

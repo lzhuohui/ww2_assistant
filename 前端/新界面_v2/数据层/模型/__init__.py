@@ -5,6 +5,6 @@
 模块隔离: 纯数据模型，无业务逻辑
 """
 
-from .用户配置模型 import 用户配置模型, 账号配置, 系统配置, 策略配置
+from .用户配置模型 import UserConfigModel, AccountConfig, SystemConfig, StrategyConfig
 
-__all__ = ["用户配置模型", "账号配置", "系统配置", "策略配置"]
+__all__ = ["UserConfigModel", "AccountConfig", "SystemConfig", "StrategyConfig"]
