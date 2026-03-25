@@ -38,4 +38,4 @@ def main(page: ft.Page):
 
 # *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.run(main)
