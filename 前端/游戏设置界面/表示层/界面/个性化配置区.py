@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 模块名称：PersonalizationConfigSection
 模块功能：个性化配置区，包含主题模式和强调色设置
