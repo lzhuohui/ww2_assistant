@@ -1,15 +1,11 @@
 ﻿# -*- coding: utf-8 -*-
 """
-模块名称：SystemConfigSection
-模块功能：系统配置区，包含挂机模式、指令速度等配置
-实现步骤：
-- 创建系统配置卡片
-- 使用unload_options销毁策略
-- 支持配置保存和加载
+模块名称：HuntingConfigSection
+模块功能：打野配置区，包含自动打野配置
 """
 
 import flet as ft
-from typing import Dict, Any, List, Callable, Optional
+from typing import Dict, Any, List, Callable
 
 from 前端.游戏设置界面.核心层.配置.界面配置 import UIConfig
 from 前端.游戏设置界面.表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
@@ -18,12 +14,11 @@ from 前端.游戏设置界面.业务层.服务.配置服务 import ConfigServic
 
 # *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
 USER_CARD_SPACING = 10  # 卡片间距
-USER_SPACING = 10  # 通用间距
 # *********************************
 
 
-class SystemConfigSection:
-    """系统配置区 - 使用unload_options策略"""
+class HuntingConfigSection:
+    """打野配置区"""
     
     @staticmethod
     def create(
@@ -51,8 +46,6 @@ class SystemConfigSection:
             saved_enabled = config_service.get_value(card_id, "enabled")
             if saved_enabled is None:
                 saved_enabled = enabled
-                if save_callback:
-                    save_callback(card_id, "enabled", str(enabled))
             
             for control_config in controls_config:
                 config_key = control_config.get("config_key")
@@ -60,12 +53,6 @@ class SystemConfigSection:
                     saved_value = config_service.get_value(card_id, config_key)
                     if saved_value is not None:
                         control_config["value"] = saved_value
-                    else:
-                        default_value = control_config.get("value")
-                        if default_value is not None:
-                            control_config["value"] = default_value
-                            if save_callback:
-                                save_callback(card_id, config_key, default_value)
             
             def handle_save(config_key: str, value: str):
                 if card_id not in card_data:
@@ -81,52 +68,22 @@ class SystemConfigSection:
                 subtitle=subtitle,
                 enabled=saved_enabled,
                 controls_config=controls_config,
-                controls_per_row=4,
+                controls_per_row=1,
                 on_save=handle_save,
                 config=config,
             )
-            
             return card
         
         card_list = []
         
         card_list.append(create_card(
-            card_id="hangup_mode",
-            title="挂机模式",
-            icon="POWER_SETTINGS_NEW",
-            subtitle="全自动:自动挂机,无需人为干预 | 半自动:点击头像,自动切换账号",
+            card_id="auto_hunting",
+            title="自动打野",
+            icon="EXPLORE",
+            subtitle="自动搜索并攻击野怪",
             controls_config=[
-                {"type": "dropdown", "config_key": "挂机模式", "label": "模式选择:", "value": "全自动", "options": ["全自动", "半自动"]},
-            ],
-        ))
-        
-        card_list.append(create_card(
-            card_id="command_speed",
-            title="指令速度",
-            icon="SPEED",
-            subtitle="运行指令间隔频率(毫秒)，数值越小速度越快",
-            controls_config=[
-                {"type": "dropdown", "config_key": "指令速度", "label": "速度选择:", "value": "100", "options": ["100", "150", "200", "250", "300", "350", "400", "450", "500"]},
-            ],
-        ))
-        
-        card_list.append(create_card(
-            card_id="retry_count",
-            title="尝试次数",
-            icon="REFRESH",
-            subtitle="连续操作失败达到最大尝试次数后,触发自动纠错系统",
-            controls_config=[
-                {"type": "dropdown", "config_key": "尝试次数", "label": "次数选择:", "value": "15", "options": ["10", "15", "20", "25", "30"]},
-            ],
-        ))
-        
-        card_list.append(create_card(
-            card_id="cache_limit",
-            title="清缓限量",
-            icon="DELETE_SWEEP",
-            subtitle="达到设置系统缓存清理阈值(M)后,自动清理缓存",
-            controls_config=[
-                {"type": "dropdown", "config_key": "清缓限量", "label": "限量选择:", "value": "1.0", "options": ["1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "4.5", "5.0"]},
+                {"type": "dropdown", "config_key": "level", "label": "野怪等级选择:", "value": "全部", "options": ["全部", "1-3级", "4-6级", "7-9级", "10级以上"]},
+                {"type": "dropdown", "config_key": "frequency", "label": "搜索频率选择:", "value": "每小时", "options": ["每30分钟", "每小时", "每2小时", "每4小时"]},
             ],
         ))
         
@@ -138,9 +95,7 @@ class SystemConfigSection:
         )
         
         content_column = ft.Column(
-            controls=[
-                card_column,
-            ],
+            controls=[card_column],
             spacing=0,
             expand=True,
         )
@@ -157,7 +112,7 @@ if __name__ == "__main__":
     def main(page: ft.Page):
         config = UIConfig()
         service = ConfigService()
-        section, manager = SystemConfigSection.create(config=config, config_service=service)
+        section, manager = HuntingConfigSection.create(config=config, config_service=service)
         page.add(section)
     
     ft.app(target=main)

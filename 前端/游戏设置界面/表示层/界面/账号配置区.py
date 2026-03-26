@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 模块名称：AccountConfigSection
 模块功能：账号配置区，包含15个账号卡片
@@ -18,14 +18,18 @@ from 前端.游戏设置界面.表示层.组件.复合.卡片组管理器 import
 from 前端.游戏设置界面.表示层.组件.基础.下拉框 import Dropdown
 from 前端.游戏设置界面.表示层.组件.基础.输入框 import InputBox
 from 前端.游戏设置界面.业务层.服务.配置服务 import ConfigService
+from 前端.游戏设置界面.表示层.界面.配置方案区 import ConfigSchemeSection
 
 
-USER_MAX_ACCOUNTS = 15
-USER_DROPDOWN_WIDTH = 70
-USER_INPUT_WIDTH = 190
-USER_AUTHORIZED_COUNT = 15
-USER_CARD_SPACING = 10
-USER_SPACING = 10
+# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
+USER_MAX_ACCOUNTS = 15  # 最大账号数量
+USER_DROPDOWN_WIDTH = 68  # 下拉框宽度
+USER_INPUT_WIDTH = 166  # 输入框宽度
+USER_SCHEME_WIDTH = 100  # 配置方案下拉框宽度
+USER_AUTHORIZED_COUNT = 15  # 授权账号数量
+USER_CARD_SPACING = 10  # 卡片间距
+USER_SPACING = 10  # 通用间距
+# *********************************
 
 
 class AccountConfigSection:
@@ -40,6 +44,7 @@ class AccountConfigSection:
         config: UIConfig = None,
         config_service: ConfigService = None,
         save_callback: Callable[[str, str, str], None] = None,
+        on_count_change: Callable[[int], None] = None,
     ) -> tuple:
         if config is None:
             config = UIConfig()
@@ -47,7 +52,7 @@ class AccountConfigSection:
             config_service = ConfigService()
         
         theme_colors = config.当前主题颜色
-        manager = CardGroupManager(destroy_strategy="none")
+        manager = CardGroupManager()
         card_data: Dict[str, Dict[str, Any]] = {}
         card_refs: Dict[str, ft.Container] = {}
         
@@ -55,19 +60,13 @@ class AccountConfigSection:
         AccountConfigSection.当前参与数量 = 0
         AccountConfigSection.账号开关状态 = {}
         
-        count_text = ft.Text(
-            f"已启用: {AccountConfigSection.当前参与数量}/{AccountConfigSection.授权数量}",
-            size=14,
-            color=theme_colors.get("text_secondary"),
-        )
-        
         def get_subtitle(enabled: bool, name: str, account: str, password: str, is_expanded: bool = False) -> str:
             if not enabled:
                 if is_expanded:
                     return "未参与挂机"
                 else:
                     display_name = name if name else "未设置"
-                    return f"{display_name} (未参与), 设置请进入 >>"
+                    return f"{display_name} (未参与), 设置请进入"
             
             if not name or not account or not password:
                 if is_expanded:
@@ -81,12 +80,12 @@ class AccountConfigSection:
                     return f"缺少: {'/'.join(missing)}"
                 else:
                     display_name = name if name else "未设置"
-                    return f"{display_name} (信息不完整), 设置请进入 >>"
+                    return f"{display_name} (信息不完整), 设置请进入"
             
             if is_expanded:
                 return f"已配置: {name}"
             else:
-                return f"{name} (参与挂机), 设置请进入 >>"
+                return f"{name} (参与挂机), 设置请进入"
         
         def can_participate(enabled: bool, name: str, account: str, password: str) -> bool:
             return enabled and bool(name) and bool(account) and bool(password)
@@ -122,12 +121,8 @@ class AccountConfigSection:
             if card and hasattr(card, 'set_subtitle'):
                 card.set_subtitle(subtitle, is_expanded)
             
-            count_text.value = f"已启用: {AccountConfigSection.当前参与数量}/{AccountConfigSection.授权数量}"
-            try:
-                if count_text.page:
-                    count_text.update()
-            except:
-                pass
+            if on_count_change:
+                on_count_change(AccountConfigSection.当前参与数量)
             
             return True
         
@@ -184,6 +179,7 @@ class AccountConfigSection:
                 saved_type = default_type
                 if save_callback:
                     save_callback(card_id, "类型", default_type)
+           
             
             saved_platform = config_service.get_value(card_id, "平台")
             if saved_platform is None:
@@ -191,13 +187,16 @@ class AccountConfigSection:
                 if save_callback:
                     save_callback(card_id, "平台", "Tap")
             
+            saved_scheme = config_service.get_value(card_id, "配置方案") or ""
+            
             card_data[card_id] = {
                 "名称": current_name,
                 "账号": current_account,
                 "密码": current_password,
                 "enabled": saved_enabled,
                 "类型": saved_type,
-                "平台": saved_platform
+                "平台": saved_platform,
+                "配置方案": saved_scheme,
             }
             
             AccountConfigSection.账号开关状态[card_id] = saved_enabled
@@ -267,11 +266,25 @@ class AccountConfigSection:
                 value=current_password,
             )
             
+            scheme_names = ConfigSchemeSection.get_scheme_names()
+            scheme_options = ["默认配置"] + scheme_names if scheme_names else ["默认配置"]
+            scheme_display = saved_scheme if saved_scheme in scheme_options else "默认配置"
+            
+            scheme_dropdown = Dropdown.create(
+                options=scheme_options,
+                current_value=scheme_display,
+                width=USER_SCHEME_WIDTH,
+                enabled=True,
+                on_change=lambda v: handle_save(card_id, "配置方案", v),
+                config=config,
+            )
+            
             controls = [
                 type_dropdown,
                 name_input,
                 account_input,
                 password_input,
+                scheme_dropdown,
                 platform_dropdown,
             ]
             
@@ -282,9 +295,7 @@ class AccountConfigSection:
                 subtitle=subtitle,
                 enabled=saved_enabled,
                 controls=controls,
-                controls_per_row=5,
-                on_expand=handle_expand,
-                on_collapse=handle_collapse,
+                controls_per_row=6,
                 on_save=lambda key, value: handle_save(card_id, key, value),
                 config=config,
             )
@@ -306,23 +317,6 @@ class AccountConfigSection:
                 default_type=default_type,
             ))
         
-        title_bar = ft.Row([
-            ft.Icon(ft.Icons.ACCOUNT_CIRCLE, size=20, color=theme_colors.get("accent")),
-            ft.Container(width=6),
-            ft.Text("账号设置", size=16, weight=ft.FontWeight.BOLD, color=theme_colors.get("text_primary")),
-            ft.Container(width=20),
-            count_text,
-        ], alignment=ft.MainAxisAlignment.START, vertical_alignment=ft.CrossAxisAlignment.CENTER)
-        
-        divider = ft.Container(
-            content=ft.Divider(
-                height=1,
-                thickness=1,
-                color=theme_colors.get("border"),
-            ),
-            opacity=0.5,
-        )
-        
         card_column = ft.Column(
             controls=card_list,
             spacing=USER_CARD_SPACING,
@@ -332,9 +326,6 @@ class AccountConfigSection:
         
         content_column = ft.Column(
             controls=[
-                title_bar,
-                divider,
-                ft.Container(height=USER_SPACING),
                 card_column,
             ],
             spacing=0,
@@ -342,6 +333,8 @@ class AccountConfigSection:
         )
         
         content_column.card_manager = manager
+        
+
         
         return content_column, manager
 

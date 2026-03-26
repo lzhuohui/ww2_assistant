@@ -1,39 +1,32 @@
 # -*- coding: utf-8 -*-
 """
-模块名称：Dropdown
-模块功能：下拉框组件，使用PopupMenuButton实现
-实现步骤：
-- 创建时加载选项列表
-- 选择后更新值并关闭菜单
-- 支持销毁管理减少内存占用
-- Win11风格
+简单测试下拉框功能
 """
 
 import flet as ft
-from typing import List, Callable
+import sys
+import os
 
-# from 核心层.配置.界面配置 import UIConfig
+# 添加当前目录到Python路径
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-
-# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
-USER_WIDTH = 120  # 下拉框宽度
-USER_HEIGHT = 30  # 下拉框高度
-# *********************************
-
-
+# 直接复制下拉框代码，避免导入问题
 class Dropdown:
     """下拉框组件 - 使用PopupMenuButton实现"""
     
     @staticmethod
     def create(
-        options: List[str] = None,
-        current_value: str = "",
-        width: int = USER_WIDTH,
-        height: int = USER_HEIGHT,
-        enabled: bool = True,
-        on_change: Callable[[str], None] = None,
-        config: any = None,
-    ) -> ft.Container:
+        options=None,
+        current_value="",
+        width=120,
+        height=30,
+        enabled=True,
+        on_change=None,
+        config=None,
+    ):
+        if options is None:
+            options = ["选项A", "选项B", "选项C"]
+        
         if config is None:
             # 使用默认颜色配置
             theme_colors = {
@@ -48,7 +41,7 @@ class Dropdown:
         else:
             theme_colors = config.当前主题颜色
         
-        actual_options = options if options else ["选项A", "选项B"]
+        actual_options = options
         actual_current_value = current_value if current_value else (actual_options[0] if actual_options else "")
         
         current_selected_value = [actual_current_value]
@@ -141,17 +134,17 @@ class Dropdown:
         
         popup_menu_button.content.on_hover = handle_hover
         
-        def get_value() -> str:
+        def get_value():
             return current_selected_value[0]
         
-        def set_value(new_value: str):
+        def set_value(new_value):
             if new_value in actual_options:
                 current_selected_value[0] = new_value
                 selected_text.value = new_value
                 if container.page:
                     container.update()
         
-        def set_enabled(state: bool):
+        def set_enabled(state):
             enabled_state[0] = state
             text_col = theme_colors.get("text_primary") if state else theme_colors.get("text_disabled")
             icon_col = theme_colors.get("text_secondary") if state else theme_colors.get("text_disabled")
@@ -169,7 +162,7 @@ class Dropdown:
             except:
                 pass
         
-        def set_options(new_options: List[str]):
+        def set_options(new_options):
             """设置选项列表"""
             nonlocal actual_options
             actual_options = new_options
@@ -191,34 +184,46 @@ class Dropdown:
         
         return container
 
-
-# *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
-if __name__ == "__main__":
-    def main(page: ft.Page):
-        # 创建简单的配置对象
-        class SimpleConfig:
-            def __init__(self):
-                self.当前主题颜色 = {
-                    "text_primary": "#000000",
-                    "text_secondary": "#666666",
-                    "text_disabled": "#999999",
-                    "bg_primary": "#FFFFFF",
-                    "bg_secondary": "#F5F5F5",
-                    "border": "#CCCCCC",
-                    "accent": "#0078D4"
-                }
-        
-        config = SimpleConfig()
-        
-        def on_change(value):
-            print(f"选择: {value}")
-        
-        dropdown = Dropdown.create(
-            options=["选项A", "选项B", "选项C"],
-            current_value="选项A",
-            on_change=on_change,
-            config=config,
-        )
-        page.add(dropdown)
+def main(page: ft.Page):
+    page.title = "下拉框测试"
+    page.window_width = 400
+    page.window_height = 300
     
+    def on_change(value):
+        print(f"选择了: {value}")
+    
+    # 创建3个下拉框
+    dropdown1 = Dropdown.create(
+        options=["选项1", "选项2", "选项3"],
+        current_value="选项1",
+        on_change=on_change,
+        width=200
+    )
+    
+    dropdown2 = Dropdown.create(
+        options=["苹果", "香蕉", "橙子"],
+        current_value="苹果",
+        on_change=on_change,
+        width=200
+    )
+    
+    dropdown3 = Dropdown.create(
+        options=["红色", "绿色", "蓝色"],
+        current_value="红色",
+        on_change=on_change,
+        width=200
+    )
+    
+    page.add(
+        ft.Column([
+            ft.Text("测试下拉框是否能正常打开选项列表", size=16, weight=ft.FontWeight.BOLD),
+            ft.Divider(),
+            dropdown1,
+            dropdown2,
+            dropdown3,
+            ft.Text("点击下拉框，应该能正常显示选项列表", size=12, color="#666666")
+        ], spacing=20)
+    )
+
+if __name__ == "__main__":
     ft.app(target=main)

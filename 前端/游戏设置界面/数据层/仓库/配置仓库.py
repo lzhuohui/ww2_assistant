@@ -13,8 +13,10 @@ import os
 from typing import Dict, Any, Optional
 
 
-USER_DEFAULT_CONFIG_FILE = "前端/游戏设置界面/配置/默认配置.json"
-USER_USER_CONFIG_FILE = "前端/游戏设置界面/配置/用户配置.json"
+# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
+USER_DEFAULT_CONFIG_FILE = "前端/游戏设置界面/配置/默认配置.json"  # 默认配置文件路径
+USER_USER_CONFIG_FILE = "前端/游戏设置界面/配置/用户配置.json"  # 用户配置文件路径
+# *********************************
 
 
 class ConfigRepository:

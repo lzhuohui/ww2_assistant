@@ -15,11 +15,13 @@ from typing import Callable, Optional, Any, Dict, List
 from 前端.游戏设置界面.核心层.配置.界面配置 import UIConfig
 
 
-USER_BUTTON_HEIGHT = 40
-USER_BUTTON_WIDTH = 220
-USER_ICON_SIZE = 20
-USER_TEXT_SIZE = 14
-USER_LEFT_PADDING = 12
+# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
+USER_BUTTON_HEIGHT = 36  # 按钮高度
+USER_BUTTON_WIDTH = 220  # 按钮宽度
+USER_ICON_SIZE = 18  # 图标大小
+USER_TEXT_SIZE = 13  # 文字大小
+USER_LEFT_PADDING = 10  # 左侧内边距
+# *********************************
 
 
 class NavigationButton:
@@ -43,13 +45,14 @@ class NavigationButton:
         icon_control = ft.Icon(
             getattr(ft.Icons, icon.upper(), ft.Icons.HOME),
             size=USER_ICON_SIZE,
-            color=theme_colors.get("text_primary") if selected else theme_colors.get("text_secondary"),
+            color=theme_colors.get("accent"),
         )
         
         text_control = ft.Text(
             label,
             size=USER_TEXT_SIZE,
-            color=theme_colors.get("text_primary") if selected else theme_colors.get("text_secondary"),
+            color=theme_colors.get("accent") if selected else theme_colors.get("text_secondary"),
+            weight=ft.FontWeight.W_500 if selected else ft.FontWeight.NORMAL,
         )
         
         left_indicator = ft.Container(
@@ -105,13 +108,13 @@ class NavigationButton:
             is_selected[0] = selected_state
             if selected_state:
                 container.bgcolor = theme_colors.get("bg_secondary")
-                icon_control.color = theme_colors.get("text_primary")
-                text_control.color = theme_colors.get("text_primary")
+                text_control.color = theme_colors.get("accent")
+                text_control.weight = ft.FontWeight.W_500
                 left_indicator.bgcolor = theme_colors.get("accent")
             else:
                 container.bgcolor = "transparent"
-                icon_control.color = theme_colors.get("text_secondary")
                 text_control.color = theme_colors.get("text_secondary")
+                text_control.weight = ft.FontWeight.NORMAL
                 left_indicator.bgcolor = "transparent"
             try:
                 if container.page:
@@ -169,7 +172,7 @@ class NavigationButtonGroup:
         
         column = ft.Column(
             controls=buttons,
-            spacing=4,
+            spacing=2,
         )
         
         def get_selected_index() -> int:

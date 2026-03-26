@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 模块名称：StrategyConfigSection
 模块功能：策略配置区，包含建筑速建、资源速产等配置
@@ -16,8 +16,10 @@ from 前端.游戏设置界面.表示层.组件.复合.卡片组管理器 import
 from 前端.游戏设置界面.业务层.服务.配置服务 import ConfigService
 
 
-USER_CARD_SPACING = 10
-USER_SPACING = 10
+# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
+USER_CARD_SPACING = 10  # 卡片间距
+USER_SPACING = 10  # 通用间距
+# *********************************
 
 
 class StrategyConfigSection:
@@ -35,7 +37,7 @@ class StrategyConfigSection:
             config_service = ConfigService()
         
         theme_colors = config.当前主题颜色
-        manager = CardGroupManager(destroy_strategy="unload_options")
+        manager = CardGroupManager()
         card_data: Dict[str, Dict[str, Any]] = {}
         
         def create_card(
@@ -120,12 +122,6 @@ class StrategyConfigSection:
             ],
         ))
         
-        title_bar = ft.Row([
-            ft.Icon(ft.Icons.ROCKET_LAUNCH, size=20, color=theme_colors.get("accent")),
-            ft.Container(width=6),
-            ft.Text("策略配置", size=16, weight=ft.FontWeight.BOLD, color=theme_colors.get("text_primary")),
-        ], alignment=ft.MainAxisAlignment.START, vertical_alignment=ft.CrossAxisAlignment.CENTER)
-        
         card_column = ft.Column(
             controls=card_list,
             spacing=USER_CARD_SPACING,
@@ -135,8 +131,6 @@ class StrategyConfigSection:
         
         content_column = ft.Column(
             controls=[
-                title_bar,
-                ft.Container(height=USER_SPACING),
                 card_column,
             ],
             spacing=0,
@@ -144,6 +138,8 @@ class StrategyConfigSection:
         )
         
         content_column.card_manager = manager
+        
+
         
         return content_column, manager
 

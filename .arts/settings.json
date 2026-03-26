@@ -1,0 +1,64 @@
+{
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestArgs": [
+        "测试",
+        "-v",
+        "--tb=short"
+    ],
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+    "python.testing.debugPort": 5678,
+    "python.defaultInterpreterPath": "c:/Users/chmm1/Documents/二战风云/venv/Scripts/python.exe",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/前端"
+    ],
+    "python.envFile": "${workspaceFolder}/.env",
+    "terminal.integrated.env.windows": {
+        "PYTHONPATH": "${workspaceFolder}"
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/.pytest_cache": true,
+        "**/htmlcov": true,
+        "**/.coverage": true
+    },
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.completeFunctionParens": true,
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.inlayHints.variableTypes": true,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    "python.formatting.provider": "black",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.mypyEnabled": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+    "task.autoDetect": "off",
+    "task.verboseLogging": false,
+    "catpawpyright.analysis.autoImportCompletions": true,
+    "catpawpyright.analysis.extraPaths": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/前端"
+    ],
+    "catpawpyright.analysis.inlayHints.functionReturnTypes": true,
+    "catpawpyright.analysis.inlayHints.variableTypes": true,
+    "catpawpyright.analysis.typeCheckingMode": "basic",
+    "workbench.editor.autoLockGroups": {
+        "default": true
+    },
+    "diffEditor.renderSideBySide": false
+}

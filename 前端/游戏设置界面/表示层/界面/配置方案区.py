@@ -1,73 +1,96 @@
 # -*- coding: utf-8 -*-
 """
 模块名称：ConfigSchemeSection
-模块功能：配置方案界面，支持多套配置管理
+模块功能：配置方案界面，支持5套固定配置管理
 实现步骤：
-- 创建配置方案卡片列表
+- 创建5个固定配置方案卡片
 - 支持加载/保存配置
-- 支持新建配置方案
+- 按钮文字替换提示反馈
+- 与账号界面联动
 """
 
 import flet as ft
 from typing import Dict, Any, List, Callable, Optional
 import json
 import os
-from datetime import datetime
+import asyncio
 
 from 前端.游戏设置界面.核心层.配置.界面配置 import UIConfig
 from 前端.游戏设置界面.表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
+from 前端.游戏设置界面.表示层.组件.基础.输入框 import InputBox
 from 前端.游戏设置界面.业务层.服务.配置服务 import ConfigService
 
 
-USER_CARD_SPACING = 10
-USER_SPACING = 10
-USER_SCHEME_DIR = "前端/游戏设置界面/配置/方案"
+# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
+USER_CARD_SPACING = 10  # 卡片间距
+USER_SCHEME_DIR = "前端/游戏设置界面/配置/方案"  # 配置方案目录
+USER_SCHEME_COUNT = 5  # 方案数量
+USER_FEEDBACK_DURATION = 1  # 反馈提示持续时间(秒)
+USER_BTN_WIDTH = 180  # 按钮宽度
+USER_INPUT_WIDTH = 180  # 输入框宽度
+# *********************************
 
 
 class ConfigSchemeSection:
-    """配置方案界面 - 支持多套配置管理"""
+    """配置方案界面 - 固定5套配置管理"""
+    
+    _scheme_names: List[str] = []
+    _on_scheme_change: Optional[Callable[[], None]] = None
+    
+    @staticmethod
+    def get_scheme_names() -> List[str]:
+        """获取所有已保存的配置方案名称"""
+        return ConfigSchemeSection._scheme_names.copy()
+    
+    @staticmethod
+    def refresh_scheme_names():
+        """刷新配置方案名称列表"""
+        os.makedirs(USER_SCHEME_DIR, exist_ok=True)
+        names = []
+        for i in range(1, USER_SCHEME_COUNT + 1):
+            scheme_id = f"scheme_{i:02d}"
+            meta_file = os.path.join(USER_SCHEME_DIR, f"{scheme_id}_meta.json")
+            if os.path.exists(meta_file):
+                with open(meta_file, 'r', encoding='utf-8') as f:
+                    meta = json.load(f)
+                    name = meta.get("name", "")
+                    if name:
+                        names.append(name)
+        ConfigSchemeSection._scheme_names = names
     
     @staticmethod
     def create(
         config: UIConfig = None,
         config_service: ConfigService = None,
         save_callback: Callable[[str, str, str], None] = None,
+        on_scheme_change: Callable[[], None] = None,
     ) -> tuple:
         if config is None:
             config = UIConfig()
         if config_service is None:
             config_service = ConfigService()
         
+        ConfigSchemeSection._on_scheme_change = on_scheme_change
+        
         theme_colors = config.当前主题颜色
-        manager = CardGroupManager(destroy_strategy="none")
-        scheme_list: List[Dict[str, Any]] = []
+        manager = CardGroupManager()
         card_refs: Dict[str, ft.Container] = {}
         
-        def load_scheme_list():
-            os.makedirs(USER_SCHEME_DIR, exist_ok=True)
-            scheme_file = os.path.join(USER_SCHEME_DIR, "scheme_list.json")
-            if os.path.exists(scheme_file):
-                with open(scheme_file, 'r', encoding='utf-8') as f:
+        os.makedirs(USER_SCHEME_DIR, exist_ok=True)
+        
+        def load_scheme_meta(scheme_id: str) -> Dict[str, Any]:
+            meta_file = os.path.join(USER_SCHEME_DIR, f"{scheme_id}_meta.json")
+            if os.path.exists(meta_file):
+                with open(meta_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
-            else:
-                default_schemes = [
-                    {"id": "scheme_01", "name": "默认配置", "created": "2026-03-25"},
-                    {"id": "scheme_02", "name": "高速模式", "created": "2026-03-25"},
-                    {"id": "scheme_03", "name": "多账号挂机", "created": "2026-03-25"},
-                ]
-                with open(scheme_file, 'w', encoding='utf-8') as f:
-                    json.dump(default_schemes, f, ensure_ascii=False, indent=2)
-                return default_schemes
+            return {"id": scheme_id, "name": ""}
         
-        def save_scheme_list():
-            os.makedirs(USER_SCHEME_DIR, exist_ok=True)
-            scheme_file = os.path.join(USER_SCHEME_DIR, "scheme_list.json")
-            with open(scheme_file, 'w', encoding='utf-8') as f:
-                json.dump(scheme_list, f, ensure_ascii=False, indent=2)
+        def save_scheme_meta(scheme_id: str, name: str):
+            meta_file = os.path.join(USER_SCHEME_DIR, f"{scheme_id}_meta.json")
+            with open(meta_file, 'w', encoding='utf-8') as f:
+                json.dump({"id": scheme_id, "name": name}, f, ensure_ascii=False, indent=2)
         
-        scheme_list.extend(load_scheme_list())
-        
-        def load_scheme(scheme_id: str):
+        def load_scheme(scheme_id: str) -> bool:
             scheme_file = os.path.join(USER_SCHEME_DIR, f"{scheme_id}.json")
             if os.path.exists(scheme_file):
                 with open(scheme_file, 'r', encoding='utf-8') as f:
@@ -77,7 +100,7 @@ class ConfigSchemeSection:
                 return True
             return False
         
-        def save_scheme(scheme_id: str):
+        def save_scheme(scheme_id: str) -> bool:
             os.makedirs(USER_SCHEME_DIR, exist_ok=True)
             scheme_file = os.path.join(USER_SCHEME_DIR, f"{scheme_id}.json")
             current_config = config_service._repository._cache.copy()
@@ -85,133 +108,115 @@ class ConfigSchemeSection:
                 json.dump(current_config, f, ensure_ascii=False, indent=2)
             return True
         
-        def create_scheme_card(scheme: Dict[str, Any]) -> ft.Container:
-            scheme_id = scheme.get("id", "")
-            scheme_name = scheme.get("name", "未命名方案")
-            
-            name_input = ft.TextField(
+        def scheme_exists(scheme_id: str) -> bool:
+            scheme_file = os.path.join(USER_SCHEME_DIR, f"{scheme_id}.json")
+            return os.path.exists(scheme_file)
+        
+        def create_scheme_card(scheme_id: str, scheme_name: str) -> ft.Container:
+            name_input = InputBox.create(
+                config=config,
+                hint_text="输入名称保存当前配置",
                 value=scheme_name,
-                width=200,
-                text_size=14,
-                border_color=theme_colors.get("border"),
-                focused_border_color=theme_colors.get("accent"),
-                text_style=ft.TextStyle(color=theme_colors.get("text_primary")),
-                on_change=lambda e: update_scheme_name(scheme_id, e.control.value),
+                width=USER_INPUT_WIDTH,
+                max_length=4,
             )
             
-            load_btn = ft.ElevatedButton(
-                "加载",
-                width=70,
-                height=32,
+            load_text = ft.Text("加载配置", color=theme_colors.get("accent"), size=14)
+            load_btn = ft.OutlinedButton(
+                content=load_text,
+                width=USER_BTN_WIDTH,
                 style=ft.ButtonStyle(
-                    bgcolor=theme_colors.get("accent"),
-                    color="#FFFFFF",
-                ),
-                on_click=lambda e: handle_load(scheme_id),
-            )
-            
-            save_btn = ft.OutlinedButton(
-                "保存",
-                width=70,
-                height=32,
-                style=ft.ButtonStyle(
-                    color=theme_colors.get("accent"),
                     side=ft.BorderSide(1, theme_colors.get("accent")),
                 ),
-                on_click=lambda e: handle_save(scheme_id),
             )
             
+            save_text = ft.Text("保存配置", color=theme_colors.get("accent"), size=14)
+            save_btn = ft.OutlinedButton(
+                content=save_text,
+                width=USER_BTN_WIDTH,
+                style=ft.ButtonStyle(
+                    side=ft.BorderSide(1, theme_colors.get("accent")),
+                ),
+            )
+            
+            async def show_feedback(btn_text: ft.Text, original: str, message: str):
+                btn_text.value = message
+                try:
+                    btn_text.update()
+                except:
+                    pass
+                
+                await asyncio.sleep(USER_FEEDBACK_DURATION)
+                
+                btn_text.value = original
+                try:
+                    btn_text.update()
+                except:
+                    pass
+            
+            def handle_load(e):
+                name = name_input.value.strip()
+                if not name:
+                    asyncio.create_task(show_feedback(load_text, "加载配置", "请输入名称"))
+                    return
+                
+                if not scheme_exists(scheme_id):
+                    asyncio.create_task(show_feedback(load_text, "加载配置", "配置不存在"))
+                    return
+                
+                if load_scheme(scheme_id):
+                    asyncio.create_task(show_feedback(load_text, "加载配置", "加载成功"))
+                else:
+                    asyncio.create_task(show_feedback(load_text, "加载配置", "加载失败"))
+            
+            def handle_save(e):
+                name = name_input.value.strip()
+                if not name:
+                    asyncio.create_task(show_feedback(save_text, "保存配置", "请输入名称"))
+                    return
+                
+                if save_scheme(scheme_id):
+                    save_scheme_meta(scheme_id, name)
+                    asyncio.create_task(show_feedback(save_text, "保存配置", "保存成功"))
+                    ConfigSchemeSection.refresh_scheme_names()
+                    if ConfigSchemeSection._on_scheme_change:
+                        ConfigSchemeSection._on_scheme_change()
+                else:
+                    asyncio.create_task(show_feedback(save_text, "保存配置", "保存失败"))
+            
+            load_btn.on_click = handle_load
+            save_btn.on_click = handle_save
+            
             controls = [
-                name_input,
-                ft.Container(width=20),
                 load_btn,
-                ft.Container(width=10),
+                name_input,
                 save_btn,
             ]
             
             card = create_managed_card(
                 manager=manager,
-                title=scheme_name,
+                title=f"{scheme_id[-2:]}方案",
                 icon="FOLDER",
-                subtitle=f"创建于: {scheme.get('created', '未知')}",
+                subtitle="加载：切换配置 | 保存：存储当前配置",
                 enabled=True,
                 controls=controls,
-                controls_per_row=5,
+                controls_per_row=3,
                 config=config,
             )
             
             card_refs[scheme_id] = card
             return card
         
-        def update_scheme_name(scheme_id: str, new_name: str):
-            for scheme in scheme_list:
-                if scheme.get("id") == scheme_id:
-                    scheme["name"] = new_name
-                    break
-            save_scheme_list()
+        ConfigSchemeSection.refresh_scheme_names()
         
-        def handle_load(scheme_id: str):
-            if load_scheme(scheme_id):
-                print(f"已加载方案: {scheme_id}")
-        
-        def handle_save(scheme_id: str):
-            if save_scheme(scheme_id):
-                print(f"已保存方案: {scheme_id}")
-        
-        def create_new_scheme():
-            new_id = f"scheme_{datetime.now().strftime('%Y%m%d%H%M%S')}"
-            new_scheme = {
-                "id": new_id,
-                "name": f"新方案 {len(scheme_list) + 1}",
-                "created": datetime.now().strftime("%Y-%m-%d"),
-            }
-            scheme_list.append(new_scheme)
-            save_scheme_list()
-            
-            new_card = create_scheme_card(new_scheme)
-            card_column.controls.append(new_card)
-            try:
-                if card_column.page:
-                    card_column.update()
-            except:
-                pass
-        
-        card_list = [create_scheme_card(scheme) for scheme in scheme_list]
-        
-        new_scheme_btn = ft.Container(
-            content=ft.Row(
-                [
-                    ft.Icon(ft.Icons.ADD, size=20, color=theme_colors.get("accent")),
-                    ft.Text("新建配置方案", size=14, color=theme_colors.get("accent")),
-                ],
-                alignment=ft.MainAxisAlignment.CENTER,
-            ),
-            height=50,
-            border_radius=8,
-            border=ft.border.all(1, theme_colors.get("border")),
-            on_click=lambda e: create_new_scheme(),
-            on_hover=lambda e: handle_hover(e),
-        )
-        
-        def handle_hover(e):
-            if e.data == "true":
-                new_scheme_btn.border = ft.border.all(1, theme_colors.get("accent"))
-            else:
-                new_scheme_btn.border = ft.border.all(1, theme_colors.get("border"))
-            try:
-                if new_scheme_btn.page:
-                    new_scheme_btn.update()
-            except:
-                pass
-        
-        title_bar = ft.Row([
-            ft.Icon(ft.Icons.FOLDER, size=20, color=theme_colors.get("accent")),
-            ft.Container(width=6),
-            ft.Text("配置方案", size=16, weight=ft.FontWeight.BOLD, color=theme_colors.get("text_primary")),
-        ], alignment=ft.MainAxisAlignment.START, vertical_alignment=ft.CrossAxisAlignment.CENTER)
+        card_list = []
+        for i in range(1, USER_SCHEME_COUNT + 1):
+            scheme_id = f"scheme_{i:02d}"
+            meta = load_scheme_meta(scheme_id)
+            card_list.append(create_scheme_card(scheme_id, meta.get("name", "")))
         
         card_column = ft.Column(
-            controls=card_list + [ft.Container(height=USER_SPACING), new_scheme_btn],
+            controls=card_list,
             spacing=USER_CARD_SPACING,
             scroll=ft.ScrollMode.HIDDEN,
             expand=True,
@@ -219,8 +224,6 @@ class ConfigSchemeSection:
         
         content_column = ft.Column(
             controls=[
-                title_bar,
-                ft.Container(height=USER_SPACING),
                 card_column,
             ],
             spacing=0,

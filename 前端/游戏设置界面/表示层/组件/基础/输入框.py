@@ -14,7 +14,10 @@ from typing import Callable, Optional
 from 前端.游戏设置界面.核心层.配置.界面配置 import UIConfig
 
 
-USER_WIDTH = 200
+# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
+USER_WIDTH = 120  # 输入框宽度
+USER_HEIGHT = 30  # 输入框高度
+# *********************************
 
 
 class InputBox:
@@ -26,8 +29,10 @@ class InputBox:
         hint_text: str = "",
         value: str = "",
         width: int = USER_WIDTH,
+        height: int = USER_HEIGHT,
         enabled: bool = True,
         password_mode: bool = False,
+        max_length: int = None,
         on_change: Callable[[str], None] = None,
     ) -> ft.TextField:
         if config is None:
@@ -36,13 +41,18 @@ class InputBox:
         theme_colors = config.当前主题颜色
         
         def handle_change(e):
+            new_value = e.control.value
+            if max_length and new_value and len(new_value) > max_length:
+                e.control.value = new_value[:max_length]
+                new_value = e.control.value
             if on_change:
-                on_change(e.control.value)
+                on_change(new_value)
         
         return ft.TextField(
             value=value,
             hint_text=hint_text,
             width=width,
+            height=height,
             disabled=not enabled,
             password=password_mode,
             can_reveal_password=password_mode,
@@ -51,6 +61,8 @@ class InputBox:
             focused_border_color=theme_colors.get("accent"),
             text_style=ft.TextStyle(color=theme_colors.get("text_primary")),
             hint_style=ft.TextStyle(color=theme_colors.get("text_disabled")),
+            text_align=ft.TextAlign.LEFT,
+            content_padding=ft.padding.symmetric(horizontal=10, vertical=5),
         )
     
     @staticmethod

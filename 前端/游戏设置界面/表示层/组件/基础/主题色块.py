@@ -14,8 +14,10 @@ from typing import List, Dict, Callable, Optional
 from 前端.游戏设置界面.核心层.配置.界面配置 import UIConfig
 
 
-USER_BLOCK_SIZE = 40
-USER_BLOCK_SPACING = 10
+# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
+USER_BLOCK_SIZE = 40  # 色块大小
+USER_BLOCK_SPACING = 10  # 色块间距
+# *********************************
 
 
 class ThemeColorBlock:
@@ -34,14 +36,17 @@ class ThemeColorBlock:
         
         theme_colors = config.当前主题颜色
         
+        def on_click_handler(e):
+            if on_select:
+                on_select(color_value)
+        
         container = ft.Container(
             width=USER_BLOCK_SIZE,
             height=USER_BLOCK_SIZE,
             bgcolor=color_value,
             border_radius=8,
             border=ft.border.all(3, theme_colors.get("accent")) if selected else None,
-            tooltip=color_name,
-            on_click=lambda e: on_select(color_value) if on_select else None,
+            on_click=on_click_handler if on_select else None,
         )
         
         return container
