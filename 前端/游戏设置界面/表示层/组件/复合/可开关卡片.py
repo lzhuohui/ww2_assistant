@@ -107,15 +107,15 @@ class SwitchableCard:
             clip_behavior=ft.ClipBehavior.NONE,
         )
         
-        # 副标题容器(始终显示)
+        # 副标题容器(始终显示,底部对齐)
         subtitle_container = ft.Container(
             content=subtitle_text,
             left=8,
             top=0,
             bottom=0,
             right=0,
-            opacity=0.0,  # 隐藏副标题,保留结构
-            alignment=ft.Alignment(-1.0, 0.0),
+            opacity=1.0,  # 显示副标题
+            alignment=ft.Alignment(-1.0, 1.0),  # 左下对齐
         )
         
         # 右侧区域Stack

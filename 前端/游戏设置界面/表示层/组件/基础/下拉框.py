@@ -12,7 +12,7 @@
 import flet as ft
 from typing import List, Callable
 
-# from 核心层.配置.界面配置 import UIConfig
+from 前端.游戏设置界面.核心层.配置.界面配置 import UIConfig
 
 
 # *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
@@ -93,7 +93,11 @@ class Dropdown:
                     return callback
                 
                 menu_item = ft.PopupMenuItem(
-                    content=option,
+                    content=ft.Text(
+                        option,
+                        size=14,
+                        color=theme_colors.get("text_primary"),
+                    ),
                     on_click=create_callback(),
                 )
                 menu_items.append(menu_item)
@@ -115,9 +119,10 @@ class Dropdown:
                 padding=ft.padding.symmetric(horizontal=12, vertical=0),
             ),
             items=create_menu_items(),  # 创建时加载选项
-            menu_padding=0,
+            menu_padding=ft.padding.all(4),
             enable_feedback=True,
             tooltip="",  # 隐藏"show menu"提示
+            bgcolor=theme_colors.get("bg_secondary"),  # 菜单背景色匹配主题
         )
         
         container = ft.Container(
