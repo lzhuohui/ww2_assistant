@@ -22,8 +22,8 @@ from 业务层.服务.配置服务 import ConfigService
 
 
 # *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
-USER_CARD_SPACING = 10  # 卡片间距
-USER_DROPDOWN_WIDTH = 70  # 下拉框宽度
+USER_CARD_SPACING = 5  # 卡片间距
+USER_DROPDOWN_WIDTH = 60  # 下拉框宽度
 # *********************************
 
 

@@ -64,16 +64,17 @@ class DropdownManager:
         self.overlay_container = ft.Container(
             content=ft.Column(scroll=ft.ScrollMode.AUTO),
             visible=False,
-            bgcolor="#FFFFFF",
-            border=ft.border.all(1, "#E0E0E0"),
-            border_radius=6,
+            bgcolor=ft.colors.SURFACE_VARIANT,
+            border=ft.border.all(1, ft.colors.OUTLINE_VARIANT),
+            border_radius=8,
             top=0,
             left=0,
-            padding=0,
+            padding=4,
             shadow=ft.BoxShadow(
-                spread_radius=1,
+                spread_radius=0,
                 blur_radius=8,
-                color="#33000000",
+                color=ft.colors.with_opacity(0.15, ft.colors.BLACK),
+                offset=ft.Offset(0, 2),
             ),
         )
         self.page.overlay.append(self.overlay_container)
@@ -99,7 +100,7 @@ class DropdownManager:
         if self.overlay_container and self.overlay_container.content:
             self.overlay_container.content.controls = []
     
-    def toggle_dropdown(self, dropdown_id: str, button: ft.Container):
+    def toggle_dropdown(self, dropdown_id: str, button: ft.Container, container: ft.Container):
         """切换下拉菜单显示"""
         drop_info = self.dropdowns.get(dropdown_id)
         if not drop_info or drop_info.get("disabled", False):
@@ -123,15 +124,7 @@ class DropdownManager:
         if not options:
             return
         
-        button_top = button.top if hasattr(button, 'top') and button.top else 0
-        button_left = button.left if hasattr(button, 'left') and button.left else 0
-        
-        if self.page:
-            try:
-                button_top = self._calculate_button_top(button)
-                button_left = self._calculate_button_left(button)
-            except:
-                pass
+        button_top, button_left = self._get_button_position(container)
         
         self._position_popup(button_top, button_left, len(options))
         
@@ -150,15 +143,16 @@ class DropdownManager:
                 content=ft.Text(
                     option,
                     size=14,
-                    color="#0078D4" if is_selected else "#333333",
+                    color=ft.colors.PRIMARY if is_selected else ft.colors.ON_SURFACE,
                 ),
                 padding=ft.padding.symmetric(horizontal=12, vertical=8),
-                bgcolor="#F0F0F0" if is_selected else "transparent",
+                bgcolor=ft.colors.SECONDARY_CONTAINER if is_selected else "transparent",
+                border_radius=4,
                 on_click=lambda e, v=option: select_item(v),
                 on_hover=lambda e, sel=is_selected: setattr(
                     e.control, 
                     "bgcolor", 
-                    "#E5E5E5" if e.data == "true" else ("#F0F0F0" if sel else "transparent")
+                    ft.colors.TERTIARY_CONTAINER if e.data == "true" else (ft.colors.SECONDARY_CONTAINER if sel else "transparent")
                 ) or e.control.update(),
             )
             options_controls.append(option_container)
@@ -166,7 +160,7 @@ class DropdownManager:
         self.overlay_container.content.controls = [
             ft.Column(
                 controls=options_controls,
-                spacing=0,
+                spacing=2,
             )
         ]
         
@@ -175,13 +169,22 @@ class DropdownManager:
         
         self.page.update()
     
-    def _calculate_button_top(self, button: ft.Container) -> float:
-        return 0
-    
-    def _calculate_button_left(self, button: ft.Container) -> float:
-        return 0
+    def _get_button_position(self, container: ft.Container) -> tuple:
+        """获取按钮在页面中的位置"""
+        try:
+            if container.page:
+                details = container.page.get_control_details(container)
+                if details:
+                    button_top = details.top
+                    button_left = details.left
+                    return button_top, button_left
+        except:
+            pass
+        
+        return 100, 100
     
     def _position_popup(self, button_top: float, button_left: float, option_count: int):
+        """定位弹出菜单"""
         if not self.page:
             return
         
@@ -204,7 +207,7 @@ class DropdownManager:
             self.overlay_container.top = button_top - menu_content_height
         else:
             self.overlay_container.top = 20
-            self.overlay_container.height = window_height - 40
+            self.overlay_container.height = min(menu_content_height, window_height - 40)
         
         popup_width = self.overlay_container.width
         if button_left + popup_width > window_width - 20:
@@ -213,6 +216,7 @@ class DropdownManager:
             self.overlay_container.left = button_left
     
     def _show_backdrop(self):
+        """显示背景遮罩"""
         if self.backdrop:
             self.backdrop.top = 0
             self.backdrop.left = 0
@@ -221,6 +225,7 @@ class DropdownManager:
             self.backdrop.visible = True
     
     def _show_popup(self, dropdown_id: str):
+        """显示弹出菜单"""
         if self.overlay_container:
             self.overlay_container.visible = True
         self.open_dropdown_id = dropdown_id
@@ -230,6 +235,7 @@ _manager_instance = None
 
 
 def get_manager(page: ft.Page = None) -> DropdownManager:
+    """获取下拉框管理器单例"""
     global _manager_instance
     if _manager_instance is None:
         _manager_instance = DropdownManager(page)
@@ -270,13 +276,13 @@ def create_dropdown(
     
     if config is None:
         theme_colors = {
-            "text_primary": "#000000",
-            "text_secondary": "#666666",
-            "text_disabled": "#999999",
-            "bg_primary": "#FFFFFF",
-            "bg_secondary": "#F5F5F5",
-            "border": "#CCCCCC",
-            "accent": "#0078D4"
+            "text_primary": ft.colors.ON_SURFACE,
+            "text_secondary": ft.colors.ON_SURFACE_VARIANT,
+            "text_disabled": ft.colors.ON_SURFACE_VARIANT,
+            "bg_primary": ft.colors.SURFACE,
+            "bg_secondary": ft.colors.SURFACE_CONTAINER_HIGHEST,
+            "border": ft.colors.OUTLINE_VARIANT,
+            "accent": ft.colors.PRIMARY
         }
     else:
         theme_colors = config.当前主题颜色
@@ -336,7 +342,7 @@ def create_dropdown(
             manager._init_overlay()
         
         manager.register_dropdown(dropdown_id, dropdown_info)
-        manager.toggle_dropdown(dropdown_id, button_container)
+        manager.toggle_dropdown(dropdown_id, button_container, container)
     
     button_container.on_click = on_button_click
     
@@ -374,7 +380,6 @@ def create_dropdown(
         pass
     
     def set_options(options: List[str]):
-        original_loader = dropdown_info.get("option_loader")
         dropdown_info["option_loader"] = lambda: options
     
     container.get_value = get_value
