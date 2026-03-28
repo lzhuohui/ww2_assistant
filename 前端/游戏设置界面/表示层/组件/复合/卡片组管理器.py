@@ -10,7 +10,18 @@
 import flet as ft
 from typing import List, Dict, Any, Callable
 
-from 前端.游戏设置界面.核心层.配置.界面配置 import UIConfig
+import sys
+import os
+
+# 添加项目根目录到Python路径
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(0, project_root)
+
+try:
+    from 核心层.配置.界面配置 import UIConfig
+except ImportError:
+    # 尝试相对导入
+    from ...核心层.配置.界面配置 import UIConfig
 
 
 class CardGroupManager:
@@ -28,6 +39,13 @@ class CardGroupManager:
         for card in self.cards:
             if hasattr(card, 'destroy_controls'):
                 card.destroy_controls()
+        
+        try:
+            from 表示层.组件.基础.下拉框 import get_manager
+            manager = get_manager()
+            manager.close_all()
+        except:
+            pass
     
     def get_all_cards(self) -> List[ft.Container]:
         """获取所有卡片"""
@@ -53,7 +71,11 @@ def create_managed_card(
     on_save: Callable[[str, str], None] = None,
     config: UIConfig = None,
 ) -> ft.Container:
-    from 前端.游戏设置界面.表示层.组件.复合.可开关卡片 import SwitchableCard
+    try:
+        from 表示层.组件.复合.可开关卡片 import SwitchableCard
+    except ImportError:
+        # 尝试相对导入
+        from .可开关卡片 import SwitchableCard
     
     card = SwitchableCard.create(
         title=title,

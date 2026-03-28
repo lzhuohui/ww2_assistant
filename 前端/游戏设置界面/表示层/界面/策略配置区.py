@@ -10,10 +10,24 @@
 
 import flet as ft
 from typing import Dict, Any, List, Callable, Optional
+import sys
+import os
 
-from 前端.游戏设置界面.核心层.配置.界面配置 import UIConfig
-from 前端.游戏设置界面.表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
-from 前端.游戏设置界面.业务层.服务.配置服务 import ConfigService
+# 添加项目根目录到Python路径
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, project_root)
+
+try:
+    from 核心层.配置.界面配置 import UIConfig
+    from 表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
+    from 业务层.服务.配置服务 import ConfigService
+    from 核心层.常量.共享选项 import get_options_for_control
+except ImportError:
+    # 尝试相对导入
+    from ..核心层.配置.界面配置 import UIConfig
+    from ..表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
+    from ..业务层.服务.配置服务 import ConfigService
+    from ..核心层.常量.共享选项 import get_options_for_control
 
 
 # *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
@@ -96,8 +110,8 @@ class StrategyConfigSection:
             icon="APARTMENT",
             subtitle="达到设置主城等级后,允许加速建筑建设",
             controls_config=[
-                {"type": "dropdown", "config_key": "速建限级", "label": "限级:", "value": "08", "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"]},
-                {"type": "dropdown", "config_key": "速建类型", "label": "类型:", "value": "城资建筑", "options": ["城资建筑", "城市建筑", "资源建筑"]},
+                {"type": "dropdown", "config_key": "速建限级", "label": "限级:", "value": "08", "options": get_options_for_control("控制6")},
+                {"type": "dropdown", "config_key": "速建类型", "label": "类型:", "value": "城资建筑", "options": get_options_for_control("控制7")},
             ],
         ))
         
@@ -107,8 +121,8 @@ class StrategyConfigSection:
             icon="INVENTORY_2",
             subtitle="达到设置主城等级后,允许加速资源生产",
             controls_config=[
-                {"type": "dropdown", "config_key": "速产限级", "label": "限级:", "value": "07", "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"]},
-                {"type": "dropdown", "config_key": "速产类型", "label": "类型:", "value": "平衡资源", "options": ["平衡资源", "战时经济", "钢铁熔炉", "橡胶采集", "石油开采"]},
+                {"type": "dropdown", "config_key": "速产限级", "label": "限级:", "value": "07", "options": get_options_for_control("控制8")},
+                {"type": "dropdown", "config_key": "速产类型", "label": "类型:", "value": "平衡资源", "options": get_options_for_control("控制9")},
             ],
         ))
         
@@ -118,7 +132,7 @@ class StrategyConfigSection:
             icon="SAVINGS",
             subtitle="达到设置保留的策略点数后,允许使用策略",
             controls_config=[
-                {"type": "dropdown", "config_key": "保留点数", "label": "点数:", "value": "60", "options": ["30", "60", "90", "120", "150", "180", "210", "240"]},
+                {"type": "dropdown", "config_key": "保留点数", "label": "点数:", "value": "60", "options": get_options_for_control("控制10")},
             ],
         ))
         
