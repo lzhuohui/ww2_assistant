@@ -6,24 +6,10 @@
 
 import flet as ft
 from typing import Dict, Any, List, Callable
-import sys
-import os
 
-# 添加项目根目录到Python路径
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, project_root)
-
-try:
-    from 核心层.配置.界面配置 import UIConfig
-    from 表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
-    from 业务层.服务.配置服务 import ConfigService
-    from 核心层.常量.共享选项 import get_options_for_control
-except ImportError:
-    # 尝试相对导入
-    from ..核心层.配置.界面配置 import UIConfig
-    from ..表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
-    from ..业务层.服务.配置服务 import ConfigService
-    from ..核心层.常量.共享选项 import get_options_for_control
+from 前端.游戏设置界面.核心层.配置.界面配置 import UIConfig
+from 前端.游戏设置界面.表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
+from 前端.游戏设置界面.业务层.服务.配置服务 import ConfigService
 
 
 # *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
@@ -96,7 +82,7 @@ class TaskConfigSection:
             icon="FLAG",
             subtitle="达到设置主城等级后,允许执行主线任务",
             controls_config=[
-                {"type": "dropdown", "config_key": "主城等级", "label": "限级选择:", "value": "05", "options": get_options_for_control("控制15")},
+                {"type": "dropdown", "config_key": "主城等级", "label": "限级选择:", "value": "05", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"]},
             ],
         ))
         
@@ -106,7 +92,7 @@ class TaskConfigSection:
             icon="ASSIGNMENT",
             subtitle="达到设置主城等级后,允许执行支线任务",
             controls_config=[
-                {"type": "dropdown", "config_key": "支线主城等级", "label": "限级选择:", "value": "10", "options": get_options_for_control("控制11")},
+                {"type": "dropdown", "config_key": "支线主城等级", "label": "限级选择:", "value": "10", "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"]},
             ],
         ))
         

@@ -11,24 +11,10 @@
 import flet as ft
 from typing import Dict, Any, List, Callable, Optional
 
-import sys
-import os
-
-# 添加项目根目录到Python路径
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, project_root)
-
-try:
-    from 核心层.配置.界面配置 import UIConfig, ACCENT_COLORS
-    from 表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
-    from 表示层.组件.基础.主题色块 import ThemeColorBlock
-    from 业务层.服务.配置服务 import ConfigService
-except ImportError:
-    # 尝试相对导入
-    from ...核心层.配置.界面配置 import UIConfig, ACCENT_COLORS
-    from ...表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
-    from ...表示层.组件.基础.主题色块 import ThemeColorBlock
-    from ...业务层.服务.配置服务 import ConfigService
+from 前端.游戏设置界面.核心层.配置.界面配置 import UIConfig, ACCENT_COLORS
+from 前端.游戏设置界面.表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
+from 前端.游戏设置界面.表示层.组件.基础.主题色块 import ThemeColorBlock
+from 前端.游戏设置界面.业务层.服务.配置服务 import ConfigService
 
 
 # *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***

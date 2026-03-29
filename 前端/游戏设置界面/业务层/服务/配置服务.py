@@ -13,7 +13,7 @@ import json
 import os
 import time
 
-from 数据层.仓库.配置仓库 import ConfigRepository
+from 前端.游戏设置界面.数据层.仓库.配置仓库 import ConfigRepository
 
 
 USER_GAME_CONFIG_FILE = "前端/output/game_config.json"

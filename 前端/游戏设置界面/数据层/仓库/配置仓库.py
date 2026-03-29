@@ -14,8 +14,8 @@ from typing import Dict, Any, Optional
 
 
 # *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
-USER_DEFAULT_CONFIG_FILE = "配置/默认配置.json"  # 默认配置文件路径
-USER_USER_CONFIG_FILE = "配置/用户配置.json"  # 用户配置文件路径
+USER_DEFAULT_CONFIG_FILE = "前端/游戏设置界面/配置/默认配置.json"  # 默认配置文件路径
+USER_USER_CONFIG_FILE = "前端/游戏设置界面/配置/用户配置.json"  # 用户配置文件路径
 # *********************************
 
 
@@ -27,14 +27,8 @@ class ConfigRepository:
         default_file: str = USER_DEFAULT_CONFIG_FILE,
         user_file: str = USER_USER_CONFIG_FILE,
     ):
-        # 转换为绝对路径
-        import os
-        # 获取项目根目录（二战风云目录）
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        # 向上三级：数据层/仓库 -> 数据层 -> 游戏设置界面 -> 前端
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
-        self._default_file = os.path.join(project_root, default_file)
-        self._user_file = os.path.join(project_root, user_file)
+        self._default_file = default_file
+        self._user_file = user_file
         self._cache: Dict[str, Any] = {}
     
     def load_config(self) -> Dict[str, Any]:

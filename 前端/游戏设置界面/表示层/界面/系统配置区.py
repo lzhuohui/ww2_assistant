@@ -10,24 +10,10 @@
 
 import flet as ft
 from typing import Dict, Any, List, Callable, Optional
-import sys
-import os
 
-# 添加项目根目录到Python路径
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, project_root)
-
-try:
-    from 核心层.配置.界面配置 import UIConfig
-    from 表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
-    from 业务层.服务.配置服务 import ConfigService
-    from 核心层.常量.共享选项 import get_options_for_control
-except ImportError:
-    # 尝试相对导入
-    from ..核心层.配置.界面配置 import UIConfig
-    from ..表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
-    from ..业务层.服务.配置服务 import ConfigService
-    from ..核心层.常量.共享选项 import get_options_for_control
+from 前端.游戏设置界面.核心层.配置.界面配置 import UIConfig
+from 前端.游戏设置界面.表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
+from 前端.游戏设置界面.业务层.服务.配置服务 import ConfigService
 
 
 # *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
@@ -110,7 +96,7 @@ class SystemConfigSection:
             icon="POWER_SETTINGS_NEW",
             subtitle="全自动:自动挂机,无需人为干预 | 半自动:点击头像,自动切换账号",
             controls_config=[
-                {"type": "dropdown", "config_key": "挂机模式", "label": "模式选择:", "value": "全自动", "options": get_options_for_control("控制1")},
+                {"type": "dropdown", "config_key": "挂机模式", "label": "模式选择:", "value": "全自动", "options": ["全自动", "半自动"]},
             ],
         ))
         
@@ -120,7 +106,7 @@ class SystemConfigSection:
             icon="SPEED",
             subtitle="运行指令间隔频率(毫秒)，数值越小速度越快",
             controls_config=[
-                {"type": "dropdown", "config_key": "指令速度", "label": "速度选择:", "value": "100", "options": get_options_for_control("控制3")},
+                {"type": "dropdown", "config_key": "指令速度", "label": "速度选择:", "value": "100", "options": ["100", "150", "200", "250", "300", "350", "400", "450", "500"]},
             ],
         ))
         
@@ -130,7 +116,7 @@ class SystemConfigSection:
             icon="REFRESH",
             subtitle="连续操作失败达到最大尝试次数后,触发自动纠错系统",
             controls_config=[
-                {"type": "dropdown", "config_key": "尝试次数", "label": "次数选择:", "value": "15", "options": get_options_for_control("控制4")},
+                {"type": "dropdown", "config_key": "尝试次数", "label": "次数选择:", "value": "15", "options": ["10", "15", "20", "25", "30"]},
             ],
         ))
         
@@ -140,7 +126,7 @@ class SystemConfigSection:
             icon="DELETE_SWEEP",
             subtitle="达到设置系统缓存清理阈值(M)后,自动清理缓存",
             controls_config=[
-                {"type": "dropdown", "config_key": "清缓限量", "label": "限量选择:", "value": "1.0", "options": get_options_for_control("控制5")},
+                {"type": "dropdown", "config_key": "清缓限量", "label": "限量选择:", "value": "1.0", "options": ["1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "4.5", "5.0"]},
             ],
         ))
         

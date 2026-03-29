@@ -6,24 +6,10 @@
 
 import flet as ft
 from typing import Dict, Any, List, Callable
-import sys
-import os
 
-# 添加项目根目录到Python路径
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, project_root)
-
-try:
-    from 核心层.配置.界面配置 import UIConfig
-    from 表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
-    from 业务层.服务.配置服务 import ConfigService
-    from 核心层.常量.共享选项 import get_options_for_control
-except ImportError:
-    # 尝试相对导入
-    from ..核心层.配置.界面配置 import UIConfig
-    from ..表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
-    from ..业务层.服务.配置服务 import ConfigService
-    from ..核心层.常量.共享选项 import get_options_for_control
+from 前端.游戏设置界面.核心层.配置.界面配置 import UIConfig
+from 前端.游戏设置界面.表示层.组件.复合.卡片组管理器 import CardGroupManager, create_managed_card
+from 前端.游戏设置界面.业务层.服务.配置服务 import ConfigService
 
 
 # *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
@@ -96,8 +82,8 @@ class HuntingConfigSection:
             icon="EXPLORE",
             subtitle="自动搜索并攻击野怪",
             controls_config=[
-                {"type": "dropdown", "config_key": "city_level", "label": "主城限级:", "value": "10", "options": get_options_for_control("控制15")},  # 10-15
-                {"type": "dropdown", "config_key": "monster_type", "label": "野怪类型:", "value": "3级轻坦师", "options": get_options_for_control("控制16")},  # 1级步兵旅, 2级侦察旅, 3级轻坦师
+                {"type": "dropdown", "config_key": "level", "label": "野怪等级选择:", "value": "全部", "options": ["全部", "1-3级", "4-6级", "7-9级", "10级以上"]},
+                {"type": "dropdown", "config_key": "frequency", "label": "搜索频率选择:", "value": "每小时", "options": ["每30分钟", "每小时", "每2小时", "每4小时"]},
             ],
         ))
         

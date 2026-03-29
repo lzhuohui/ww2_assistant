@@ -18,11 +18,6 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-# 添加项目根目录到Python路径
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, project_root)
-
-# 使用绝对导入
 from 核心层.配置.界面配置 import UIConfig
 from 业务层.服务.配置服务 import ConfigService
 from 表示层.组件.复合.用户信息卡片 import UserInfoCard
@@ -30,7 +25,7 @@ from 表示层.组件.复合.导航按钮 import NavigationButtonGroup
 from 表示层.界面.系统配置区 import SystemConfigSection
 from 表示层.界面.策略配置区 import StrategyConfigSection
 from 表示层.界面.任务配置区 import TaskConfigSection
-from 表示层.界面.建筑配置区_最终版 import create_building_config_section
+from 表示层.界面.建筑配置区 import BuildingConfigSection
 from 表示层.界面.集资配置区 import FundingConfigSection
 from 表示层.界面.账号配置区 import AccountConfigSection
 from 表示层.界面.打扫配置区 import CleaningConfigSection
@@ -137,7 +132,7 @@ class MainEntry:
                     config_service=config_service,
                 )
             elif label == "建筑":
-                section, manager = create_building_config_section(
+                section, manager = BuildingConfigSection.create(
                     config=config,
                     config_service=config_service,
                 )
@@ -219,13 +214,13 @@ class MainEntry:
                 ft.Container(
                     content=title_bar,
                     height=USER_TITLE_BAR_HEIGHT,
-                    padding=ft.Padding.only(left=16),
+                    padding=ft.padding.only(left=16),
                 ),
                 ft.Divider(height=1, thickness=1, color=theme_colors.get("border")),
                 ft.Container(
                     content=initial_section,
                     expand=True,
-                    padding=ft.Padding.all(16),
+                    padding=ft.padding.all(16),
                 ),
             ], spacing=0, expand=True),
             expand=True,
@@ -272,7 +267,7 @@ class MainEntry:
             ], spacing=0, expand=True),
             width=USER_NAV_WIDTH,
             bgcolor=theme_colors.get("bg_primary"),
-            padding=ft.Padding.only(left=10, top=0, right=10, bottom=10),
+            padding=ft.padding.only(left=10, top=0, right=10, bottom=10),
         )
         
         divider = ft.VerticalDivider(
@@ -311,4 +306,4 @@ def main(page: ft.Page):
 
 # *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
 if __name__ == "__main__":
-    ft.run(main)
+    ft.app(target=main)

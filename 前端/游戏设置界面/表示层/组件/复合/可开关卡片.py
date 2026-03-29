@@ -20,20 +20,8 @@
 import flet as ft
 from typing import Callable, Dict, Any, List, Optional
 
-import sys
-import os
-
-# 添加项目根目录到Python路径
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, project_root)
-
-try:
-    from 核心层.配置.界面配置 import UIConfig
-    from 表示层.组件.基础.卡片容器 import CardContainer, USER_HEIGHT, USER_PADDING
-except ImportError:
-    # 尝试相对导入
-    from ...核心层.配置.界面配置 import UIConfig
-    from ...表示层.组件.基础.卡片容器 import CardContainer, USER_HEIGHT, USER_PADDING
+from 前端.游戏设置界面.核心层.配置.界面配置 import UIConfig
+from 前端.游戏设置界面.表示层.组件.基础.卡片容器 import CardContainer, USER_HEIGHT, USER_PADDING
 
 
 # *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
@@ -60,14 +48,9 @@ class SwitchableCard:
         on_value_change: Callable[[str, Any], None] = None,
         on_save: Callable[[str, str], None] = None,
         config: UIConfig = None,
-        card_id: str = None,
     ) -> ft.Container:
         if config is None:
             config = UIConfig()
-        
-        if card_id is None:
-            import uuid
-            card_id = f"card_{uuid.uuid4().hex[:8]}"
         
         theme_colors = config.当前主题颜色
         control_h_spacing = config.get_size("spacing", "spacing_md") or 12
@@ -235,21 +218,22 @@ class SwitchableCard:
         left_container.on_click = lambda e: handle_switch_toggle()
         
         def load_controls():
-            """加载控件选项列表 - 真正的懒加载实现"""
-            # 只设置选项，但不立即创建菜单项
+            """加载控件选项列表"""
+            # 加载所有控件的选项列表
             for config_key, control_instance in control_dict.items():
                 if hasattr(control_instance, 'set_options') and config_key in options_dict:
-                    # 设置选项，但使用懒加载
                     control_instance.set_options(options_dict[config_key])
             
-            # 不立即更新页面，等待用户交互
-            # 这样可以避免一次性更新所有控件导致的卡顿
+            try:
+                if container.page:
+                    container.page.update()
+            except:
+                pass
         
         def create_controls_from_config() -> List[ft.Control]:
             """根据配置创建控件"""
-            # 使用标准下拉框（懒加载+视觉优化）
-            from 表示层.组件.基础.下拉框 import create_dropdown, USER_WIDTH as DROPDOWN_WIDTH
-            from 表示层.组件.基础.输入框 import InputBox, USER_WIDTH as INPUT_WIDTH
+            from 前端.游戏设置界面.表示层.组件.基础.下拉框 import Dropdown, USER_WIDTH as DROPDOWN_WIDTH
+            from 前端.游戏设置界面.表示层.组件.基础.输入框 import InputBox, USER_WIDTH as INPUT_WIDTH
             
             created_controls = []
             
@@ -271,22 +255,14 @@ class SwitchableCard:
                         color=theme_colors.get("text_secondary"),
                     )
                     
-                    # 创建优化版下拉框（真正的懒加载）
-                    def create_option_loader(opts):
-                        def loader():
-                            return opts
-                        return loader
-                    
-                    # 生成唯一的下拉框ID：卡片ID + 配置键
-                    dropdown_id = f"{card_id}_{config_key}"
-                    
-                    dropdown_instance = create_dropdown(
+                    # 创建下拉框,直接传入完整选项列表
+                    dropdown_instance = Dropdown.create(
+                        options=options,
                         current_value=value,
                         width=control_width,
+                        enabled=is_enabled[0],
                         on_change=lambda v, k=config_key: handle_value_change(k, v),
                         config=config,
-                        option_loader=create_option_loader(options),
-                        dropdown_id=dropdown_id,  # 传递唯一标识
                     )
                     control_dict[config_key] = dropdown_instance
                     
@@ -413,10 +389,6 @@ class SwitchableCard:
         def destroy_controls():
             """销毁控件"""
             unload_options()
-            # 清理下拉框资源
-            for control_instance in control_dict.values():
-                if hasattr(control_instance, 'cleanup'):
-                    control_instance.cleanup()
         
         # 添加方法到容器
         container.get_values = get_values
