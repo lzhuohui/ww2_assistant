@@ -2,10 +2,22 @@
 
 """
 模块名称：账号界面.py
-模块功能：账号设置界面 - 15个卡片
+模块功能：账号设置界面
 
-卡片配置：
-账号01-15 - 类型、名称、账号、密码、方案、平台
+职责：
+- 从配置服务获取section列表
+- 调用卡片组创建卡片
+- 销毁功能
+
+不负责：
+- 卡片信息获取（由卡片开关负责）
+- 控件创建（由卡片控件负责）
+- 开关逻辑（由卡片开关负责）
+
+设计原则（符合V2版本模块化设计补充共识）：
+- 从配置服务获取数据，不硬编码
+- 只传递section，不传递具体数据
+- 数据归属原则：界面配置.json是唯一数据源
 """
 
 import flet as ft
@@ -14,44 +26,64 @@ from typing import Callable, Dict, Any
 from 前端.V2.层级3_卡片组.卡片组 import CardGroup
 
 USER_CARD_SPACING = 10
-MAX_ACCOUNTS = 15
-
-ACCOUNT_CONTROLS = [
-    {"id": "类型", "type": "dropdown", "label": "类型:"},
-    {"id": "名称", "type": "input", "label": "名称:", "hint": "输入名称"},
-    {"id": "账号", "type": "input", "label": "账号:", "hint": "输入账号"},
-    {"id": "密码", "type": "input", "label": "密码:", "hint": "输入密码", "password": True},
-    {"id": "方案", "type": "dropdown", "label": "方案:"},
-    {"id": "平台", "type": "dropdown", "label": "平台:"},
-]
 
 class AccountPage:
+    """
+    账号设置界面（层级2：功能界面）
+    
+    职责：
+    - 从配置服务获取section列表
+    - 调用卡片组创建卡片
+    - 销毁功能
+    
+    不负责：
+    - 卡片信息获取（由卡片开关负责）
+    - 控件创建（由卡片控件负责）
+    - 开关逻辑（由卡片开关负责）
+    """
+    
     _card_group: CardGroup = None
     
     @staticmethod
-    def create(page: ft.Page, config_service, on_change: Callable = None, theme_colors: Dict = None) -> ft.Control:
+    def create(
+        page: ft.Page,
+        config_service,
+        on_change: Callable = None,
+        theme_colors: Dict = None,
+    ) -> ft.Control:
+        """
+        创建账号设置界面
+        
+        参数：
+        - page: 页面实例
+        - config_service: 配置服务实例
+        - on_change: 控件值变更回调
+        - theme_colors: 主题颜色
+        
+        返回：
+        - ft.Control: 界面内容
+        """
         if theme_colors is None:
-            theme_colors = {"text_primary": "#000000", "text_secondary": "#666666", "text_disabled": "#999999", "bg_card": "#FFFFFF", "accent": "#0078D4", "border": "#CCCCCC"}
+            theme_colors = config_service.get_theme_colors()
         
         AccountPage._card_group = CardGroup(page, config_service)
         cards = []
-        for i in range(1, MAX_ACCOUNTS + 1):
-            card = AccountPage._card_group.create(
-                section=f"账号设置.账号{i:02d}",
-                title=f"账号{i:02d}",
-                icon="ACCOUNT_CIRCLE",
-                subtitle="设置账号信息",
-                controls_config=ACCOUNT_CONTROLS,
-                has_switch=True,
-                on_change=on_change,
-                theme_colors=theme_colors,
-            )
-            cards.append(card)
+        
+        sections = config_service.get_all_sections()
+        for section in sections:
+            if section.startswith("账号设置."):
+                card = AccountPage._card_group.create(
+                    section=section,
+                    on_control_change=on_change,
+                    theme_colors=theme_colors,
+                )
+                cards.append(card)
         
         return ft.Column(cards, spacing=USER_CARD_SPACING, scroll=ft.ScrollMode.AUTO, expand=True)
     
     @staticmethod
     def destroy():
+        """销毁所有卡片"""
         if AccountPage._card_group:
             AccountPage._card_group.destroy_all()
             AccountPage._card_group = None
@@ -61,14 +93,13 @@ if __name__ == "__main__":
     import os
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     
-    from 前端.V2.数据层.仓库.配置仓库 import ConfigRepository
     from 前端.V2.业务层.服务.配置服务 import ConfigService
     
     def main(page: ft.Page):
         page.title = "账号设置测试"
         
-        repository = ConfigRepository()
-        config_service = ConfigService(repository)
+        config_service = ConfigService()
+        CardGroup.set_config_service(config_service)
         
         account_page = AccountPage.create(page, config_service)
         page.add(account_page)
