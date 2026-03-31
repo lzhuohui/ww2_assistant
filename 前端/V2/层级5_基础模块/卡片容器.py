@@ -13,31 +13,30 @@
 职责：
 - 布局容器
 - 阴影效果
-- 从配置服务获取UI配置
+- 从用户偏好.json获取UI配置
 
 不负责：
 - 内部内容
+- 控件高度和间距
 - 销毁（不需要销毁）
 
 设计原则（符合V2版本模块化设计补充共识）：
-- 从配置服务获取UI配置
-- 定义DEFAULT_XXX作为fallback（确保模块可独立测试）
-- 不在模块中硬编码配置值
+- 用户偏好.json是UI配置唯一来源
+- 如果用户偏好.json缺少配置，抛出错误
+- 不使用DEFAULT_XXX掩盖问题
+- 容器只做主题细节的处理
 """
 
 import flet as ft
-from typing import Callable, Dict, Optional, Any
+from typing import Dict, Optional, Callable
 
 # ============================================
-# 默认配置（fallback，用于模块独立测试）
+# 数据和文件接口（前置，方便查看和修改）
 # ============================================
 
-DEFAULT_WIDTH = None
-DEFAULT_HEIGHT = 92
-DEFAULT_PADDING = 6
-DEFAULT_BORDER_RADIUS = 8
-CONTROL_ROW_HEIGHT = 36
-CONTROL_V_SPACING = 8
+# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
+USER_CARD_HEIGHT = 100         # 卡片高度（像素）
+# *********************************
 
 # ============================================
 # 公开接口
@@ -50,19 +49,19 @@ class CardContainer:
     职责：
     - 布局容器
     - 阴影效果
-    - 从配置服务获取UI配置
+    - 从用户偏好.json获取UI配置
     
     不负责：
     - 内部内容
+    - 控件高度和间距
     - 销毁（不需要销毁）
     
     设计原则：
-    - 优先从config_service获取配置
-    - 使用DEFAULT_XXX作为fallback
-    - 确保模块可独立运行测试
+    - 用户偏好.json是UI配置唯一来源
+    - 如果缺少配置，抛出错误而非掩盖
+    - 容器只做主题细节的处理
     """
     
-    # 缓存配置服务实例
     _config_service = None
     
     @classmethod
@@ -71,154 +70,90 @@ class CardContainer:
         cls._config_service = config_service
     
     @staticmethod
+    def _check_config_service():
+        """检查配置服务是否已设置"""
+        if CardContainer._config_service is None:
+            raise RuntimeError(
+                "CardContainer模块未设置config_service，"
+                "请先调用 CardContainer.set_config_service(config_service)"
+            )
+    
+    @staticmethod
     def get_height() -> int:
-        """获取卡片最小高度（从配置服务获取，fallback到默认值）"""
-        if CardContainer._config_service:
-            return CardContainer._config_service.get_card_min_height()
-        return DEFAULT_HEIGHT
+        """获取卡片高度（用户指定变量）"""
+        return USER_CARD_HEIGHT
     
     @staticmethod
     def get_width() -> Optional[int]:
         """获取卡片宽度（从配置服务获取）"""
-        return DEFAULT_WIDTH
+        return None
     
     @staticmethod
     def get_padding() -> int:
-        """获取内边距（从配置服务获取，fallback到默认值）"""
-        if CardContainer._config_service:
-            return CardContainer._config_service.get_card_padding()
-        return DEFAULT_PADDING
+        """获取内边距（从用户偏好.json获取）"""
+        CardContainer._check_config_service()
+        padding = CardContainer._config_service.get_ui_config("卡片", "内边距")
+        if padding is None:
+            raise RuntimeError("用户偏好.json缺少配置: 卡片.内边距")
+        return padding
     
     @staticmethod
     def get_border_radius() -> int:
-        """获取圆角半径"""
-        return DEFAULT_BORDER_RADIUS
+        """获取圆角半径（从用户偏好.json获取）"""
+        CardContainer._check_config_service()
+        radius = CardContainer._config_service.get_ui_config("卡片", "圆角")
+        if radius is None:
+            raise RuntimeError("用户偏好.json缺少配置: 卡片.圆角")
+        return radius
     
     @staticmethod
     def _get_theme_colors() -> Dict[str, str]:
         """获取主题颜色"""
-        if CardContainer._config_service is None:
-            raise RuntimeError("CardContainer模块未设置config_service，请先调用CardContainer.set_config_service()")
+        CardContainer._check_config_service()
         return CardContainer._config_service.get_theme_colors()
     
     @staticmethod
-    def get_control_row_height() -> int:
-        """获取每行控件高度"""
-        if CardContainer._config_service:
-            return CardContainer._config_service.get_ui_config("卡片", "控件行高", CONTROL_ROW_HEIGHT)
-        return CONTROL_ROW_HEIGHT
-    
-    @staticmethod
-    def get_control_v_spacing() -> int:
-        """获取控件垂直间距"""
-        if CardContainer._config_service:
-            return CardContainer._config_service.get_ui_config("卡片", "控件行间距", CONTROL_V_SPACING)
-        return CONTROL_V_SPACING
-    
-    @staticmethod
-    def calculate_height(control_rows: int = 1) -> int:
-        """
-        计算卡片高度（最小高度为DEFAULT_HEIGHT，确保统一风格）
-        
-        参数：
-        - control_rows: 控件行数
-        
-        返回：
-        - 计算后的卡片高度（不小于最小高度）
-        
-        设计说明：
-        - 最小高度92px对应2行控件，是大多数卡片的常见情况
-        - 统一最小高度可保证同一界面内卡片高度一致，视觉整齐美观
-        - 控件行数超过2行时自动扩展高度
-        """
-        min_height = CardContainer.get_height()
-        
-        if control_rows <= 0:
-            return min_height
-        
-        row_height = CardContainer.get_control_row_height()
-        v_spacing = CardContainer.get_control_v_spacing()
-        
-        # 控件区域高度 = 控件行数 * 行高 + (行数-1) * 行间距
-        control_area_height = control_rows * row_height
-        if control_rows > 1:
-            control_area_height += (control_rows - 1) * v_spacing
-        
-        # 计算高度 = 内边距 + 控件区域高度
-        padding = CardContainer.get_padding()
-        calculated_height = padding * 2 + control_area_height
-        
-        # 返回不小于最小高度的高度值
-        return max(min_height, calculated_height)
-    
-    @staticmethod
     def create(
-        content: ft.Control = None,
+        content: ft.Control,
         height: int = None,
         width: int = None,
-        padding: int = None,
         on_click: Callable = None,
-        elevation: int = 1,
-        theme_colors: Dict[str, str] = None,
+        on_hover: Callable = None,
     ) -> ft.Container:
         """
         创建卡片容器
         
         参数：
-        - content: 内部内容
-        - height: 高度（默认从配置服务获取）
-        - width: 宽度（默认从配置服务获取）
-        - padding: 内边距（默认从配置服务获取）
+        - content: 容器内容
+        - height: 容器高度（可选，默认从模块变量获取）
+        - width: 容器宽度（可选）
         - on_click: 点击回调
-        - elevation: 阴影层级
-        - theme_colors: 主题颜色
+        - on_hover: 悬停回调
         """
-        if height is None:
-            height = CardContainer.get_height()
-        if width is None:
-            width = CardContainer.get_width()
-        if padding is None:
-            padding = CardContainer.get_padding()
+        theme_colors = CardContainer._get_theme_colors()
         
-        if theme_colors is None:
-            theme_colors = CardContainer._get_theme_colors()
-        
-        shadow = ft.BoxShadow(
-            spread_radius=0,
-            blur_radius=4 * elevation,
-            color=theme_colors.get("shadow", "#26000000"),
-            offset=ft.Offset(0, 2 * elevation),
-        )
+        container_height = height if height is not None else CardContainer.get_height()
+        container_width = width
+        padding = CardContainer.get_padding()
+        border_radius = CardContainer.get_border_radius()
         
         container = ft.Container(
             content=content,
-            width=width,
-            height=height,
+            width=container_width,
+            height=container_height,
             padding=padding,
-            bgcolor=theme_colors.get("bg_card", "#FFFFFF"),
-            border_radius=DEFAULT_BORDER_RADIUS,
+            border_radius=border_radius,
+            bgcolor=theme_colors.get("bg_card"),
+            shadow=ft.BoxShadow(
+                spread_radius=1,
+                blur_radius=4,
+                color=theme_colors.get("shadow", "rgba(0, 0, 0, 0.25)"),
+                offset=ft.Offset(0, 2),
+            ),
             on_click=on_click,
-            shadow=shadow,
-            animate=ft.Animation(150, ft.AnimationCurve.EASE_OUT),
+            on_hover=on_hover,
+            animate=ft.Animation(200, ft.AnimationCurve.EASE_OUT),
         )
-        
-        def handle_hover(e):
-            if e.data == "true":
-                container.shadow = ft.BoxShadow(
-                    spread_radius=0,
-                    blur_radius=8,
-                    color=theme_colors.get("shadow_hover", "#33000000"),
-                    offset=ft.Offset(0, 4),
-                )
-            else:
-                container.shadow = shadow
-            try:
-                if container.page:
-                    container.update()
-            except:
-                pass
-        
-        container.on_hover = handle_hover
         
         return container
 
@@ -236,14 +171,14 @@ if __name__ == "__main__":
         config_service = ConfigService()
         CardContainer.set_config_service(config_service)
         
+        print(f"卡片高度: {CardContainer.get_height()}")
+        print(f"卡片内边距: {CardContainer.get_padding()}")
+        print(f"卡片圆角: {CardContainer.get_border_radius()}")
+        
         card1 = CardContainer.create(
             content=ft.Text("测试卡片"),
             height=80,
         )
         page.add(card1)
-        
-        print(f"1行控件高度: {CardContainer.calculate_height(1)}")
-        print(f"2行控件高度: {CardContainer.calculate_height(2)}")
-        print(f"3行控件高度: {CardContainer.calculate_height(3)}")
     
-    ft.app(target=main)
+    ft.run(main)

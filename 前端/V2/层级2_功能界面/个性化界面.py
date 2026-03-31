@@ -147,4 +147,4 @@ if __name__ == "__main__":
         personalization_page = PersonalizationPage.create(page, config_service)
         page.add(personalization_page)
     
-    ft.app(target=main)
+    ft.run(main)

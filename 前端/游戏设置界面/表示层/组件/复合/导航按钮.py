@@ -210,4 +210,4 @@ if __name__ == "__main__":
         )
         page.add(nav_group)
     
-    ft.app(target=main)
+    ft.run(main)

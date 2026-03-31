@@ -98,4 +98,4 @@ if __name__ == "__main__":
         )
         page.add(input_box)
     
-    ft.app(target=main)
+    ft.run(main)

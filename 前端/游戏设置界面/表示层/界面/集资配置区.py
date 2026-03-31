@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 模块名称：FundingConfigSection
 模块功能：集资配置区，包含小号上贡、分城纳租配置
@@ -257,4 +257,4 @@ if __name__ == "__main__":
         section, manager = FundingConfigSection.create(config=config, config_service=service)
         page.add(section)
     
-    ft.app(target=main)
+    ft.run(main)

@@ -62,4 +62,4 @@ def main(page: ft.Page):
     page.go("/")
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.run(main)

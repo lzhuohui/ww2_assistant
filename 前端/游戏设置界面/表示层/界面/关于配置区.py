@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 模块名称：AboutConfigSection
 模块功能：关于信息区，展示版本信息、联系方式、缴费说明、免责声明
@@ -129,4 +129,4 @@ if __name__ == "__main__":
         section, manager = AboutConfigSection.create(config=config)
         page.add(section)
     
-    ft.app(target=main)
+    ft.run(main)

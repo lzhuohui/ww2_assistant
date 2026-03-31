@@ -266,4 +266,4 @@ if __name__ == "__main__":
     def main(page: ft.Page):
         entry = MainEntry(page)
     
-    ft.app(main)
+    ft.run(main)

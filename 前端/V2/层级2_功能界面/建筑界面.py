@@ -161,4 +161,4 @@ if __name__ == "__main__":
         building_page = BuildingPage.create(page, config_service)
         page.add(building_page)
     
-    ft.app(target=main)
+    ft.run(main)

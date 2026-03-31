@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 模块名称：StrategyConfigSection
 模块功能：策略配置区，包含建筑速建、资源速产等配置
@@ -152,4 +152,4 @@ if __name__ == "__main__":
         section, manager = StrategyConfigSection.create(config=config, config_service=service)
         page.add(section)
     
-    ft.app(target=main)
+    ft.run(main)

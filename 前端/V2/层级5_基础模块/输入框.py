@@ -13,7 +13,7 @@
 
 职责：
 - 从配置服务获取当前值
-- 从配置服务获取UI配置
+- 从用户偏好.json获取UI配置
 - 文本输入
 - 自动保存到配置
 
@@ -22,19 +22,25 @@
 - 销毁（不需要销毁）
 
 设计原则（符合V2版本模块化设计补充共识）：
-- 从配置服务获取UI配置（宽度、高度）
-- 定义DEFAULT_XXX作为fallback
+- 用户偏好.json是UI配置唯一来源
+- 如果用户偏好.json缺少配置，抛出错误
+- 不使用DEFAULT_XXX掩盖问题
 """
 
 import flet as ft
 from typing import Callable, Dict, Optional, Any
 
 # ============================================
-# 默认配置（fallback，用于模块独立测试）
+# 数据和文件接口（前置，方便查看和修改）
 # ============================================
 
-DEFAULT_WIDTH = 120
-DEFAULT_HEIGHT = 30
+# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
+USER_WIDTH = 150      # 输入框宽度（None表示从用户偏好.json获取）
+USER_HEIGHT = 30     # 输入框高度（None表示从用户偏好.json获取）
+# *********************************
+
+# 输入框无默认值配置，所有UI配置从用户偏好.json获取
+# 如果用户偏好.json缺少配置，抛出错误而非掩盖
 
 # ============================================
 # 公开接口
@@ -46,7 +52,7 @@ class InputBox:
     
     职责：
     - 从配置服务获取当前值
-    - 从配置服务获取UI配置
+    - 从用户偏好.json获取UI配置
     - 文本输入
     - 自动保存到配置
     
@@ -63,18 +69,42 @@ class InputBox:
         cls._config_service = config_service
     
     @staticmethod
+    def _check_config_service():
+        """检查配置服务是否已设置"""
+        if InputBox._config_service is None:
+            raise RuntimeError(
+                "InputBox模块未设置config_service，"
+                "请先调用 InputBox.set_config_service(config_service)"
+            )
+    
+    @staticmethod
     def get_width() -> int:
-        """获取输入框宽度（从配置服务获取，fallback到默认值）"""
-        if InputBox._config_service:
-            return InputBox._config_service.get_ui_config("输入框", "宽度", DEFAULT_WIDTH)
-        return DEFAULT_WIDTH
+        """获取输入框宽度（从用户偏好.json获取）"""
+        InputBox._check_config_service()
+        width = InputBox._config_service.get_ui_config("输入框", "宽度")
+        if width is None:
+            raise RuntimeError("用户偏好.json缺少配置: 输入框.宽度")
+        return width
     
     @staticmethod
     def get_height() -> int:
-        """获取输入框高度（从配置服务获取，fallback到默认值）"""
-        if InputBox._config_service:
-            return InputBox._config_service.get_ui_config("输入框", "高度", DEFAULT_HEIGHT)
-        return DEFAULT_HEIGHT
+        """获取输入框高度（从用户偏好.json获取）"""
+        InputBox._check_config_service()
+        height = InputBox._config_service.get_ui_config("输入框", "高度")
+        if height is None:
+            raise RuntimeError("用户偏好.json缺少配置: 输入框.高度")
+        return height
+    
+    @staticmethod
+    def get_border_radius() -> int:
+        """获取输入框圆角（从用户偏好.json获取）"""
+        InputBox._check_config_service()
+        radius = InputBox._config_service.get_ui_config("输入框", "圆角")
+        if radius is None:
+            radius = InputBox._config_service.get_ui_config("圆角", "小")
+        if radius is None:
+            raise RuntimeError("用户偏好.json缺少配置: 输入框.圆角")
+        return radius
     
     def __init__(self, page: ft.Page = None, config_service=None):
         self._page = page
@@ -89,6 +119,10 @@ class InputBox:
         max_length: int = None,
         on_change: Callable[[str, str, str], None] = None,
         theme_colors: Dict[str, str] = None,
+        hint_text: str = None,
+        password_mode: bool = False,
+        width: int = None,
+        height: int = None,
     ) -> ft.TextField:
         """
         创建输入框
@@ -97,50 +131,33 @@ class InputBox:
         - section: 配置节
         - control_id: 控件ID
         - enabled: 是否启用
-        - max_length: 最大长度限制
+        - max_length: 最大长度
         - on_change: 值变更回调
         - theme_colors: 主题颜色
-        
-        注意：
-        - 宽度、高度从配置服务获取，调用者不应传递
-        - hint_text、password从配置服务获取，调用者不应传递
+        - hint_text: 提示文本
+        - password_mode: 密码模式
+        - width: 宽度（可选，优先级：USER_WIDTH > 参数 > 用户偏好.json）
+        - height: 高度（可选，优先级：USER_HEIGHT > 参数 > 用户偏好.json）
         """
-        width = InputBox.get_width()
-        height = InputBox.get_height()
+        width = USER_WIDTH if USER_WIDTH is not None else (width if width is not None else InputBox.get_width())
+        height = USER_HEIGHT if USER_HEIGHT is not None else (height if height is not None else InputBox.get_height())
+        border_radius = InputBox.get_border_radius()
         
         if theme_colors is None:
             theme_colors = self._get_theme_colors()
         
         current_value = self._get_current_value(section, control_id)
-        hint_text = self._get_hint(section, control_id)
-        password_mode = self._get_password(section, control_id)
         
-        def handle_change(e):
-            new_value = e.control.value
-            if max_length and new_value and len(new_value) > max_length:
-                e.control.value = new_value[:max_length]
-                new_value = e.control.value
-            
-            self._save_value(section, control_id, new_value)
-            
-            if on_change and section and control_id:
-                on_change(section, control_id, new_value)
+        if hint_text is None:
+            hint_text = self._get_hint(section, control_id)
         
-        text_field = ft.TextField(
-            value=current_value,
-            hint_text=hint_text,
-            width=width,
-            height=height,
-            disabled=not enabled,
-            password=password_mode,
-            can_reveal_password=password_mode,
-            on_change=handle_change,
-            border_color=theme_colors.get("border"),
-            focused_border_color=theme_colors.get("accent"),
-            text_style=ft.TextStyle(color=theme_colors.get("text_primary")),
-            hint_style=ft.TextStyle(color=theme_colors.get("text_disabled")),
-            text_align=ft.TextAlign.LEFT,
-            content_padding=ft.padding.symmetric(horizontal=10, vertical=5),
+        if password_mode is None:
+            password_mode = self._get_password_mode(section, control_id)
+        
+        text_field = self._build_text_field(
+            current_value, enabled, width, height, border_radius,
+            theme_colors, hint_text, password_mode,
+            max_length, section, control_id, on_change
         )
         
         key = f"{section}.{control_id}" if section and control_id else f"input_{len(self._inputs)}"
@@ -148,16 +165,17 @@ class InputBox:
         
         return text_field
     
+    def _get_theme_colors(self) -> Dict[str, str]:
+        """获取主题颜色"""
+        if self._config_service is None:
+            raise RuntimeError("InputBox模块未设置config_service")
+        return self._config_service.get_theme_colors()
+    
     def _get_current_value(self, section: str, control_id: str) -> str:
         """从配置服务获取当前值"""
         if self._config_service:
             return self._config_service.get_value(section, control_id, "")
         return ""
-    
-    def _save_value(self, section: str, control_id: str, value: str):
-        """保存值到配置"""
-        if self._config_service:
-            self._config_service.set_value(section, control_id, value)
     
     def _get_hint(self, section: str, control_id: str) -> str:
         """从配置服务获取提示文本"""
@@ -166,18 +184,65 @@ class InputBox:
             return config.get("hint", "")
         return ""
     
-    def _get_password(self, section: str, control_id: str) -> bool:
+    def _get_password_mode(self, section: str, control_id: str) -> bool:
         """从配置服务获取密码模式"""
         if self._config_service:
             config = self._config_service.get_control_config(section, control_id)
             return config.get("password", False)
         return False
     
-    def _get_theme_colors(self) -> Dict[str, str]:
-        """获取主题颜色"""
-        if self._config_service is None:
-            raise RuntimeError("InputBox模块未设置config_service")
-        return self._config_service.get_theme_colors()
+    def _build_text_field(
+        self,
+        current_value: str,
+        enabled: bool,
+        width: int,
+        height: int,
+        border_radius: int,
+        theme_colors: Dict,
+        hint_text: str,
+        password_mode: bool,
+        max_length: int,
+        section: str,
+        control_id: str,
+        on_change: Callable,
+    ) -> ft.TextField:
+        """构建文本输入框"""
+        
+        text_color = theme_colors.get("text_primary", "#FFFFFF")
+        disabled_color = theme_colors.get("text_disabled", "#656565")
+        bg_card = theme_colors.get("bg_card", "#2D2D4A")
+        border_color = theme_colors.get("border", "#3D3D3D")
+        
+        def handle_change(e):
+            self._save_value(section, control_id, e.control.value)
+            if on_change:
+                on_change(section, control_id, e.control.value)
+        
+        text_field = ft.TextField(
+            value=current_value,
+            width=width,
+            height=height,
+            text_size=12,
+            color=text_color if enabled else disabled_color,
+            bgcolor=bg_card,
+            border_color=border_color,
+            border_radius=border_radius,
+            hint_text=hint_text,
+            hint_style=ft.TextStyle(color=disabled_color),
+            password=password_mode,
+            can_reveal_password=password_mode,
+            max_length=max_length,
+            on_change=handle_change,
+            disabled=not enabled,
+            content_padding=ft.Padding.symmetric(horizontal=8, vertical=4),
+        )
+        
+        return text_field
+    
+    def _save_value(self, section: str, control_id: str, value: str):
+        """保存值到配置"""
+        if self._config_service:
+            self._config_service.set_value(section, control_id, value)
     
     def get_value(self, section: str, control_id: str) -> str:
         """获取输入框当前值"""
@@ -185,28 +250,6 @@ class InputBox:
         if key in self._inputs:
             return self._inputs[key].value or ""
         return ""
-    
-    def set_value(self, section: str, control_id: str, value: str) -> None:
-        """设置输入框值"""
-        key = f"{section}.{control_id}"
-        if key in self._inputs:
-            self._inputs[key].value = value
-            if self._page:
-                try:
-                    self._inputs[key].update()
-                except:
-                    pass
-    
-    def set_enabled(self, section: str, control_id: str, enabled: bool) -> None:
-        """设置启用状态"""
-        key = f"{section}.{control_id}"
-        if key in self._inputs:
-            self._inputs[key].disabled = not enabled
-            if self._page:
-                try:
-                    self._inputs[key].update()
-                except:
-                    pass
 
 # *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
 if __name__ == "__main__":
@@ -219,16 +262,11 @@ if __name__ == "__main__":
     def main(page: ft.Page):
         page.title = "输入框测试"
         
-        print("=" * 50)
-        print("测试: 使用真实配置服务")
-        print("=" * 50)
-        
         config_service = ConfigService()
         InputBox.set_config_service(config_service)
         
-        print(f"从配置服务获取输入框宽度: {InputBox.get_width()}")
-        print(f"从配置服务获取输入框高度: {InputBox.get_height()}")
-        print(f"配置文件中的值应为: 宽度=120, 高度=30")
+        print(f"输入框宽度: {InputBox.get_width()}")
+        print(f"输入框高度: {InputBox.get_height()}")
         
         input_box = InputBox(page, config_service)
         
@@ -238,12 +276,9 @@ if __name__ == "__main__":
             enabled=True,
         )
         
-        print(f"输入框宽度: {text_field.width}")
-        print(f"验证: 宽度应等于配置服务返回值({InputBox.get_width()})")
-        
         page.add(ft.Column([
             ft.Text("输入框测试", size=20, weight=ft.FontWeight.BOLD),
             text_field,
         ]))
     
-    ft.app(target=main)
+    ft.run(main)

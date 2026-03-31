@@ -62,4 +62,4 @@ def main(page: ft.Page):
     print("注意：如果懒加载生效，应该在点击下拉框时才看到'开始加载选项...'的日志")
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.run(main)

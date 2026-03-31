@@ -198,4 +198,4 @@ if __name__ == "__main__":
     print("3. ✅ 销毁上一个下拉框的选项列表")
     print("=" * 60)
     
-    ft.app(target=test_true_lazy_loading)
+    ft.run(test_true_lazy_loading)

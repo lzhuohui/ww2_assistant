@@ -91,4 +91,4 @@ if __name__ == "__main__":
         funding_page = FundingPage.create(page, config_service)
         page.add(funding_page)
     
-    ft.app(target=main)
+    ft.run(main)

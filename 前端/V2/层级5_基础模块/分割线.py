@@ -15,6 +15,10 @@
 不负责：
 - 布局
 - 销毁（不需要销毁）
+
+设计原则（符合V2版本模块化设计补充共识）：
+- 用户偏好.json是UI配置唯一来源
+- 分割线粗细是固定值，不是风格配置，使用硬编码默认值
 """
 
 import flet as ft
@@ -24,6 +28,7 @@ from typing import Dict, Optional
 # 数据和文件接口（前置，方便查看和修改）
 # ============================================
 
+# 分割线粗细是固定值，不是风格配置，使用硬编码默认值
 DEFAULT_HEIGHT = 1
 DEFAULT_WIDTH = 1
 
@@ -51,15 +56,23 @@ class Divider:
         cls._config_service = config_service
     
     @staticmethod
+    def _check_config_service():
+        """检查配置服务是否已设置"""
+        if Divider._config_service is None:
+            raise RuntimeError(
+                "Divider模块未设置config_service，"
+                "请先调用 Divider.set_config_service(config_service)"
+            )
+    
+    @staticmethod
     def _get_theme_colors() -> Dict[str, str]:
         """获取主题颜色"""
-        if Divider._config_service is None:
-            raise RuntimeError("Divider模块未设置config_service，请先调用Divider.set_config_service()")
+        Divider._check_config_service()
         return Divider._config_service.get_theme_colors()
     
     @staticmethod
     def create_horizontal(
-        height: int = DEFAULT_HEIGHT,
+        height: int = 1,
         color_type: str = "divider",
         theme_colors: Dict[str, str] = None,
     ) -> ft.Divider:
@@ -67,7 +80,7 @@ class Divider:
         创建水平分割线
         
         参数：
-        - height: 分割线高度
+        - height: 分割线高度（粗细）
         - color_type: 颜色类型 (divider/accent)
         - theme_colors: 主题颜色
         """
@@ -84,7 +97,7 @@ class Divider:
     
     @staticmethod
     def create_vertical(
-        width: int = DEFAULT_WIDTH,
+        width: int = 1,
         color_type: str = "divider",
         theme_colors: Dict[str, str] = None,
     ) -> ft.VerticalDivider:
@@ -92,7 +105,7 @@ class Divider:
         创建垂直分割线
         
         参数：
-        - width: 分割线宽度
+        - width: 分割线宽度（粗细）
         - color_type: 颜色类型 (divider/accent)
         - theme_colors: 主题颜色
         """
@@ -128,4 +141,4 @@ if __name__ == "__main__":
         ])
         page.add(column)
     
-    ft.app(target=main)
+    ft.run(main)

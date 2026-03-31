@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 模块名称：AccountConfigSection
 模块功能：账号配置区，包含15个账号卡片
@@ -347,4 +347,4 @@ if __name__ == "__main__":
         section, manager = AccountConfigSection.create(config=config, config_service=service)
         page.add(section)
     
-    ft.app(target=main)
+    ft.run(main)

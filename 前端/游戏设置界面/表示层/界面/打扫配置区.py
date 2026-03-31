@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 模块名称：CleaningConfigSection
 模块功能：打扫配置区，包含打扫城区、打扫政区配置
@@ -110,4 +110,4 @@ if __name__ == "__main__":
         section, manager = CleaningConfigSection.create(config=config, config_service=service)
         page.add(section)
     
-    ft.app(target=main)
+    ft.run(main)

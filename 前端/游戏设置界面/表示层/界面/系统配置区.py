@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 模块名称：SystemConfigSection
 模块功能：系统配置区，包含挂机模式、指令速度等配置
@@ -160,4 +160,4 @@ if __name__ == "__main__":
         section, manager = SystemConfigSection.create(config=config, config_service=service)
         page.add(section)
     
-    ft.app(target=main)
+    ft.run(main)

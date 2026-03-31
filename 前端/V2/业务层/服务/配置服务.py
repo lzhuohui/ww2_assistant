@@ -361,7 +361,7 @@ class ConfigService:
         """
         ui_config = self._repository.load_ui_config()
         section_config = ui_config.get("界面配置", {}).get(section, {})
-        return section_config.get("卡片信息", {"title": section, "icon": "HOME", "subtitle": "", "enabled": true})
+        return section_config.get("卡片信息", {"title": section, "icon": "HOME", "subtitle": "", "enabled": True})
     
     def get_card_enabled_default(self, section: str) -> bool:
         """

@@ -70,4 +70,4 @@ if __name__ == "__main__":
         about_page = AboutPage.create(page, config_service)
         page.add(about_page)
     
-    ft.app(target=main)
+    ft.run(main)

@@ -97,4 +97,4 @@ if __name__ == "__main__":
         strategy_page = StrategyPage.create(page, config_service)
         page.add(strategy_page)
     
-    ft.app(target=main)
+    ft.run(main)

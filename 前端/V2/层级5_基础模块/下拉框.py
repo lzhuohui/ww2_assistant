@@ -2,41 +2,47 @@
 
 """
 模块名称：下拉框.py
-模块功能：下拉框组件，使用PopupMenuButton实现，支持text/value格式
+模块功能：下拉框组件，使用PopupMenuButton实现，支持text/value格式和懒加载
 
 实现步骤：
 - 创建时自动从配置服务加载选项列表
-- 创建时自动从配置服务加载当前值
+- 创建时自动从配置服务获取当前值
 - 支持text/value格式
+- 支持懒加载（option_loader）
 - 选择后自动保存到配置
 - 支持销毁管理减少内存占用
-- Win11风格
+- Win11风格深色主题
 
 职责：
 - 从配置服务获取选项列表
 - 从配置服务获取当前值
-- 懒加载菜单（点击时加载，关闭时销毁）
+- 从用户偏好.json获取UI配置
 - 自动保存到配置
-- 销毁菜单
 
 不负责：
 - 布局
 - 开关状态
 
 设计原则（符合V2版本模块化设计补充共识）：
-- 从配置服务获取UI配置（宽度、高度）
-- 定义DEFAULT_XXX作为fallback
+- 用户偏好.json是UI配置唯一来源
+- 如果用户偏好.json缺少配置，抛出错误
+- 不使用DEFAULT_XXX掩盖问题
 """
 
 import flet as ft
 from typing import List, Dict, Callable, Any, Optional
 
 # ============================================
-# 默认配置（fallback，用于模块独立测试）
+# 数据和文件接口（前置，方便查看和修改）
 # ============================================
 
-DEFAULT_WIDTH = 120
-DEFAULT_HEIGHT = 30
+# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
+USER_WIDTH = 120      # 下拉框宽度（None表示从用户偏好.json获取）
+USER_HEIGHT = 30     # 下拉框高度（None表示从用户偏好.json获取）
+# *********************************
+
+# 下拉框无默认值配置，所有UI配置从用户偏好.json获取
+# 如果用户偏好.json缺少配置，抛出错误而非掩盖
 
 # ============================================
 # 公开接口
@@ -49,7 +55,7 @@ class Dropdown:
     职责：
     - 从配置服务获取选项列表
     - 从配置服务获取当前值
-    - 从配置服务获取UI配置
+    - 从用户偏好.json获取UI配置
     - 自动保存到配置
     
     不负责：
@@ -65,18 +71,42 @@ class Dropdown:
         cls._config_service = config_service
     
     @staticmethod
+    def _check_config_service():
+        """检查配置服务是否已设置"""
+        if Dropdown._config_service is None:
+            raise RuntimeError(
+                "Dropdown模块未设置config_service，"
+                "请先调用 Dropdown.set_config_service(config_service)"
+            )
+    
+    @staticmethod
     def get_width() -> int:
-        """获取下拉框宽度（从配置服务获取）"""
-        if Dropdown._config_service:
-            return Dropdown._config_service.get_ui_config("下拉框", "宽度", DEFAULT_WIDTH)
-        return DEFAULT_WIDTH
+        """获取下拉框宽度（从用户偏好.json获取）"""
+        Dropdown._check_config_service()
+        width = Dropdown._config_service.get_ui_config("下拉框", "宽度")
+        if width is None:
+            raise RuntimeError("用户偏好.json缺少配置: 下拉框.宽度")
+        return width
     
     @staticmethod
     def get_height() -> int:
-        """获取下拉框高度（从配置服务获取）"""
-        if Dropdown._config_service:
-            return Dropdown._config_service.get_ui_config("下拉框", "高度", DEFAULT_HEIGHT)
-        return DEFAULT_HEIGHT
+        """获取下拉框高度（从用户偏好.json获取）"""
+        Dropdown._check_config_service()
+        height = Dropdown._config_service.get_ui_config("下拉框", "高度")
+        if height is None:
+            raise RuntimeError("用户偏好.json缺少配置: 下拉框.高度")
+        return height
+    
+    @staticmethod
+    def get_border_radius() -> int:
+        """获取下拉框圆角（从用户偏好.json获取）"""
+        Dropdown._check_config_service()
+        radius = Dropdown._config_service.get_ui_config("下拉框", "圆角")
+        if radius is None:
+            radius = Dropdown._config_service.get_ui_config("圆角", "小")
+        if radius is None:
+            raise RuntimeError("用户偏好.json缺少配置: 下拉框.圆角")
+        return radius
     
     def __init__(self, page: ft.Page = None, config_service=None):
         self._page = page
@@ -90,6 +120,9 @@ class Dropdown:
         enabled: bool = True,
         on_change: Callable[[str, str, Dict[str, str]], None] = None,
         theme_colors: Dict[str, str] = None,
+        width: int = None,
+        height: int = None,
+        option_loader: Callable[[], List[Dict[str, str]]] = None,
     ) -> ft.Container:
         """
         创建下拉框
@@ -100,11 +133,13 @@ class Dropdown:
         - enabled: 是否启用
         - on_change: 值变更回调
         - theme_colors: 主题颜色
-        
-        注意：宽度、高度从配置服务获取，调用者不应传递
+        - width: 宽度（可选，优先级：USER_WIDTH > 参数 > 用户偏好.json）
+        - height: 高度（可选，优先级：USER_HEIGHT > 参数 > 用户偏好.json）
+        - option_loader: 懒加载函数，点击时才加载选项
         """
-        width = Dropdown.get_width()
-        height = Dropdown.get_height()
+        width = USER_WIDTH if USER_WIDTH is not None else (width if width is not None else Dropdown.get_width())
+        height = USER_HEIGHT if USER_HEIGHT is not None else (height if height is not None else Dropdown.get_height())
+        border_radius = Dropdown.get_border_radius()
         
         if theme_colors is None:
             theme_colors = self._get_theme_colors()
@@ -112,130 +147,12 @@ class Dropdown:
         options = self._get_options(section, control_id)
         current_value = self._get_current_value(section, control_id, options)
         
-        current_selected = [current_value.copy()]
-        enabled_state = [enabled]
-        
-        text_color = theme_colors.get("text_primary") if enabled else theme_colors.get("text_disabled")
-        icon_color = theme_colors.get("text_secondary") if enabled else theme_colors.get("text_disabled")
-        bg_color = theme_colors.get("bg_secondary") if enabled else theme_colors.get("bg_primary")
-        border_color = theme_colors.get("border") if enabled else "transparent"
-        
-        selected_text = ft.Text(
-            current_selected[0].get("text", ""),
-            size=14,
-            color=text_color,
-            overflow=ft.TextOverflow.ELLIPSIS,
+        container = self._build_dropdown(
+            options, current_value, enabled,
+            width, height, border_radius, theme_colors,
+            section, control_id, on_change,
+            option_loader
         )
-        
-        dropdown_icon = ft.Icon(
-            ft.Icons.KEYBOARD_ARROW_DOWN,
-            size=18,
-            color=icon_color,
-        )
-        
-        def create_menu_items():
-            """创建菜单项列表"""
-            menu_items = []
-            for option in options:
-                def create_callback(opt=option):
-                    def callback(e):
-                        current_selected[0] = opt.copy()
-                        selected_text.value = opt.get("text", "")
-                        
-                        self._save_value(section, control_id, opt)
-                        
-                        if on_change:
-                            on_change(section, control_id, opt)
-                        
-                        if self._page:
-                            try:
-                                container.update()
-                            except:
-                                pass
-                    return callback
-                
-                menu_item = ft.PopupMenuItem(
-                    content=option.get("text", ""),
-                    on_click=create_callback(),
-                )
-                menu_items.append(menu_item)
-            return menu_items
-        
-        popup_menu_button = ft.PopupMenuButton(
-            content=ft.Container(
-                content=ft.Row(
-                    [selected_text, dropdown_icon],
-                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                ),
-                width=width,
-                height=height,
-                border_radius=6,
-                bgcolor=bg_color,
-                border=ft.border.all(1, border_color),
-                padding=ft.padding.symmetric(horizontal=12, vertical=0),
-            ),
-            items=create_menu_items(),
-            menu_padding=0,
-            enable_feedback=True,
-            tooltip="",
-        )
-        
-        container = ft.Container(
-            content=popup_menu_button,
-            width=width,
-        )
-        
-        def handle_hover(e):
-            if not enabled_state[0]:
-                return
-            button_content = popup_menu_button.content
-            if e.data == "true":
-                button_content.border = ft.border.all(1, theme_colors.get("accent"))
-            else:
-                button_content.border = ft.border.all(1, theme_colors.get("border"))
-            try:
-                if self._page:
-                    container.update()
-            except:
-                pass
-        
-        popup_menu_button.content.on_hover = handle_hover
-        
-        def get_value() -> Dict[str, str]:
-            return current_selected[0].copy()
-        
-        def set_value(new_value: Dict[str, str]):
-            if isinstance(new_value, dict):
-                current_selected[0] = new_value.copy()
-                selected_text.value = new_value.get("text", "")
-                if self._page:
-                    try:
-                        container.update()
-                    except:
-                        pass
-        
-        def set_enabled(state: bool):
-            enabled_state[0] = state
-            text_col = theme_colors.get("text_primary") if state else theme_colors.get("text_disabled")
-            icon_col = theme_colors.get("text_secondary") if state else theme_colors.get("text_disabled")
-            bg_col = theme_colors.get("bg_secondary") if state else theme_colors.get("bg_primary")
-            border_col = theme_colors.get("border") if state else "transparent"
-            
-            selected_text.color = text_col
-            dropdown_icon.color = icon_col
-            popup_menu_button.content.bgcolor = bg_col
-            popup_menu_button.content.border = ft.border.all(1, border_col)
-            
-            try:
-                if self._page:
-                    container.update()
-            except:
-                pass
-        
-        container.get_value = get_value
-        container.set_value = set_value
-        container.set_enabled = set_enabled
         
         key = f"{section}.{control_id}" if section and control_id else f"dropdown_{len(self._dropdowns)}"
         self._dropdowns[key] = container
@@ -255,15 +172,7 @@ class Dropdown:
         return self._config_service.get_options(section, control_id)
     
     def _get_current_value(self, section: str, control_id: str, options: List[Dict]) -> Dict[str, str]:
-        """
-        从配置服务获取当前值
-        
-        加载逻辑：
-        1. 有用户配置值 → 显示用户配置的值
-        2. 无用户配置值（APK第一次安装或文件损坏）→ 显示"请选定数据..."
-        
-        注意：保留原有懒加载功能（PopupMenuButton行为不变）
-        """
+        """从配置服务获取当前值"""
         if self._config_service:
             value = self._config_service.get_text_value(section, control_id)
             if value and value.get("text") and value.get("text") != "":
@@ -276,38 +185,209 @@ class Dropdown:
         if self._config_service:
             self._config_service.set_value(section, control_id, value)
     
-    def get_default_value(self, section: str, control_id: str) -> str:
-        """
-        公开接口：获取默认值
+    def _build_dropdown(
+        self,
+        options: List[Dict],
+        current_value: Dict,
+        enabled: bool,
+        width: int,
+        height: int,
+        border_radius: int,
+        theme_colors: Dict,
+        section: str,
+        control_id: str,
+        on_change: Callable,
+        option_loader: Callable,
+    ) -> ft.Container:
+        """构建下拉框"""
         
-        用途：
-        - "重置为默认值"功能
-        - "一键填充默认值"功能
-        - 新用户快速配置参考
-        """
-        if self._config_service:
-            return self._config_service.get_control_default(section, control_id)
-        return ""
+        text_color = theme_colors.get("text_primary", "#FFFFFF")
+        text_secondary = theme_colors.get("text_secondary", "#B0B0B0")
+        disabled_color = theme_colors.get("text_disabled", "#666666")
+        bg_primary = theme_colors.get("bg_primary", "#1A1A2E")
+        bg_card = theme_colors.get("bg_card", "#2D2D4A")
+        border_color = theme_colors.get("border", "#3D3D5C")
+        accent_color = theme_colors.get("accent", "#0078D4")
+        
+        state = {
+            "current_value": current_value,
+            "enabled": enabled,
+            "options": options or [],
+            "option_loader": option_loader,
+            "has_loaded": option_loader is None,
+        }
+        
+        display_text = ft.Text(
+            value=current_value.get("text", ""),
+            size=14,
+            color=text_color if enabled else disabled_color,
+            overflow=ft.TextOverflow.ELLIPSIS,
+        )
+        
+        dropdown_icon = ft.Icon(
+            ft.Icons.ARROW_DROP_DOWN,
+            size=20,
+            color=text_secondary if enabled else disabled_color,
+        )
+        
+        button_container = ft.Container(
+            content=ft.Row(
+                [display_text, dropdown_icon],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=8,
+            ),
+            width=width,
+            height=height,
+            bgcolor=bg_card,
+            border=ft.Border.all(1, border_color),
+            border_radius=border_radius,
+            padding=ft.Padding.symmetric(horizontal=12, vertical=0),
+        )
+        
+        def create_option_callback(option: Dict):
+            def callback(e):
+                state["current_value"] = option
+                display_text.value = option.get("text", "")
+                display_text.color = text_color
+                self._save_value(section, control_id, option)
+                if on_change:
+                    on_change(section, control_id, option)
+                if button_container.page:
+                    button_container.page.update()
+            return callback
+        
+        def load_options() -> List[Dict]:
+            if not state["has_loaded"] and state["option_loader"]:
+                print(f"[懒加载] 执行option_loader函数")
+                state["options"] = state["option_loader"]()
+                state["has_loaded"] = True
+                print(f"[懒加载] 加载了 {len(state['options'])} 个选项")
+            return state["options"]
+        
+        def create_menu_items() -> List[ft.PopupMenuItem]:
+            opts = load_options()
+            menu_items = []
+            
+            for opt in opts:
+                menu_content = ft.Container(
+                    content=ft.Text(opt.get("text", ""), size=14, color=text_color),
+                    padding=ft.Padding.symmetric(horizontal=12, vertical=8),
+                    bgcolor=bg_card,
+                    border_radius=4,
+                )
+                
+                menu_item = ft.PopupMenuItem(
+                    content=menu_content,
+                    on_click=create_option_callback(opt),
+                )
+                menu_items.append(menu_item)
+            
+            if not menu_items:
+                menu_content = ft.Container(
+                    content=ft.Text("无可用选项", size=14, color=disabled_color, italic=True),
+                    padding=ft.Padding.symmetric(horizontal=12, vertical=8),
+                )
+                menu_item = ft.PopupMenuItem(
+                    content=menu_content,
+                    disabled=True,
+                )
+                menu_items.append(menu_item)
+            
+            return menu_items
+        
+        initial_menu_items = create_menu_items()
+        
+        popup_menu_button = ft.PopupMenuButton(
+            content=button_container,
+            items=initial_menu_items,
+            menu_padding=0,
+            enable_feedback=True,
+            tooltip="",
+            disabled=not enabled,
+            bgcolor=bg_card,
+        )
+        
+        container = ft.Container(
+            content=popup_menu_button,
+            width=width,
+        )
+        
+        last_hover_state = [False]
+        
+        def handle_hover(e):
+            if not state["enabled"]:
+                return
+            
+            is_hovering = e.data == "true"
+            if last_hover_state[0] != is_hovering:
+                last_hover_state[0] = is_hovering
+                if is_hovering:
+                    button_container.border = ft.Border.all(1, accent_color)
+                else:
+                    button_container.border = ft.Border.all(1, border_color if state["enabled"] else "transparent")
+                
+                if container.page:
+                    container.page.update()
+        
+        button_container.on_hover = handle_hover
+        
+        def get_value() -> Dict[str, str]:
+            return state["current_value"]
+        
+        def set_value(value: Dict[str, str]):
+            opts = load_options()
+            value_text = value.get("text", "")
+            for opt in opts:
+                if opt.get("text") == value_text:
+                    state["current_value"] = opt
+                    display_text.value = opt.get("text", "")
+                    if container.page:
+                        container.page.update()
+                    break
+        
+        def set_enabled(is_enabled: bool):
+            state["enabled"] = is_enabled
+            popup_menu_button.disabled = not is_enabled
+            
+            text_col = text_color if is_enabled else disabled_color
+            icon_col = text_secondary if is_enabled else disabled_color
+            border_col = border_color if is_enabled else "transparent"
+            
+            display_text.color = text_col
+            dropdown_icon.color = icon_col
+            button_container.border = ft.Border.all(1, border_col)
+            
+            try:
+                if container.page:
+                    container.page.update()
+            except RuntimeError:
+                pass
+        
+        def set_options(new_options: List[Dict]):
+            state["options"] = new_options
+            popup_menu_button.items = create_menu_items()
+            if container.page:
+                container.page.update()
+        
+        container.get_value = get_value
+        container.set_value = set_value
+        container.set_enabled = set_enabled
+        container.set_options = set_options
+        
+        return container
     
-    def reset_to_default(self, section: str, control_id: str) -> bool:
-        """
-        公开接口：重置为默认值
-        
-        返回：
-        - True: 重置成功
-        - False: 没有默认值或重置失败
-        """
-        default_value = self.get_default_value(section, control_id)
-        if default_value:
-            options = self._get_options(section, control_id)
-            for opt in options:
-                if opt.get("value") == default_value or opt.get("text") == default_value:
-                    self._save_value(section, control_id, opt)
-                    return True
-        return False
+    def get_value(self, section: str, control_id: str) -> Dict[str, str]:
+        """获取下拉框当前值"""
+        key = f"{section}.{control_id}"
+        if key in self._dropdowns:
+            container = self._dropdowns[key]
+            if hasattr(container, 'get_value'):
+                return container.get_value()
+        return {"text": "", "value": ""}
     
     def destroy_all(self):
-        """销毁所有下拉框菜单"""
+        """销毁所有下拉框"""
         self._dropdowns.clear()
 
 # *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
@@ -320,46 +400,30 @@ if __name__ == "__main__":
     
     def main(page: ft.Page):
         page.title = "下拉框测试"
-        
-        print("=" * 50)
-        print("测试1: 使用真实配置服务")
-        print("=" * 50)
+        page.bgcolor = "#1A1A2E"
         
         config_service = ConfigService()
-        
         Dropdown.set_config_service(config_service)
         
-        print(f"从配置服务获取下拉框宽度: {Dropdown.get_width()}")
-        print(f"从配置服务获取下拉框高度: {Dropdown.get_height()}")
-        print(f"配置文件中的值应为: 宽度=120, 高度=30")
-        
-        print("\n" + "=" * 50)
-        print("测试2: 验证选项列表获取")
-        print("=" * 50)
+        print(f"下拉框宽度: {Dropdown.get_width()}")
+        print(f"下拉框高度: {Dropdown.get_height()}")
         
         dropdown = Dropdown(page, config_service)
         
-        options = dropdown._get_options("建筑设置.主帅主城", "城市等级")
-        print(f"获取选项列表(建筑设置.主帅主城.城市等级): {len(options)}个选项")
-        if options:
-            print(f"第一个选项: {options[0]}")
-        
-        print("\n" + "=" * 50)
-        print("测试3: 创建下拉框并验证")
-        print("=" * 50)
+        def on_change(section, control_id, value):
+            print(f"选择变更: section={section}, control_id={control_id}, value={value}")
         
         container = dropdown.create(
             section="建筑设置.主帅主城",
             control_id="城市等级",
             enabled=True,
+            on_change=on_change,
         )
         
-        print(f"下拉框容器宽度: {container.width}")
-        print(f"验证: 宽度应等于配置服务返回值({Dropdown.get_width()})")
-        
         page.add(ft.Column([
-            ft.Text("下拉框测试", size=20, weight=ft.FontWeight.BOLD),
+            ft.Text("下拉框测试", size=20, weight=ft.FontWeight.BOLD, color="#FFFFFF"),
+            ft.Container(height=20),
             container,
-        ]))
+        ], alignment=ft.MainAxisAlignment.CENTER))
     
-    ft.app(target=main)
+    ft.run(main)

@@ -78,4 +78,4 @@ if __name__ == "__main__":
         hunting_page = HuntingPage.create(page, config_service)
         page.add(hunting_page)
     
-    ft.app(target=main)
+    ft.run(main)

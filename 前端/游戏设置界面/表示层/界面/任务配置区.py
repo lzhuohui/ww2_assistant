@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 模块名称：TaskConfigSection
 模块功能：任务配置区，包含主线任务、支线任务配置
@@ -124,4 +124,4 @@ if __name__ == "__main__":
         section, manager = TaskConfigSection.create(config=config, config_service=service)
         page.add(section)
     
-    ft.app(target=main)
+    ft.run(main)

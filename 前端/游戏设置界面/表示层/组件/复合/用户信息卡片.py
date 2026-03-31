@@ -153,4 +153,4 @@ if __name__ == "__main__":
         )
         page.add(card)
     
-    ft.app(target=main)
+    ft.run(main)

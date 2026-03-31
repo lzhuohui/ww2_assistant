@@ -259,4 +259,4 @@ if __name__ == "__main__":
             section,
         ], spacing=10))
     
-    ft.app(target=main)
+    ft.run(main)

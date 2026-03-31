@@ -73,4 +73,4 @@ if __name__ == "__main__":
         account_page = AccountPage.create(page, config_service)
         page.add(account_page)
     
-    ft.app(target=main)
+    ft.run(main)

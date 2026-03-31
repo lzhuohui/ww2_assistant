@@ -105,4 +105,4 @@ if __name__ == "__main__":
         system_page = SystemPage.create(page, config_service)
         page.add(system_page)
     
-    ft.app(target=main)
+    ft.run(main)

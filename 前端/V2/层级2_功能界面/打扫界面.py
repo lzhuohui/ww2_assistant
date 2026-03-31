@@ -83,4 +83,4 @@ if __name__ == "__main__":
         cleaning_page = CleaningPage.create(page, config_service)
         page.add(cleaning_page)
     
-    ft.app(target=main)
+    ft.run(main)

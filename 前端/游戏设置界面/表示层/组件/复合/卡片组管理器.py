@@ -98,4 +98,4 @@ if __name__ == "__main__":
         
         page.add(ft.Column([card1, card2], spacing=10))
     
-    ft.app(target=main)
+    ft.run(main)

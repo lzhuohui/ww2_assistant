@@ -85,4 +85,4 @@ if __name__ == "__main__":
         task_page = TaskPage.create(page, config_service)
         page.add(task_page)
     
-    ft.app(target=main)
+    ft.run(main)

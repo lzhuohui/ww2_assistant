@@ -243,4 +243,4 @@ if __name__ == "__main__":
         section, manager = ConfigSchemeSection.create(config=config, config_service=service)
         page.add(section)
     
-    ft.app(target=main)
+    ft.run(main)

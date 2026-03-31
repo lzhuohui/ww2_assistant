@@ -105,4 +105,4 @@ if __name__ == "__main__":
         config = UIConfig()
         page.add(GameSettingsPage.create(config=config))
     
-    ft.app(target=main)
+    ft.run(main)

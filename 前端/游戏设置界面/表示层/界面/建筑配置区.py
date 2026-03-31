@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 模块名称：BuildingConfigSection
 模块功能：建筑配置区，包含主帅主城、付帅主城、分城、军团城市等建筑等级配置
@@ -204,4 +204,4 @@ if __name__ == "__main__":
         section, manager = BuildingConfigSection.create(config=config, config_service=service)
         page.add(section)
     
-    ft.app(target=main)
+    ft.run(main)

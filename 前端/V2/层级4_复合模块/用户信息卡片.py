@@ -2,214 +2,198 @@
 
 """
 模块名称：用户信息卡片.py
-模块功能：用户信息卡片组件，紧凑左右布局
+模块功能：用户信息卡片组件，显示用户名和账号信息
 
 实现步骤：
-- 从配置服务获取用户信息
-- 创建头像（左）
-- 创建用户名、授权信息、到期时间（右）
-- 左右布局
+- 创建用户名显示
+- 创建账号信息显示
+- 创建卡片容器
+- 组合布局
 
 职责：
-- 用户信息显示
-- 从配置服务获取数据
-- 更新授权数量
+- 用户名显示
+- 账号信息显示
+- 卡片容器
+- 从配置服务获取用户信息、主题颜色
 
 不负责：
+- 布局
 - 销毁（不需要销毁）
+
+设计原则（符合V2版本模块化设计补充共识）：
+- 定义1：自己获取用户名、账号信息、主题颜色
+- 定义2：上层只传递section
+- 定义3：theme_colors可覆盖
+- 定义4：create()
 """
 
 import flet as ft
-from typing import Dict, Optional, Any
+from typing import Dict, Optional
+
+from 前端.V2.层级5_基础模块.卡片容器 import CardContainer
+from 前端.V2.层级5_基础模块.标签 import Label
+from 前端.V2.层级5_基础模块.头像 import Avatar
 
 # ============================================
 # 数据和文件接口（前置，方便查看和修改）
 # ============================================
 
-DEFAULT_CARD_HEIGHT = 70
-DEFAULT_AVATAR_SIZE = 44
-DEFAULT_NAME_SIZE = 14
-DEFAULT_STATUS_SIZE = 11
-DEFAULT_PADDING = 16
+# *** 用户指定变量: 变量值必须生效,AI不得更改数据 ***
+USER_WIDTH = 200      # 卡片宽度（None表示自适应）
+USER_HEIGHT = 80     # 卡片高度（None表示从用户偏好.json获取）
+# *********************************
 
-DEFAULT_USERNAME = "二战风云玩家"
-DEFAULT_AUTHORIZED_COUNT = 0
-DEFAULT_MAX_ACCOUNTS = 15
-DEFAULT_EXPIRE_DAYS = 30
+# 用户信息卡片无默认值配置，所有UI配置从用户偏好.json获取
+# 如果用户偏好.json缺少配置，抛出错误而非掩盖
 
 # ============================================
 # 公开接口
 # ============================================
 
-class UserCard:
+class UserInfoCard:
     """
-    用户信息卡片组件 - 紧凑左右布局
+    用户信息卡片组件（层级4：复合模块）
     
     职责：
-    - 用户信息显示
-    - 从配置服务获取数据
-    - 更新授权数量
+    - 用户名显示
+    - 账号信息显示
+    - 卡片容器
+    - 从配置服务获取用户信息、主题颜色
     
     不负责：
+    - 布局
     - 销毁（不需要销毁）
     """
     
-    def __init__(self, config_service=None):
-        self._config_service = config_service
-        self._container = None
-        self._account_text = None
-        self._expire_text = None
-        self._name_text = None
-        self._max_accounts = DEFAULT_MAX_ACCOUNTS
+    _config_service = None
     
-    def create(self, theme_colors: Dict[str, str] = None) -> ft.Container:
+    @classmethod
+    def set_config_service(cls, config_service):
+        """设置配置服务实例"""
+        cls._config_service = config_service
+        CardContainer.set_config_service(config_service)
+        Label.set_config_service(config_service)
+        Avatar.set_config_service(config_service)
+    
+    @staticmethod
+    def get_username_size() -> int:
+        """获取用户名尺寸（从用户偏好.json获取基础大小*1.14）"""
+        UserInfoCard._check_config_service()
+        base_size = Label.get_base_size()
+        return int(base_size * 1.14)
+    
+    @staticmethod
+    def get_info_size() -> int:
+        """获取信息尺寸（从用户偏好.json获取基础大小*0.86）"""
+        UserInfoCard._check_config_service()
+        base_size = Label.get_base_size()
+        return int(base_size * 0.86)
+    
+    @staticmethod
+    def get_card_height() -> int:
+        """获取卡片高度（从用户偏好.json获取）"""
+        UserInfoCard._check_config_service()
+        value = UserInfoCard._config_service.get_ui_config("用户信息卡片", "高度")
+        if value is None:
+            raise RuntimeError("用户偏好.json缺少配置: 用户信息卡片.高度")
+        return value
+    
+    @staticmethod
+    def _check_config_service():
+        """检查配置服务是否已设置"""
+        if UserInfoCard._config_service is None:
+            raise RuntimeError(
+                "UserInfoCard模块未设置config_service，"
+                "请先调用 UserInfoCard.set_config_service(config_service)"
+            )
+    
+    @staticmethod
+    def create(
+        section: str = "用户信息",
+        theme_colors: Dict[str, str] = None,
+        width: int = None,
+        height: int = None,
+    ) -> ft.Container:
         """
-        创建用户信息卡片
+        创建用户信息卡片（模块自己从配置服务获取用户信息）
         
         参数：
-        - theme_colors: 主题颜色
+        - section: 配置节
+        - theme_colors: 主题颜色（可选，不传则从配置服务获取）
+        - width: 宽度（可选，优先级：USER_WIDTH > 参数 > 自适应）
+        - height: 高度（可选，优先级：USER_HEIGHT > 参数 > 用户偏好.json）
+        
+        注意：用户名、账号信息由模块自己从config_service获取
         """
+        if UserInfoCard._config_service is None:
+            raise RuntimeError("UserInfoCard模块未设置config_service，请先调用UserInfoCard.set_config_service()")
+        
         if theme_colors is None:
-            theme_colors = {
-                "text_primary": "#000000",
-                "text_secondary": "#666666",
-                "bg_primary": "#FFFFFF",
-                "bg_tertiary": "#F5F5F5",
-                "accent": "#0078D4",
-            }
+            theme_colors = UserInfoCard._config_service.get_theme_colors()
         
-        username = self._get_username()
-        authorized_count = self._get_authorized_count()
-        self._max_accounts = self._get_max_accounts()
-        expire_days = self._get_expire_days()
+        width = USER_WIDTH if USER_WIDTH is not None else width
+        height = USER_HEIGHT if USER_HEIGHT is not None else (height if height is not None else UserInfoCard.get_card_height())
         
-        avatar = ft.Container(
-            content=ft.Icon(
-                ft.Icons.ACCOUNT_CIRCLE,
-                size=DEFAULT_AVATAR_SIZE,
-                color=theme_colors.get("accent"),
-            ),
-            width=DEFAULT_AVATAR_SIZE,
-            height=DEFAULT_AVATAR_SIZE,
-            border_radius=ft.border_radius.all(24),
-            bgcolor=theme_colors.get("bg_tertiary"),
-            alignment=ft.alignment.Alignment(0.5, 0.5),
+        username = UserInfoCard._config_service.get_value(section, "username", "用户名")
+        account_info = UserInfoCard._config_service.get_value(section, "account_info", "账号信息")
+        
+        username_size = UserInfoCard.get_username_size()
+        info_size = UserInfoCard.get_info_size()
+        
+        avatar = Avatar.create(
+            text=username if username else None,
+            on_text_change=None,
+            theme_colors=theme_colors,
+            enabled=True,
         )
         
-        self._name_text = ft.Text(
-            username,
-            size=DEFAULT_NAME_SIZE,
+        username_text = Label.create(
+            text=username,
+            size=username_size,
             weight=ft.FontWeight.BOLD,
-            color=theme_colors.get("text_primary"),
-            text_align=ft.TextAlign.LEFT,
+            color_type="primary",
         )
         
-        self._account_text = ft.Text(
-            f"授权账号: {authorized_count}/{self._max_accounts}",
-            size=DEFAULT_STATUS_SIZE,
-            color=theme_colors.get("text_secondary"),
-            text_align=ft.TextAlign.LEFT,
+        info_text = Label.create(
+            text=account_info,
+            size=info_size,
+            color_type="secondary",
         )
         
-        self._expire_text = ft.Text(
-            f"到期时间: {expire_days} 天",
-            size=DEFAULT_STATUS_SIZE,
-            color=theme_colors.get("text_secondary"),
-            text_align=ft.TextAlign.LEFT,
-        )
+        right_column = ft.Column([
+            username_text,
+            info_text,
+        ], spacing=4, alignment=ft.MainAxisAlignment.CENTER)
         
-        right_info_column = ft.Column(
-            controls=[
-                self._name_text,
-                ft.Container(height=2),
-                self._account_text,
-                ft.Container(height=2),
-                self._expire_text,
-            ],
-            alignment=ft.MainAxisAlignment.CENTER,
-            horizontal_alignment=ft.CrossAxisAlignment.START,
-            spacing=0,
-        )
+        content = ft.Row([
+            avatar,
+            ft.Container(width=12),
+            right_column,
+        ], alignment=ft.MainAxisAlignment.START, vertical_alignment=ft.CrossAxisAlignment.CENTER)
         
-        content = ft.Row(
-            controls=[
-                avatar,
-                ft.Container(width=12),
-                right_info_column,
-            ],
-            alignment=ft.MainAxisAlignment.START,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=0,
-        )
-        
-        self._container = ft.Container(
+        container = CardContainer.create(
             content=content,
-            height=DEFAULT_CARD_HEIGHT,
-            padding=DEFAULT_PADDING,
-            bgcolor=theme_colors.get("bg_primary"),
-            alignment=ft.alignment.Alignment(0, 0.5),
+            height=height,
+            width=width,
         )
         
-        return self._container
-    
-    def update_authorized_count(self, count: int):
-        """更新授权账号数量"""
-        if self._account_text:
-            self._account_text.value = f"授权账号: {count}/{self._max_accounts}"
-            self._update()
-    
-    def update_expire_days(self, days: int):
-        """更新到期天数"""
-        if self._expire_text:
-            self._expire_text.value = f"到期时间: {days} 天"
-            self._update()
-    
-    def update_name(self, name: str):
-        """更新用户名"""
-        if self._name_text:
-            self._name_text.value = name
-            self._update()
-    
-    def _update(self):
-        """更新显示"""
-        if self._container:
-            try:
-                if self._container.page:
-                    self._container.update()
-            except:
-                pass
-    
-    def _get_username(self) -> str:
-        """获取用户名"""
-        if self._config_service:
-            return self._config_service.get_user_preference("username", DEFAULT_USERNAME)
-        return DEFAULT_USERNAME
-    
-    def _get_authorized_count(self) -> int:
-        """获取已授权账号数"""
-        if self._config_service:
-            return self._config_service.get_user_preference("authorized_count", DEFAULT_AUTHORIZED_COUNT)
-        return DEFAULT_AUTHORIZED_COUNT
-    
-    def _get_max_accounts(self) -> int:
-        """获取最大账号数"""
-        if self._config_service:
-            return self._config_service.get_user_preference("max_accounts", DEFAULT_MAX_ACCOUNTS)
-        return DEFAULT_MAX_ACCOUNTS
-    
-    def _get_expire_days(self) -> int:
-        """获取到期天数"""
-        if self._config_service:
-            return self._config_service.get_user_preference("expire_days", DEFAULT_EXPIRE_DAYS)
-        return DEFAULT_EXPIRE_DAYS
+        return container
 
 # *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
 if __name__ == "__main__":
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    
+    from 前端.V2.业务层.服务.配置服务 import ConfigService
+    
     def main(page: ft.Page):
         page.title = "用户信息卡片测试"
         
-        user_card = UserCard()
-        card = user_card.create()
+        config_service = ConfigService()
+        UserInfoCard.set_config_service(config_service)
+        
+        card = UserInfoCard.create()
         page.add(card)
     
-    ft.app(target=main)
+    ft.run(main)
