@@ -1,0 +1,114 @@
+# -*- coding: utf-8 -*-
+
+"""
+模块名称：分割线.py
+模块功能：分割线组件
+
+实现步骤：
+- 创建水平/垂直分割线
+- 支持主题颜色
+- 支持自定义粗细
+
+职责：
+- 分隔显示
+
+不负责：
+- 布局
+- 销毁（不需要销毁）
+"""
+
+import flet as ft
+from typing import Dict, Optional
+
+# ============================================
+# 数据和文件接口（前置，方便查看和修改）
+# ============================================
+
+DEFAULT_HEIGHT = 1
+DEFAULT_WIDTH = 1
+
+# ============================================
+# 公开接口
+# ============================================
+
+class Divider:
+    """
+    分割线组件
+    
+    职责：
+    - 分隔显示
+    
+    不负责：
+    - 布局
+    - 销毁（不需要销毁）
+    """
+    
+    @staticmethod
+    def create_horizontal(
+        height: int = DEFAULT_HEIGHT,
+        color_type: str = "divider",
+        theme_colors: Dict[str, str] = None,
+    ) -> ft.Divider:
+        """
+        创建水平分割线
+        
+        参数：
+        - height: 分割线高度
+        - color_type: 颜色类型 (divider/accent)
+        - theme_colors: 主题颜色
+        """
+        if theme_colors is None:
+            theme_colors = {
+                "divider": "#3D3D3D",
+                "accent": "#0078D4",
+            }
+        
+        color = theme_colors.get(color_type, theme_colors.get("divider"))
+        
+        return ft.Divider(
+            height=height,
+            thickness=height,
+            color=color,
+        )
+    
+    @staticmethod
+    def create_vertical(
+        width: int = DEFAULT_WIDTH,
+        color_type: str = "divider",
+        theme_colors: Dict[str, str] = None,
+    ) -> ft.VerticalDivider:
+        """
+        创建垂直分割线
+        
+        参数：
+        - width: 分割线宽度
+        - color_type: 颜色类型 (divider/accent)
+        - theme_colors: 主题颜色
+        """
+        if theme_colors is None:
+            theme_colors = {
+                "divider": "#3D3D3D",
+                "accent": "#0078D4",
+            }
+        
+        color = theme_colors.get(color_type, theme_colors.get("divider"))
+        
+        return ft.VerticalDivider(
+            width=width,
+            thickness=width,
+            color=color,
+        )
+
+# *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
+if __name__ == "__main__":
+    def main(page: ft.Page):
+        page.title = "分割线测试"
+        
+        column = ft.Column([
+            ft.Text("上方内容"),
+            Divider.create_horizontal(),
+            ft.Text("下方内容"),
+        ])
+        page.add(column)
+    
+    ft.app(target=main)
