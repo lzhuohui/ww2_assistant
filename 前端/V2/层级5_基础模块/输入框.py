@@ -109,15 +109,7 @@ class InputBox:
         height = InputBox.get_height()
         
         if theme_colors is None:
-            theme_colors = {
-                "text_primary": "#FFFFFF",
-                "text_secondary": "#C5C5C5",
-                "text_disabled": "#656565",
-                "bg_primary": "#202020",
-                "bg_secondary": "#282828",
-                "border": "#3D3D3D",
-                "accent": "#0078D4"
-            }
+            theme_colors = self._get_theme_colors()
         
         current_value = self._get_current_value(section, control_id)
         hint_text = self._get_hint(section, control_id)
@@ -181,6 +173,12 @@ class InputBox:
             return config.get("password", False)
         return False
     
+    def _get_theme_colors(self) -> Dict[str, str]:
+        """获取主题颜色"""
+        if self._config_service is None:
+            raise RuntimeError("InputBox模块未设置config_service")
+        return self._config_service.get_theme_colors()
+    
     def get_value(self, section: str, control_id: str) -> str:
         """获取输入框当前值"""
         key = f"{section}.{control_id}"
@@ -216,7 +214,6 @@ if __name__ == "__main__":
     import os
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
     
-    from 前端.V2.数据层.仓库.配置仓库 import ConfigRepository
     from 前端.V2.业务层.服务.配置服务 import ConfigService
     
     def main(page: ft.Page):
@@ -235,13 +232,10 @@ if __name__ == "__main__":
         
         input_box = InputBox(page, config_service)
         
-        theme_colors = config_service.get_theme_colors()
-        
         text_field = input_box.create(
             section="账号设置.账号01",
             control_id="名称",
             enabled=True,
-            theme_colors=theme_colors,
         )
         
         print(f"输入框宽度: {text_field.width}")

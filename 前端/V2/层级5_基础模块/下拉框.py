@@ -107,15 +107,7 @@ class Dropdown:
         height = Dropdown.get_height()
         
         if theme_colors is None:
-            theme_colors = {
-                "text_primary": "#FFFFFF",
-                "text_secondary": "#C5C5C5",
-                "text_disabled": "#656565",
-                "bg_primary": "#202020",
-                "bg_secondary": "#282828",
-                "border": "#3D3D3D",
-                "accent": "#0078D4"
-            }
+            theme_colors = self._get_theme_colors()
         
         options = self._get_options(section, control_id)
         current_value = self._get_current_value(section, control_id, options)
@@ -250,6 +242,12 @@ class Dropdown:
         
         return container
     
+    def _get_theme_colors(self) -> Dict[str, str]:
+        """获取主题颜色"""
+        if self._config_service is None:
+            raise RuntimeError("Dropdown模块未设置config_service")
+        return self._config_service.get_theme_colors()
+    
     def _get_options(self, section: str, control_id: str) -> List[Dict[str, str]]:
         """从配置服务获取选项列表"""
         if self._config_service is None:
@@ -318,7 +316,6 @@ if __name__ == "__main__":
     import os
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
     
-    from 前端.V2.数据层.仓库.配置仓库 import ConfigRepository
     from 前端.V2.业务层.服务.配置服务 import ConfigService
     
     def main(page: ft.Page):
@@ -328,8 +325,7 @@ if __name__ == "__main__":
         print("测试1: 使用真实配置服务")
         print("=" * 50)
         
-        repository = ConfigRepository()
-        config_service = ConfigService(repository)
+        config_service = ConfigService()
         
         Dropdown.set_config_service(config_service)
         
@@ -352,14 +348,10 @@ if __name__ == "__main__":
         print("测试3: 创建下拉框并验证")
         print("=" * 50)
         
-        theme_colors = config_service.get_theme_colors()
-        print(f"从配置服务获取主题颜色: {theme_colors}")
-        
         container = dropdown.create(
             section="建筑设置.主帅主城",
             control_id="城市等级",
             enabled=True,
-            theme_colors=theme_colors,
         )
         
         print(f"下拉框容器宽度: {container.width}")

@@ -43,6 +43,20 @@ class Divider:
     - 销毁（不需要销毁）
     """
     
+    _config_service = None
+    
+    @classmethod
+    def set_config_service(cls, config_service):
+        """设置配置服务实例"""
+        cls._config_service = config_service
+    
+    @staticmethod
+    def _get_theme_colors() -> Dict[str, str]:
+        """获取主题颜色"""
+        if Divider._config_service is None:
+            raise RuntimeError("Divider模块未设置config_service，请先调用Divider.set_config_service()")
+        return Divider._config_service.get_theme_colors()
+    
     @staticmethod
     def create_horizontal(
         height: int = DEFAULT_HEIGHT,
@@ -58,10 +72,7 @@ class Divider:
         - theme_colors: 主题颜色
         """
         if theme_colors is None:
-            theme_colors = {
-                "divider": "#3D3D3D",
-                "accent": "#0078D4",
-            }
+            theme_colors = Divider._get_theme_colors()
         
         color = theme_colors.get(color_type, theme_colors.get("divider"))
         
@@ -86,10 +97,7 @@ class Divider:
         - theme_colors: 主题颜色
         """
         if theme_colors is None:
-            theme_colors = {
-                "divider": "#3D3D3D",
-                "accent": "#0078D4",
-            }
+            theme_colors = Divider._get_theme_colors()
         
         color = theme_colors.get(color_type, theme_colors.get("divider"))
         
@@ -101,8 +109,17 @@ class Divider:
 
 # *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
 if __name__ == "__main__":
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+    
+    from 前端.V2.业务层.服务.配置服务 import ConfigService
+    
     def main(page: ft.Page):
         page.title = "分割线测试"
+        
+        config_service = ConfigService()
+        Divider.set_config_service(config_service)
         
         column = ft.Column([
             ft.Text("上方内容"),

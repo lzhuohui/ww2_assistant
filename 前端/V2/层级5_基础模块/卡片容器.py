@@ -95,6 +95,13 @@ class CardContainer:
         return DEFAULT_BORDER_RADIUS
     
     @staticmethod
+    def _get_theme_colors() -> Dict[str, str]:
+        """获取主题颜色"""
+        if CardContainer._config_service is None:
+            raise RuntimeError("CardContainer模块未设置config_service，请先调用CardContainer.set_config_service()")
+        return CardContainer._config_service.get_theme_colors()
+    
+    @staticmethod
     def get_control_row_height() -> int:
         """获取每行控件高度"""
         if CardContainer._config_service:
@@ -174,11 +181,7 @@ class CardContainer:
             padding = CardContainer.get_padding()
         
         if theme_colors is None:
-            theme_colors = {
-                "bg_card": "#2D2D2D",
-                "shadow": "rgba(0, 0, 0, 0.25)",
-                "shadow_hover": "rgba(0, 0, 0, 0.35)",
-            }
+            theme_colors = CardContainer._get_theme_colors()
         
         shadow = ft.BoxShadow(
             spread_radius=0,
@@ -221,17 +224,24 @@ class CardContainer:
 
 # *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
 if __name__ == "__main__":
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+    
+    from 前端.V2.业务层.服务.配置服务 import ConfigService
+    
     def main(page: ft.Page):
         page.title = "卡片容器测试"
         
-        # 测试1：不使用配置服务（使用fallback）
+        config_service = ConfigService()
+        CardContainer.set_config_service(config_service)
+        
         card1 = CardContainer.create(
-            content=ft.Text("测试卡片（无配置服务）"),
+            content=ft.Text("测试卡片"),
             height=80,
         )
         page.add(card1)
         
-        # 测试2：计算高度
         print(f"1行控件高度: {CardContainer.calculate_height(1)}")
         print(f"2行控件高度: {CardContainer.calculate_height(2)}")
         print(f"3行控件高度: {CardContainer.calculate_height(3)}")

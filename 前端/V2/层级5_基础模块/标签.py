@@ -43,6 +43,20 @@ class Label:
     - 销毁（不需要销毁）
     """
     
+    _config_service = None
+    
+    @classmethod
+    def set_config_service(cls, config_service):
+        """设置配置服务实例"""
+        cls._config_service = config_service
+    
+    @staticmethod
+    def _get_theme_colors() -> Dict[str, str]:
+        """获取主题颜色"""
+        if Label._config_service is None:
+            raise RuntimeError("Label模块未设置config_service，请先调用Label.set_config_service()")
+        return Label._config_service.get_theme_colors()
+    
     @staticmethod
     def create(
         text: str = "",
@@ -66,11 +80,7 @@ class Label:
         - overflow: 溢出处理
         """
         if theme_colors is None:
-            theme_colors = {
-                "text_primary": "#FFFFFF",
-                "text_secondary": "#C5C5C5",
-                "text_disabled": "#656565",
-            }
+            theme_colors = Label._get_theme_colors()
         
         color_key = f"text_{color_type}" if color_type != "primary" else "text_primary"
         color = theme_colors.get(color_key, theme_colors.get("text_primary"))
@@ -86,8 +96,17 @@ class Label:
 
 # *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
 if __name__ == "__main__":
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+    
+    from 前端.V2.业务层.服务.配置服务 import ConfigService
+    
     def main(page: ft.Page):
         page.title = "标签测试"
+        
+        config_service = ConfigService()
+        Label.set_config_service(config_service)
         
         column = ft.Column([
             Label.create("主标题", size=16, weight=ft.FontWeight.BOLD),

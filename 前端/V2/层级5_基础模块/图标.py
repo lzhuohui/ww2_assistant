@@ -42,6 +42,20 @@ class Icon:
     - 销毁（不需要销毁）
     """
     
+    _config_service = None
+    
+    @classmethod
+    def set_config_service(cls, config_service):
+        """设置配置服务实例"""
+        cls._config_service = config_service
+    
+    @staticmethod
+    def _get_theme_colors() -> Dict[str, str]:
+        """获取主题颜色"""
+        if Icon._config_service is None:
+            raise RuntimeError("Icon模块未设置config_service，请先调用Icon.set_config_service()")
+        return Icon._config_service.get_theme_colors()
+    
     @staticmethod
     def create(
         icon_name: str = "HOME",
@@ -61,11 +75,7 @@ class Icon:
         - opacity: 透明度
         """
         if theme_colors is None:
-            theme_colors = {
-                "text_primary": "#FFFFFF",
-                "text_secondary": "#C5C5C5",
-                "accent": "#0078D4",
-            }
+            theme_colors = Icon._get_theme_colors()
         
         color = theme_colors.get(color_type, theme_colors.get("accent"))
         
@@ -80,8 +90,17 @@ class Icon:
 
 # *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
 if __name__ == "__main__":
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+    
+    from 前端.V2.业务层.服务.配置服务 import ConfigService
+    
     def main(page: ft.Page):
         page.title = "图标测试"
+        
+        config_service = ConfigService()
+        Icon.set_config_service(config_service)
         
         row = ft.Row([
             Icon.create("SETTINGS", color_type="accent"),

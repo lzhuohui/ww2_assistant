@@ -45,6 +45,18 @@ class ThemeBlock:
     - 销毁（不需要销毁）
     """
     
+    _config_service = None
+    
+    @classmethod
+    def set_config_service(cls, config_service):
+        """设置配置服务实例"""
+        cls._config_service = config_service
+    
+    @staticmethod
+    def _get_theme_data(theme_name: str) -> Dict:
+        """获取主题数据"""
+        return ThemeBlock._config_service.get_theme_colors(theme_name)
+    
     @staticmethod
     def create(
         theme_name: str = "light",
@@ -61,15 +73,10 @@ class ThemeBlock:
         - selected: 是否选中
         - on_click: 点击回调
         - size: 色块大小
-        - theme_data: 主题数据（由上层从配置服务获取）
+        - theme_data: 主题数据（可选，不传则从配置服务获取）
         """
         if theme_data is None:
-            theme_data = {
-                "name": "默认",
-                "bg_primary": "#202020",
-                "border": "#3D3D3D",
-                "accent": "#0078D4",
-            }
+            theme_data = ThemeBlock._get_theme_data(theme_name)
         
         border = ft.border.all(2, theme_data.get("accent")) if selected else ft.border.all(1, theme_data.get("border"))
         
@@ -91,15 +98,25 @@ class ThemeBlock:
 
 # *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
 if __name__ == "__main__":
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+    
+    from 前端.V2.业务层.服务.配置服务 import ConfigService
+    
     def main(page: ft.Page):
         page.title = "主题色块测试"
+        
+        config_service = ConfigService()
+        ThemeBlock.set_config_service(config_service)
         
         def on_theme_click(theme_name):
             print(f"选择主题: {theme_name}")
         
+        themes = config_service.get_all_themes()
         row = ft.Row([
-            ThemeBlock.create("light", True, on_theme_click),
-            ThemeBlock.create("dark", False, on_theme_click),
+            ThemeBlock.create(theme, theme == themes[0], on_theme_click)
+            for theme in themes
         ])
         page.add(row)
     

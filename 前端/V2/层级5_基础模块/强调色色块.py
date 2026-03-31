@@ -45,6 +45,19 @@ class AccentBlock:
     - 销毁（不需要销毁）
     """
     
+    _config_service = None
+    
+    @classmethod
+    def set_config_service(cls, config_service):
+        """设置配置服务实例"""
+        cls._config_service = config_service
+    
+    @staticmethod
+    def _get_accent_colors() -> Dict:
+        """获取所有强调色配置"""
+        accents = AccentBlock._config_service.get_all_accents()
+        return {a["name"]: a for a in accents}
+    
     @staticmethod
     def create(
         accent_name: str = "blue",
@@ -61,12 +74,10 @@ class AccentBlock:
         - selected: 是否选中
         - on_click: 点击回调
         - size: 色块大小
-        - accent_colors: 强调色配置字典（可选，默认使用DEFAULT_ACCENT_COLORS）
+        - accent_colors: 强调色配置字典（可选，不传则从配置服务获取）
         """
         if accent_colors is None:
-            accent_colors = {
-                "blue": {"name": "蓝色", "value": "#0078D4"},
-            }
+            accent_colors = AccentBlock._get_accent_colors()
         
         accent = accent_colors.get(accent_name, {"name": accent_name, "value": "#0078D4"})
         
@@ -86,15 +97,26 @@ class AccentBlock:
 
 # *** 标准测试格式: 仅调用被测模块,AI不得添加数据 ***
 if __name__ == "__main__":
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+    
+    from 前端.V2.业务层.服务.配置服务 import ConfigService
+    
     def main(page: ft.Page):
         page.title = "强调色色块测试"
+        
+        config_service = ConfigService()
+        AccentBlock.set_config_service(config_service)
         
         def on_accent_click(accent_name):
             print(f"选择强调色: {accent_name}")
         
+        accents = config_service.get_all_accents()
+        current_accent = config_service.get_current_accent()
         row = ft.Row([
-            AccentBlock.create(name, name == "blue", on_accent_click)
-            for name in DEFAULT_ACCENT_COLORS.keys()
+            AccentBlock.create(a["name"], a["name"] == current_accent, on_accent_click)
+            for a in accents
         ])
         page.add(row)
     
