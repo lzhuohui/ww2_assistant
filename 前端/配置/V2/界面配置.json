@@ -25,15 +25,98 @@
     "系统设置.挂机模式": {
       "卡片信息": {
         "title": "挂机模式",
-        "icon": "SETTINGS",
-        "subtitle": "设置挂机基础参数",
+        "icon": "POWER_SETTINGS_NEW",
+        "subtitle": "全自动:自动挂机,无需人为干预 | 半自动:点击头像,自动切换账号",
         "enabled": true
       },
       "控件列表": [
-        {"id": "挂机模式", "type": "dropdown", "label": "挂机模式", "options": ["全自动", "半自动"], "default": "全自动"},
-        {"id": "指令速度", "type": "dropdown", "label": "速度", "options": ["100", "150", "200", "250", "300", "350", "400", "450", "500"], "default": "100"},
-        {"id": "尝试次数", "type": "dropdown", "label": "尝试", "options": ["10", "15", "20", "25", "30"], "default": "15"},
-        {"id": "清缓限量", "type": "dropdown", "label": "清缓", "options": ["1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "4.5", "5.0"], "default": "1.0"}
+        {
+          "id": "挂机模式",
+          "type": "dropdown",
+          "label": "模式选择",
+          "options": [
+            "全自动",
+            "半自动"
+          ],
+          "default": "全自动"
+        }
+      ]
+    },
+    "系统设置.指令速度": {
+      "卡片信息": {
+        "title": "指令速度",
+        "icon": "SPEED",
+        "subtitle": "运行指令间隔频率(毫秒)，数值越小速度越快",
+        "enabled": true
+      },
+      "控件列表": [
+        {
+          "id": "指令速度",
+          "type": "dropdown",
+          "label": "速度选择",
+          "options": [
+            "100",
+            "150",
+            "200",
+            "250",
+            "300",
+            "350",
+            "400",
+            "450",
+            "500"
+          ],
+          "default": "100"
+        }
+      ]
+    },
+    "系统设置.尝试次数": {
+      "卡片信息": {
+        "title": "尝试次数",
+        "icon": "REFRESH",
+        "subtitle": "连续操作失败达到最大尝试次数后,触发自动纠错系统",
+        "enabled": true
+      },
+      "控件列表": [
+        {
+          "id": "尝试次数",
+          "type": "dropdown",
+          "label": "次数选择",
+          "options": [
+            "10",
+            "15",
+            "20",
+            "25",
+            "30"
+          ],
+          "default": "15"
+        }
+      ]
+    },
+    "系统设置.清缓限量": {
+      "卡片信息": {
+        "title": "清缓限量",
+        "icon": "DELETE_SWEEP",
+        "subtitle": "达到设置系统缓存清理阈值(M)后,自动清理缓存",
+        "enabled": true
+      },
+      "控件列表": [
+        {
+          "id": "清缓限量",
+          "type": "dropdown",
+          "label": "限量选择",
+          "options": [
+            "1.0",
+            "1.5",
+            "2.0",
+            "2.5",
+            "3.0",
+            "3.5",
+            "4.0",
+            "4.5",
+            "5.0"
+          ],
+          "default": "1.0"
+        }
       ]
     },
     "策略设置.建筑速建": {
@@ -44,8 +127,36 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "速建限级", "type": "dropdown", "label": "限级", "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"], "default": "08"},
-        {"id": "速建类型", "type": "dropdown", "label": "类型", "options": ["城资建筑", "城市建筑", "资源建筑"], "default": "城资建筑"}
+        {
+          "id": "速建限级",
+          "type": "dropdown",
+          "label": "限级",
+          "options": [
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "default": "08"
+        },
+        {
+          "id": "速建类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "城资建筑",
+            "城市建筑",
+            "资源建筑"
+          ],
+          "default": "城资建筑"
+        }
       ]
     },
     "策略设置.资源速产": {
@@ -56,8 +167,38 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "速产限级", "type": "dropdown", "label": "限级", "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"], "default": "07"},
-        {"id": "速产类型", "type": "dropdown", "label": "类型", "options": ["平衡资源", "战时经济", "钢铁熔炉", "橡胶采集", "石油开采"], "default": "平衡资源"}
+        {
+          "id": "速产限级",
+          "type": "dropdown",
+          "label": "限级",
+          "options": [
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "default": "07"
+        },
+        {
+          "id": "速产类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "平衡资源",
+            "战时经济",
+            "钢铁熔炉",
+            "橡胶采集",
+            "石油开采"
+          ],
+          "default": "平衡资源"
+        }
       ]
     },
     "策略设置.策点保留": {
@@ -68,7 +209,22 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "保留点数", "type": "dropdown", "label": "点数", "options": ["30", "60", "90", "120", "150", "180", "210", "240"], "default": "60"}
+        {
+          "id": "保留点数",
+          "type": "dropdown",
+          "label": "点数",
+          "options": [
+            "30",
+            "60",
+            "90",
+            "120",
+            "150",
+            "180",
+            "210",
+            "240"
+          ],
+          "default": "60"
+        }
       ]
     },
     "任务设置.主线任务": {
@@ -79,7 +235,29 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "主城等级", "type": "dropdown", "label": "等级", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"], "default": "01"}
+        {
+          "id": "主城等级",
+          "type": "dropdown",
+          "label": "等级",
+          "options": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "default": "01"
+        }
       ]
     },
     "任务设置.支线任务": {
@@ -90,7 +268,25 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "支线主城等级", "type": "dropdown", "label": "等级", "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"], "default": "05"}
+        {
+          "id": "支线主城等级",
+          "type": "dropdown",
+          "label": "等级",
+          "options": [
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "default": "05"
+        }
       ]
     },
     "建筑设置.主帅主城": {
@@ -101,18 +297,342 @@
         "enabled": true
       },
       "控件列表": [
-        {"id": "城市等级", "type": "dropdown", "label": "城市", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "17"},
-        {"id": "兵工厂等级", "type": "dropdown", "label": "兵工", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "17"},
-        {"id": "陆军基地等级", "type": "dropdown", "label": "陆军", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "14"},
-        {"id": "空军基地等级", "type": "dropdown", "label": "空军", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "03"},
-        {"id": "商业区等级", "type": "dropdown", "label": "商业", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "04"},
-        {"id": "补给品厂等级", "type": "dropdown", "label": "补给", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "03"},
-        {"id": "内塔等级", "type": "dropdown", "label": "内塔", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "04"},
-        {"id": "村庄等级", "type": "dropdown", "label": "村庄", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "03"},
-        {"id": "资源等级", "type": "dropdown", "label": "资源", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "03"},
-        {"id": "军工等级", "type": "dropdown", "label": "军工", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "03"},
-        {"id": "港口等级", "type": "dropdown", "label": "港口", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "03"},
-        {"id": "外塔等级", "type": "dropdown", "label": "外塔", "options": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "03"}
+        {
+          "id": "城市等级",
+          "type": "dropdown",
+          "label": "城市",
+          "options": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "17"
+        },
+        {
+          "id": "兵工厂等级",
+          "type": "dropdown",
+          "label": "兵工",
+          "options": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "17"
+        },
+        {
+          "id": "陆军基地等级",
+          "type": "dropdown",
+          "label": "陆军",
+          "options": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "14"
+        },
+        {
+          "id": "空军基地等级",
+          "type": "dropdown",
+          "label": "空军",
+          "options": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "03"
+        },
+        {
+          "id": "商业区等级",
+          "type": "dropdown",
+          "label": "商业",
+          "options": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "04"
+        },
+        {
+          "id": "补给品厂等级",
+          "type": "dropdown",
+          "label": "补给",
+          "options": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "03"
+        },
+        {
+          "id": "内塔等级",
+          "type": "dropdown",
+          "label": "内塔",
+          "options": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "04"
+        },
+        {
+          "id": "村庄等级",
+          "type": "dropdown",
+          "label": "村庄",
+          "options": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "03"
+        },
+        {
+          "id": "资源等级",
+          "type": "dropdown",
+          "label": "资源",
+          "options": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "03"
+        },
+        {
+          "id": "军工等级",
+          "type": "dropdown",
+          "label": "军工",
+          "options": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "03"
+        },
+        {
+          "id": "港口等级",
+          "type": "dropdown",
+          "label": "港口",
+          "options": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "03"
+        },
+        {
+          "id": "外塔等级",
+          "type": "dropdown",
+          "label": "外塔",
+          "options": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "03"
+        }
       ]
     },
     "建筑设置.建筑优先": {
@@ -123,8 +643,28 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "资源建筑", "type": "dropdown", "label": "资源", "options": ["自动平衡", "钢铁优先", "橡胶优先", "石油优先"], "default": "自动平衡"},
-        {"id": "塔防建筑", "type": "dropdown", "label": "塔防", "options": ["炮塔优先", "岸防优先"], "default": "炮塔优先"}
+        {
+          "id": "资源建筑",
+          "type": "dropdown",
+          "label": "资源",
+          "options": [
+            "自动平衡",
+            "钢铁优先",
+            "橡胶优先",
+            "石油优先"
+          ],
+          "default": "自动平衡"
+        },
+        {
+          "id": "塔防建筑",
+          "type": "dropdown",
+          "label": "塔防",
+          "options": [
+            "炮塔优先",
+            "岸防优先"
+          ],
+          "default": "炮塔优先"
+        }
       ]
     },
     "集资设置.小号上贡": {
@@ -135,10 +675,70 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "上贡限级", "type": "dropdown", "label": "限级", "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"], "default": "10"},
-        {"id": "上贡限量", "type": "dropdown", "label": "限量", "options": ["2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "2"},
-        {"id": "主要统帅", "type": "dropdown", "label": "主统", "options": ["无"], "default": "无"},
-        {"id": "次要统帅", "type": "dropdown", "label": "次统", "options": ["无"], "default": "无"}
+        {
+          "id": "上贡限级",
+          "type": "dropdown",
+          "label": "限级",
+          "options": [
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "default": "10"
+        },
+        {
+          "id": "上贡限量",
+          "type": "dropdown",
+          "label": "限量",
+          "options": [
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "2"
+        },
+        {
+          "id": "主要统帅",
+          "type": "dropdown",
+          "label": "主统",
+          "options": [
+            "无"
+          ],
+          "default": "无"
+        },
+        {
+          "id": "次要统帅",
+          "type": "dropdown",
+          "label": "次统",
+          "options": [
+            "无"
+          ],
+          "default": "无"
+        }
       ]
     },
     "集资设置.分城纳租": {
@@ -149,8 +749,52 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "分城等级", "type": "dropdown", "label": "等级", "options": ["05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15"], "default": "10"},
-        {"id": "纳租限量", "type": "dropdown", "label": "限量", "options": ["2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "default": "2"}
+        {
+          "id": "分城等级",
+          "type": "dropdown",
+          "label": "等级",
+          "options": [
+            "05",
+            "06",
+            "07",
+            "08",
+            "09",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "default": "10"
+        },
+        {
+          "id": "纳租限量",
+          "type": "dropdown",
+          "label": "限量",
+          "options": [
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "default": "2"
+        }
       ]
     },
     "打野设置.自动打野": {
@@ -161,8 +805,31 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "野怪等级", "type": "dropdown", "label": "等级", "options": ["全部", "1-3级", "4-6级", "7-9级", "10级以上"], "default": "全部"},
-        {"id": "搜索频率", "type": "dropdown", "label": "频率", "options": ["每30分钟", "每小时", "每2小时", "每4小时"], "default": "每小时"}
+        {
+          "id": "野怪等级",
+          "type": "dropdown",
+          "label": "等级",
+          "options": [
+            "全部",
+            "1-3级",
+            "4-6级",
+            "7-9级",
+            "10级以上"
+          ],
+          "default": "全部"
+        },
+        {
+          "id": "搜索频率",
+          "type": "dropdown",
+          "label": "频率",
+          "options": [
+            "每30分钟",
+            "每小时",
+            "每2小时",
+            "每4小时"
+          ],
+          "default": "每小时"
+        }
       ]
     },
     "打扫设置.打扫城区": {
@@ -191,12 +858,61 @@
         "enabled": true
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "主帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "主帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号02": {
@@ -207,12 +923,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号03": {
@@ -223,12 +988,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号04": {
@@ -239,12 +1053,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号05": {
@@ -255,12 +1118,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号06": {
@@ -271,12 +1183,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号07": {
@@ -287,12 +1248,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号08": {
@@ -303,12 +1313,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号09": {
@@ -319,12 +1378,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号10": {
@@ -335,12 +1443,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号11": {
@@ -351,12 +1508,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号12": {
@@ -367,12 +1573,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号13": {
@@ -383,12 +1638,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号14": {
@@ -399,12 +1703,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     },
     "账号设置.账号15": {
@@ -415,12 +1768,61 @@
         "enabled": false
       },
       "控件列表": [
-        {"id": "类型", "type": "dropdown", "label": "类型", "options": ["主帅", "副帅"], "default": "副帅"},
-        {"id": "名称", "type": "input", "label": "名称", "hint": "输入名称", "default": ""},
-        {"id": "账号", "type": "input", "label": "账号", "hint": "输入账号", "default": ""},
-        {"id": "密码", "type": "input", "label": "密码", "hint": "输入密码", "password": true, "default": ""},
-        {"id": "方案", "type": "dropdown", "label": "方案", "options": ["默认方案"], "default": "默认方案"},
-        {"id": "平台", "type": "dropdown", "label": "平台", "options": ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"], "default": "Tap"}
+        {
+          "id": "类型",
+          "type": "dropdown",
+          "label": "类型",
+          "options": [
+            "主帅",
+            "副帅"
+          ],
+          "default": "副帅"
+        },
+        {
+          "id": "名称",
+          "type": "input",
+          "label": "名称",
+          "hint": "输入名称",
+          "default": ""
+        },
+        {
+          "id": "账号",
+          "type": "input",
+          "label": "账号",
+          "hint": "输入账号",
+          "default": ""
+        },
+        {
+          "id": "密码",
+          "type": "input",
+          "label": "密码",
+          "hint": "输入密码",
+          "password": true,
+          "default": ""
+        },
+        {
+          "id": "方案",
+          "type": "dropdown",
+          "label": "方案",
+          "options": [
+            "默认方案"
+          ],
+          "default": "默认方案"
+        },
+        {
+          "id": "平台",
+          "type": "dropdown",
+          "label": "平台",
+          "options": [
+            "Tap",
+            "九游",
+            "Fan",
+            "小7",
+            "Vivo",
+            "Opop"
+          ],
+          "default": "Tap"
+        }
       ]
     }
   }
