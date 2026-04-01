@@ -445,6 +445,60 @@ class ConfigService:
         ui_config = self._repository.load_ui_config()
         return list(ui_config.get("界面配置", {}).keys())
 
+    def get_interface(self, section: str) -> str:
+        """
+        获取section所属界面
+        
+        参数:
+            section: 配置节，如 "系统设置.挂机模式"
+        
+        返回:
+            所属界面名称，如 "系统界面"
+        """
+        ui_config = self._repository.load_ui_config()
+        section_config = ui_config.get("界面配置", {}).get(section, {})
+        return section_config.get("所属界面", "")
+    
+    def get_interfaces(self) -> List[str]:
+        """
+        获取所有界面列表（按首次出现顺序）
+        
+        返回:
+            界面名称列表，如 ["系统界面", "建筑界面", ...]
+        """
+        ui_config = self._repository.load_ui_config()
+        interface_config = ui_config.get("界面配置", {})
+        
+        # 按首次出现顺序收集界面
+        interfaces = []
+        for section, config in interface_config.items():
+            interface = config.get("所属界面", "")
+            if interface and interface not in interfaces:
+                interfaces.append(interface)
+        
+        return interfaces
+    
+    def get_sections_by_interface(self, interface: str) -> List[str]:
+        """
+        获取指定界面的section列表（保持配置文件顺序）
+        
+        参数:
+            interface: 界面名称，如 "系统界面"
+        
+        返回:
+            section列表，如 ["系统设置.挂机模式", "系统设置.指令速度", ...]
+        """
+        ui_config = self._repository.load_ui_config()
+        interface_config = ui_config.get("界面配置", {})
+        
+        # 按配置文件顺序收集section
+        sections = []
+        for section, config in interface_config.items():
+            if config.get("所属界面") == interface:
+                sections.append(section)
+        
+        return sections
+
 # ============================================
 # 内部逻辑（不暴露）
 # ============================================
