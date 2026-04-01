@@ -66,6 +66,7 @@ class StrategyPage:
         if theme_colors is None:
             theme_colors = config_service.get_theme_colors()
         
+        CardGroup.set_config_service(config_service)
         StrategyPage._card_group = CardGroup(page, config_service)
         cards = []
         

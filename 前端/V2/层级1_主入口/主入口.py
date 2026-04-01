@@ -129,6 +129,8 @@ class MainEntry:
         """创建主布局"""
         user_card = self._create_user_card()
         
+        NavButton.set_config_service(self._config_service)
+        
         nav_buttons = []
         for i, interface in enumerate(self._interfaces):
             nav_info = INTERFACE_NAV_MAP.get(interface, {"label": interface, "icon": "HOME"})
@@ -173,8 +175,8 @@ class MainEntry:
     
     def _create_user_card(self) -> ft.Container:
         """创建用户信息卡片"""
-        user_card = UserInfoCard(self._config_service)
-        return user_card.create(theme_colors=self._theme_colors)
+        UserInfoCard.set_config_service(self._config_service)
+        return UserInfoCard.create(theme_colors=self._theme_colors)
     
     def _create_content_area(self, nav_index: int) -> ft.Container:
         """创建内容区"""
