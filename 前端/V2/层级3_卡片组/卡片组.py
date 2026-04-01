@@ -177,6 +177,7 @@ class CardGroup:
             return self._card_controls.get_all_values(section)
         
         switch_height = CardSwitch.get_divider_height()
+        switch_width = CardSwitch.get_left_width()
         top_offset = (height - switch_height) / 2
         
         switch_container = ft.Container(
@@ -184,7 +185,7 @@ class CardGroup:
             alignment=ft.alignment.Alignment(0.5, 0.5),
             top=top_offset,
             left=0,
-            right=0,
+            width=switch_width,
         )
         
         card_stack = ft.Stack([
