@@ -17,9 +17,17 @@ import flet as ft
 from typing import Callable, Dict, Any
 
 from 前端.V2.层级5_基础模块.主题色块 import ThemeBlock
-from 前端.V2.层级5_基础模块.强调色色块 import AccentBlock, DEFAULT_ACCENT_COLORS
+from 前端.V2.层级5_基础模块.强调色色块 import AccentBlock
 
 USER_CARD_SPACING = 10
+
+DEFAULT_ACCENT_COLORS = {
+    "blue": {"name": "蓝色", "value": "#0078D4"},
+    "red": {"name": "红色", "value": "#D13438"},
+    "green": {"name": "绿色", "value": "#107C10"},
+    "orange": {"name": "橙色", "value": "#FF8C00"},
+    "purple": {"name": "紫色", "value": "#8764B8"},
+}
 
 class PersonalizationPage:
     

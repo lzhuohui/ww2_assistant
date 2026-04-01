@@ -23,8 +23,8 @@ import flet as ft
 from typing import Callable, Dict, List, Optional, Any
 
 from 前端.V2.业务层.服务.配置服务 import ConfigService
-from 前端.V2.层级4_复合模块.导航按钮 import NavigationButtonGroup
-from 前端.V2.层级4_复合模块.用户信息卡片 import UserCard
+from 前端.V2.层级4_复合模块.导航按钮 import NavButton
+from 前端.V2.层级4_复合模块.用户信息卡片 import UserInfoCard
 from 前端.V2.层级2_功能界面.系统界面 import SystemPage
 from 前端.V2.层级2_功能界面.策略界面 import StrategyPage
 from 前端.V2.层级2_功能界面.任务界面 import TaskPage
@@ -108,12 +108,18 @@ class MainEntry:
         """创建主布局"""
         user_card = self._create_user_card()
         
-        nav_group = NavigationButtonGroup.create(
-            items=NAV_ITEMS,
-            selected_index=0,
-            on_change=self._handle_nav_change,
-            theme_colors=self._theme_colors,
-        )
+        nav_buttons = []
+        for i, item in enumerate(NAV_ITEMS):
+            btn = NavButton.create(
+                icon_name=item["icon"],
+                text=item["label"],
+                selected=(i == 0),
+                on_click=lambda icon_name, idx=i: self._handle_nav_click(idx),
+                theme_colors=self._theme_colors,
+            )
+            nav_buttons.append(btn)
+        
+        nav_group = ft.Column(nav_buttons, spacing=4)
         
         left_nav = ft.Container(
             content=ft.Column([
@@ -145,7 +151,7 @@ class MainEntry:
     
     def _create_user_card(self) -> ft.Container:
         """创建用户信息卡片"""
-        user_card = UserCard(self._config_service)
+        user_card = UserInfoCard(self._config_service)
         return user_card.create(theme_colors=self._theme_colors)
     
     def _create_content_area(self, nav_index: int) -> ft.Container:
@@ -233,6 +239,7 @@ class MainEntry:
             self._current_page_module.destroy()
         
         icon_name = NAV_ITEMS[index]["icon"]
+        label = NAV_ITEMS[index]["label"]
         title_icon = ft.Icon(
             getattr(ft.Icons, icon_name.upper(), ft.Icons.HOME),
             size=20,
@@ -251,6 +258,10 @@ class MainEntry:
                 self._content_area.update()
         except:
             pass
+    
+    def _handle_nav_click(self, index: int):
+        """处理导航按钮点击"""
+        self._handle_nav_change(NAV_ITEMS[index]["label"], index)
     
     def _refresh_page(self):
         """刷新页面主题"""
