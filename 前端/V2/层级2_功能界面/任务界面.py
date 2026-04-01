@@ -72,11 +72,11 @@ class TaskPage:
         sections = config_service.get_sections_by_interface("任务界面")
         for section in sections:
             card = TaskPage._card_group.create(
-                    section=section,
-                    on_control_change=on_change,
-                    theme_colors=theme_colors,
-                )
-                cards.append(card)
+                section=section,
+                on_control_change=on_change,
+                theme_colors=theme_colors,
+            )
+            cards.append(card)
         
         return ft.Column(cards, spacing=USER_CARD_SPACING, scroll=ft.ScrollMode.AUTO, expand=True)
     
