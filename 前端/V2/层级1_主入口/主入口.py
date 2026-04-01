@@ -48,19 +48,35 @@ USER_NAV_WIDTH = 240
 USER_TITLE_BAR_HEIGHT = 40
 USER_SPACING = 10
 
-NAV_ITEMS = [
-    {"label": "系统", "icon": "SETTINGS"},
-    {"label": "策略", "icon": "ROCKET_LAUNCH"},
-    {"label": "任务", "icon": "ASSIGNMENT"},
-    {"label": "建筑", "icon": "APARTMENT"},
-    {"label": "集资", "icon": "ATTACH_MONEY"},
-    {"label": "账号", "icon": "ACCOUNT_CIRCLE"},
-    {"label": "打扫", "icon": "CLEANING_SERVICES"},
-    {"label": "打野", "icon": "EXPLORE"},
-    {"label": "个性化", "icon": "PALETTE"},
-    {"label": "配置方案", "icon": "FOLDER"},
-    {"label": "关于", "icon": "INFO"},
-]
+# 界面名称到导航信息的映射
+INTERFACE_NAV_MAP = {
+    "系统界面": {"label": "系统", "icon": "SETTINGS"},
+    "策略界面": {"label": "策略", "icon": "ROCKET_LAUNCH"},
+    "任务界面": {"label": "任务", "icon": "ASSIGNMENT"},
+    "建筑界面": {"label": "建筑", "icon": "APARTMENT"},
+    "集资界面": {"label": "集资", "icon": "ATTACH_MONEY"},
+    "账号界面": {"label": "账号", "icon": "ACCOUNT_CIRCLE"},
+    "打扫界面": {"label": "打扫", "icon": "CLEANING_SERVICES"},
+    "打野界面": {"label": "打野", "icon": "EXPLORE"},
+    "个性化界面": {"label": "个性化", "icon": "PALETTE"},
+    "配置方案界面": {"label": "配置方案", "icon": "FOLDER"},
+    "关于界面": {"label": "关于", "icon": "INFO"},
+}
+
+# 界面名称到模块的映射
+INTERFACE_MODULE_MAP = {
+    "系统界面": SystemPage,
+    "策略界面": StrategyPage,
+    "任务界面": TaskPage,
+    "建筑界面": BuildingPage,
+    "集资界面": FundingPage,
+    "账号界面": AccountPage,
+    "打扫界面": CleaningPage,
+    "打野界面": HuntingPage,
+    "个性化界面": PersonalizationPage,
+    "配置方案界面": ConfigSchemePage,
+    "关于界面": AboutPage,
+}
 
 # ============================================
 # 公开接口
@@ -85,8 +101,13 @@ class MainEntry:
         self._current_page_module = None
         self._content_area = ft.Container()
         self._theme_colors = self._get_theme_colors()
+        self._interfaces = self._get_interfaces()
         
         self._setup_page()
+    
+    def _get_interfaces(self) -> List[str]:
+        """获取界面列表（从配置服务）"""
+        return self._config_service.get_interfaces()
     
     def _get_theme_colors(self) -> Dict[str, str]:
         """获取主题颜色（从配置服务获取）"""
@@ -109,12 +130,13 @@ class MainEntry:
         user_card = self._create_user_card()
         
         nav_buttons = []
-        for i, item in enumerate(NAV_ITEMS):
+        for i, interface in enumerate(self._interfaces):
+            nav_info = INTERFACE_NAV_MAP.get(interface, {"label": interface, "icon": "HOME"})
             btn = NavButton.create(
-                icon_name=item["icon"],
-                text=item["label"],
+                icon_name=nav_info["icon"],
+                text=nav_info["label"],
                 selected=(i == 0),
-                on_click=lambda icon_name, idx=i: self._handle_nav_click(idx),
+                on_click=lambda e, idx=i: self._handle_nav_click(idx),
                 theme_colors=self._theme_colors,
             )
             nav_buttons.append(btn)
@@ -156,17 +178,17 @@ class MainEntry:
     
     def _create_content_area(self, nav_index: int) -> ft.Container:
         """创建内容区"""
-        initial_icon_name = NAV_ITEMS[nav_index]["icon"]
-        initial_label = NAV_ITEMS[nav_index]["label"]
+        interface = self._interfaces[nav_index] if nav_index < len(self._interfaces) else ""
+        nav_info = INTERFACE_NAV_MAP.get(interface, {"label": interface, "icon": "HOME"})
         
         title_icon = ft.Icon(
-            getattr(ft.Icons, initial_icon_name.upper(), ft.Icons.HOME),
+            getattr(ft.Icons, nav_info["icon"].upper(), ft.Icons.HOME),
             size=20,
             color=self._theme_colors.get("accent"),
         )
         
         title_text = ft.Text(
-            initial_label,
+            nav_info["label"],
             size=16,
             weight=ft.FontWeight.BOLD,
             color=self._theme_colors.get("text_primary"),
@@ -200,24 +222,11 @@ class MainEntry:
     
     def _create_section(self, nav_index: int) -> ft.Control:
         """创建功能界面"""
-        page_modules = {
-            0: SystemPage,
-            1: StrategyPage,
-            2: TaskPage,
-            3: BuildingPage,
-            4: FundingPage,
-            5: AccountPage,
-            6: CleaningPage,
-            7: HuntingPage,
-            8: PersonalizationPage,
-            9: ConfigSchemePage,
-            10: AboutPage,
-        }
-        
-        self._current_page_module = page_modules.get(nav_index)
+        interface = self._interfaces[nav_index] if nav_index < len(self._interfaces) else ""
+        self._current_page_module = INTERFACE_MODULE_MAP.get(interface)
         
         if self._current_page_module:
-            if nav_index == 8:
+            if interface == "个性化界面":
                 return self._current_page_module.create(
                     page=self._page,
                     config_service=self._config_service,
@@ -233,22 +242,23 @@ class MainEntry:
         
         return ft.Container(content=ft.Text("未知页面"))
     
-    def _handle_nav_change(self, label: str, index: int):
+    def _handle_nav_change(self, index: int):
         """处理导航切换"""
         if self._current_page_module and hasattr(self._current_page_module, 'destroy'):
             self._current_page_module.destroy()
         
-        icon_name = NAV_ITEMS[index]["icon"]
-        label = NAV_ITEMS[index]["label"]
+        interface = self._interfaces[index] if index < len(self._interfaces) else ""
+        nav_info = INTERFACE_NAV_MAP.get(interface, {"label": interface, "icon": "HOME"})
+        
         title_icon = ft.Icon(
-            getattr(ft.Icons, icon_name.upper(), ft.Icons.HOME),
+            getattr(ft.Icons, nav_info["icon"].upper(), ft.Icons.HOME),
             size=20,
             color=self._theme_colors.get("accent"),
         )
         
         title_bar = self._content_area.content.controls[0]
         title_bar.content.controls[0] = title_icon
-        title_bar.content.controls[2].value = label
+        title_bar.content.controls[2].value = nav_info["label"]
         
         new_section = self._create_section(index)
         self._content_area.content.controls[2].content = new_section
@@ -261,7 +271,7 @@ class MainEntry:
     
     def _handle_nav_click(self, index: int):
         """处理导航按钮点击"""
-        self._handle_nav_change(NAV_ITEMS[index]["label"], index)
+        self._handle_nav_change(index)
     
     def _refresh_page(self):
         """刷新页面主题"""

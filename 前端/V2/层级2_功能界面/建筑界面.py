@@ -69,10 +69,9 @@ class BuildingPage:
         BuildingPage._card_group = CardGroup(page, config_service)
         cards = []
         
-        sections = config_service.get_all_sections()
+        sections = config_service.get_sections_by_interface("建筑界面")
         for section in sections:
-            if section.startswith("建筑设置."):
-                card = BuildingPage._card_group.create(
+            card = BuildingPage._card_group.create(
                     section=section,
                     on_control_change=on_change,
                     theme_colors=theme_colors,

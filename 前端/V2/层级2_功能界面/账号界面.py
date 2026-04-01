@@ -69,10 +69,9 @@ class AccountPage:
         AccountPage._card_group = CardGroup(page, config_service)
         cards = []
         
-        sections = config_service.get_all_sections()
+        sections = config_service.get_sections_by_interface("账号界面")
         for section in sections:
-            if section.startswith("账号设置."):
-                card = AccountPage._card_group.create(
+            card = AccountPage._card_group.create(
                     section=section,
                     on_control_change=on_change,
                     theme_colors=theme_colors,
