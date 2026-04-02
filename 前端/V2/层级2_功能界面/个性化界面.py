@@ -19,8 +19,6 @@ from typing import Callable, Dict, Any
 from 前端.V2.层级5_基础模块.主题色块 import ThemeBlock
 from 前端.V2.层级5_基础模块.强调色色块 import AccentBlock
 
-USER_CARD_SPACING = 10
-
 DEFAULT_ACCENT_COLORS = {
     "blue": {"name": "蓝色", "value": "#0078D4"},
     "red": {"name": "红色", "value": "#D13438"},

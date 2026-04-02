@@ -46,6 +46,7 @@ class ConfigService:
     def __init__(self):
         self._repository = ConfigRepository()
         self._on_change_callbacks: List[Callable] = []
+        self._layout_cache: Dict[str, Dict[str, Any]] = {}
     
     def get_current_scheme_name(self) -> str:
         """获取当前方案名称"""
@@ -349,19 +350,114 @@ class ConfigService:
     # 界面配置接口（从界面配置.json读取）
     # ============================================
     
+    def _parse_section(self, section: str) -> tuple:
+        """
+        解析section为(界面名, 卡片名)
+        
+        参数:
+            section: 配置节，如 "系统设置.挂机模式" 或 "挂机模式"
+        
+        返回:
+            (界面名, 卡片名)
+        """
+        if "." in section:
+            parts = section.split(".", 1)
+            return parts[0].replace("设置", "界面"), parts[1]
+        return None, section
+    
+    def _get_interface_config(self, interface: str) -> Dict[str, Any]:
+        """获取界面配置"""
+        ui_config = self._repository.load_ui_config()
+        return ui_config.get("界面配置", {}).get(interface, {})
+    
+    def _get_card_config(self, section: str) -> Dict[str, Any]:
+        """获取卡片配置"""
+        interface, card_name = self._parse_section(section)
+        if not interface:
+            return {}
+        interface_config = self._get_interface_config(interface)
+        return interface_config.get(card_name, {})
+    
+    def get_interface_layout(self, interface: str) -> Dict[str, Any]:
+        """
+        获取界面布局配置
+        
+        参数:
+            interface: 界面名称，如 "系统界面"
+        
+        返回:
+            {"下拉框宽度": 70, "输入框宽度": 100, "每行控件数": 3}
+        """
+        interface_config = self._get_interface_config(interface)
+        return interface_config.get("界面布局", {})
+    
+    def get_layout_value(self, section: str, key: str, control_id: str = None) -> Any:
+        """
+        按优先级获取布局值：控件列表 > 卡片信息 > 界面布局 > 默认值
+        
+        参数:
+            section: 配置节
+            key: 布局键，如 "下拉框宽度"、"每行控件数"
+            control_id: 控件ID（可选，用于控件级覆盖）
+        
+        返回:
+            布局值
+        """
+        cache_key = f"{section}.{key}"
+        if cache_key in self._layout_cache:
+            return self._layout_cache[cache_key]
+        
+        interface, card_name = self._parse_section(section)
+        result = None
+        
+        if control_id:
+            controls = self.get_controls(section)
+            for ctrl in controls:
+                if ctrl.get("id") == control_id:
+                    if key == "下拉框宽度" and "width" in ctrl:
+                        result = ctrl["width"]
+                    elif key == "输入框宽度" and "width" in ctrl:
+                        result = ctrl["width"]
+                    break
+        
+        if result is None:
+            card_info = self.get_card_info(section)
+            card_key_map = {
+                "下拉框宽度": "下拉框宽度",
+                "输入框宽度": "输入框宽度",
+                "每行控件数": "每行控件数"
+            }
+            if card_key_map.get(key) in card_info:
+                result = card_info[card_key_map[key]]
+        
+        if result is None and interface:
+            interface_layout = self.get_interface_layout(interface)
+            if key in interface_layout:
+                result = interface_layout[key]
+        
+        if result is None:
+            default_map = {
+                "下拉框宽度": 70,
+                "输入框宽度": 100,
+                "每行控件数": 3
+            }
+            result = default_map.get(key)
+        
+        self._layout_cache[cache_key] = result
+        return result
+    
     def get_card_info(self, section: str) -> Dict[str, Any]:
         """
         获取卡片信息（从界面配置.json读取）
         
         参数:
-            section: 配置节，如 "建筑设置.主帅主城"
+            section: 配置节，如 "系统设置.挂机模式"
         
         返回:
-            {"title": "主帅主城", "icon": "DOMAIN", "subtitle": "设置主帅主城建筑等级", "enabled": true}
+            {"title": "挂机模式", "icon": "POWER_SETTINGS_NEW", "subtitle": "...", "enabled": true}
         """
-        ui_config = self._repository.load_ui_config()
-        section_config = ui_config.get("界面配置", {}).get(section, {})
-        return section_config.get("卡片信息", {"title": section, "icon": "HOME", "subtitle": "", "enabled": True})
+        card_config = self._get_card_config(section)
+        return card_config.get("卡片信息", {"title": section, "icon": "HOME", "subtitle": "", "enabled": True})
     
     def get_card_enabled_default(self, section: str) -> bool:
         """
@@ -384,11 +480,10 @@ class ConfigService:
             section: 配置节
         
         返回:
-            [{"id": "城市等级", "type": "dropdown", "label": "城市", "options": [...], "default": "17"}, ...]
+            [{"id": "挂机模式", "type": "dropdown", "label": "模式选择", "options": [...], "default": "全自动"}, ...]
         """
-        ui_config = self._repository.load_ui_config()
-        section_config = ui_config.get("界面配置", {}).get(section, {})
-        return section_config.get("控件列表", [])
+        card_config = self._get_card_config(section)
+        return card_config.get("控件列表", [])
     
     def get_control_config(self, section: str, control_id: str) -> Dict[str, Any]:
         """
@@ -399,7 +494,7 @@ class ConfigService:
             control_id: 控件ID
         
         返回:
-            {"id": "城市等级", "type": "dropdown", "label": "城市", "options": [...], "default": "17"}
+            {"id": "挂机模式", "type": "dropdown", "label": "模式选择", "options": [...], "default": "全自动"}
         """
         controls = self.get_controls(section)
         for ctrl in controls:
@@ -442,8 +537,10 @@ class ConfigService:
     
     def get_all_sections(self) -> List[str]:
         """获取所有配置节列表"""
-        ui_config = self._repository.load_ui_config()
-        return list(ui_config.get("界面配置", {}).keys())
+        sections = []
+        for interface in self.get_interfaces():
+            sections.extend(self.get_sections_by_interface(interface))
+        return sections
 
     def get_interface(self, section: str) -> str:
         """
@@ -455,28 +552,19 @@ class ConfigService:
         返回:
             所属界面名称，如 "系统界面"
         """
-        ui_config = self._repository.load_ui_config()
-        section_config = ui_config.get("界面配置", {}).get(section, {})
-        return section_config.get("所属界面", "")
+        interface, _ = self._parse_section(section)
+        return interface or ""
     
     def get_interfaces(self) -> List[str]:
         """
-        获取所有界面列表（按首次出现顺序）
+        获取所有界面列表
         
         返回:
-            界面名称列表，如 ["系统界面", "建筑界面", ...]
+            界面名称列表，如 ["系统界面", "策略界面", ...]
         """
         ui_config = self._repository.load_ui_config()
         interface_config = ui_config.get("界面配置", {})
-        
-        # 按首次出现顺序收集界面
-        interfaces = []
-        for section, config in interface_config.items():
-            interface = config.get("所属界面", "")
-            if interface and interface not in interfaces:
-                interfaces.append(interface)
-        
-        return interfaces
+        return [k for k in interface_config.keys() if k]
     
     def get_sections_by_interface(self, interface: str) -> List[str]:
         """
@@ -488,14 +576,13 @@ class ConfigService:
         返回:
             section列表，如 ["系统设置.挂机模式", "系统设置.指令速度", ...]
         """
-        ui_config = self._repository.load_ui_config()
-        interface_config = ui_config.get("界面配置", {})
+        interface_config = self._get_interface_config(interface)
         
-        # 按配置文件顺序收集section
         sections = []
-        for section, config in interface_config.items():
-            if config.get("所属界面") == interface:
-                sections.append(section)
+        for card_name in interface_config.keys():
+            if card_name != "界面布局":
+                section_prefix = interface.replace("界面", "设置")
+                sections.append(f"{section_prefix}.{card_name}")
         
         return sections
 

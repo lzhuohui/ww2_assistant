@@ -107,6 +107,15 @@ class CardContainer:
         return radius
     
     @staticmethod
+    def get_spacing() -> int:
+        """获取卡片间距（从用户偏好.json获取）"""
+        CardContainer._check_config_service()
+        spacing = CardContainer._config_service.get_ui_config("卡片", "间距")
+        if spacing is None:
+            raise RuntimeError("用户偏好.json缺少配置: 卡片.间距")
+        return spacing
+    
+    @staticmethod
     def _get_theme_colors() -> Dict[str, str]:
         """获取主题颜色"""
         CardContainer._check_config_service()

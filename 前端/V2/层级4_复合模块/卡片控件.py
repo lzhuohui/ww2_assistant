@@ -40,10 +40,6 @@ from 前端.V2.层级5_基础模块.输入框 import InputBox
 # 数据和文件接口（前置，方便查看和修改）
 # ============================================
 
-# 控件布局变量（可在模块中直接调整）
-CONTROL_ROW_HEIGHT = 30     # 每行控件高度
-CONTROL_V_SPACING = 6       # 控件垂直间距
-
 # ============================================
 # 公开接口
 # ============================================
@@ -85,16 +81,6 @@ class CardControls:
             )
     
     @staticmethod
-    def get_control_row_height() -> int:
-        """获取每行控件高度（从模块变量获取，可快速调整）"""
-        return CONTROL_ROW_HEIGHT
-    
-    @staticmethod
-    def get_control_v_spacing() -> int:
-        """获取控件垂直间距（从模块变量获取，可快速调整）"""
-        return CONTROL_V_SPACING
-    
-    @staticmethod
     def get_controls_per_row() -> int:
         """获取每行控件数（从用户偏好.json获取）"""
         CardControls._check_config_service()
@@ -130,15 +116,6 @@ class CardControls:
             raise RuntimeError("用户偏好.json缺少配置: 控件布局.右边距")
         return value
     
-    @staticmethod
-    def _check_config_service():
-        """检查配置服务是否已设置"""
-        if CardControls._config_service is None:
-            raise RuntimeError(
-                "CardControls模块未设置config_service，"
-                "请先调用 CardControls.set_config_service(config_service)"
-            )
-    
     
     def __init__(self, page: ft.Page, config_service=None):
         self._page = page
@@ -148,16 +125,14 @@ class CardControls:
     
     @property
     def dropdown(self):
-        """提供下拉框实例访问（用于销毁）- 从LabeledDropdown获取"""
-        from 前端.V2.层级5_基础模块.下拉框 import Dropdown
-        return Dropdown
+        """提供下拉框实例访问（用于销毁）- 通过公开接口"""
+        return LabeledDropdown.get_dropdown()
     
     def create(
         self,
         section: str,
         on_change: Callable[[str, str, Any], None] = None,
         theme_colors: Dict[str, str] = None,
-        controls_per_row: int = None,
     ) -> ft.Control:
         """
         创建控件区（不包装容器）
@@ -166,12 +141,14 @@ class CardControls:
         - section: 配置节
         - on_change: 值变更回调
         - theme_colors: 主题颜色（可选，不传则从配置服务获取）
-        - controls_per_row: 每行控件数（可选，默认从配置服务获取）
         
         返回：
         - ft.Control: 右侧控件区内容（Column）
         
-        注意：enabled状态、控件列表由模块自己从config_service获取
+        注意：
+        - enabled状态、控件列表由模块自己从config_service获取
+        - 布局值（下拉框宽度、每行控件数）按优先级从配置获取：
+          控件列表 > 卡片信息 > 界面布局 > 默认值
         """
         if self._config_service is None:
             raise RuntimeError("CardControls模块未设置config_service，请先调用CardControls.set_config_service()")
@@ -183,7 +160,7 @@ class CardControls:
         
         v_spacing = self.get_v_spacing()
         controls_column = ft.Column([], spacing=v_spacing, alignment=ft.MainAxisAlignment.CENTER)
-        self._layout_controls(controls_column, controls, controls_per_row)
+        self._layout_controls(section, controls_column, controls)
         
         self._controls_cache[section] = controls_column
         
@@ -196,7 +173,16 @@ class CardControls:
         def set_opacity(opacity: float):
             container.opacity = opacity
         
+        def set_enabled(state: bool):
+            container.opacity = 1.0 if state else 0.5
+            for row in controls_column.controls:
+                if hasattr(row, 'controls'):
+                    for ctrl in row.controls:
+                        if hasattr(ctrl, 'set_enabled'):
+                            ctrl.set_enabled(state)
+        
         container.set_opacity = set_opacity
+        container.set_enabled = set_enabled
         
         return container
     
@@ -216,12 +202,14 @@ class CardControls:
             label = config.get("label", "")
             
             if control_type == "dropdown":
+                width = self._config_service.get_layout_value(section, "下拉框宽度", control_id)
                 control = LabeledDropdown.create(
                     section=section,
                     control_id=control_id,
                     label=label,
                     enabled=enabled,
                     on_change=on_change,
+                    dropdown_width=width,
                 )
             elif control_type == "input":
                 control = self._create_input_control(section, control_id, config, enabled, on_change)
@@ -255,9 +243,9 @@ class CardControls:
             on_change=on_change,
         )
     
-    def _layout_controls(self, controls_column: ft.Column, controls: List[ft.Control], controls_per_row: int = None):
+    def _layout_controls(self, section: str, controls_column: ft.Column, controls: List[ft.Control]):
         """布局控件"""
-        per_row = controls_per_row if controls_per_row is not None else self.get_controls_per_row()
+        per_row = self._config_service.get_layout_value(section, "每行控件数")
         h_spacing = self.get_h_spacing()
         
         row_list = []
@@ -292,8 +280,6 @@ class CardControls:
     
     def get_all_values(self, section: str) -> Dict[str, Any]:
         """获取指定section所有控件的值"""
-        from 前端.V2.层级5_基础模块.下拉框 import Dropdown
-        
         values = {}
         controls_config = self._get_controls(section)
         for config in controls_config:
@@ -301,7 +287,7 @@ class CardControls:
             control_type = config.get("type", "dropdown")
             
             if control_type == "dropdown":
-                values[control_id] = Dropdown.get_value(section, control_id)
+                values[control_id] = self.dropdown.get_value(section, control_id)
             elif control_type == "input":
                 values[control_id] = self._input_box.get_value(section, control_id)
         

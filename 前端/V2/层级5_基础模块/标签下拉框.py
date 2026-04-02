@@ -69,6 +69,14 @@ class LabeledDropdown:
         cls._dropdown_instance = Dropdown(page, cls._config_service)
     
     @staticmethod
+    def get_dropdown():
+        """获取下拉框实例（公开接口）"""
+        LabeledDropdown._check_config_service()
+        if LabeledDropdown._dropdown_instance is None:
+            LabeledDropdown._dropdown_instance = Dropdown(None, LabeledDropdown._config_service)
+        return LabeledDropdown._dropdown_instance
+    
+    @staticmethod
     def _check_config_service():
         """检查配置服务是否已设置"""
         if LabeledDropdown._config_service is None:

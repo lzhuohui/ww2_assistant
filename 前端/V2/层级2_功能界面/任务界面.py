@@ -24,8 +24,7 @@ import flet as ft
 from typing import Callable, Dict, Any
 
 from 前端.V2.层级3_卡片组.卡片组 import CardGroup
-
-USER_CARD_SPACING = 10
+from 前端.V2.层级5_基础模块.卡片容器 import CardContainer
 
 class TaskPage:
     """
@@ -79,7 +78,7 @@ class TaskPage:
             )
             cards.append(card)
         
-        return ft.Column(cards, spacing=USER_CARD_SPACING, scroll=ft.ScrollMode.AUTO, expand=True)
+        return ft.Column(cards, spacing=CardContainer.get_spacing(), scroll=ft.ScrollMode.AUTO, expand=True)
     
     @staticmethod
     def destroy():

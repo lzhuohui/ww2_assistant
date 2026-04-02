@@ -137,8 +137,8 @@ class Dropdown:
         - height: 高度（可选，优先级：USER_HEIGHT > 参数 > 用户偏好.json）
         - option_loader: 懒加载函数，点击时才加载选项
         """
-        width = USER_WIDTH if USER_WIDTH is not None else (width if width is not None else Dropdown.get_width())
-        height = USER_HEIGHT if USER_HEIGHT is not None else (height if height is not None else Dropdown.get_height())
+        width = width if width is not None else (USER_WIDTH if USER_WIDTH is not None else Dropdown.get_width())
+        height = height if height is not None else (USER_HEIGHT if USER_HEIGHT is not None else Dropdown.get_height())
         border_radius = Dropdown.get_border_radius()
         
         if theme_colors is None:

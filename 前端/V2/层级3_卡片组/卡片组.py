@@ -104,7 +104,6 @@ class CardGroup:
         theme_colors: Dict[str, str] = None,
         width: int = None,
         height: int = None,
-        controls_per_row: int = None,
     ) -> ft.Stack:
         """
         创建卡片组（卡片开关浮动在卡片容器上层）
@@ -117,10 +116,11 @@ class CardGroup:
         - theme_colors: 主题颜色（可选，不传则从配置服务获取）
         - width: 卡片宽度
         - height: 卡片高度（可选，默认使用卡片容器高度）
-        - controls_per_row: 每行控件数（可选，默认从配置服务获取）
         
         返回：
         - ft.Stack: 卡片开关浮动在卡片容器上层的堆叠
+        
+        注意：布局值（下拉框宽度、每行控件数）按优先级从配置获取
         """
         if self._config_service is None:
             raise RuntimeError("CardGroup模块未设置config_service，请先调用CardGroup.set_config_service()")
@@ -131,18 +131,9 @@ class CardGroup:
         if height is None:
             height = CardContainer.get_height()
         
-        def on_toggle(new_enabled: bool):
-            if on_switch_change:
-                on_switch_change(new_enabled)
-            try:
-                if self._page:
-                    card_stack.update()
-            except:
-                pass
-        
         switch_module = self._card_switch.create(
             section=section,
-            on_toggle=on_toggle,
+            on_toggle=None,
             theme_colors=theme_colors,
         )
         
@@ -150,7 +141,6 @@ class CardGroup:
             section=section,
             on_change=on_control_change,
             theme_colors=theme_colors,
-            controls_per_row=controls_per_row,
         )
         
         right_margin = CardControls.get_right_margin()
@@ -167,6 +157,16 @@ class CardGroup:
             width=width,
         )
         
+        def update_card_state(new_enabled: bool):
+            container.opacity = 1.0 if new_enabled else 0.5
+            if hasattr(controls_module, 'set_enabled'):
+                controls_module.set_enabled(new_enabled)
+            if self._page:
+                try:
+                    card_stack.update()
+                except:
+                    pass
+        
         def get_switch_state() -> bool:
             return self._card_switch.get_state(section)
         
@@ -177,15 +177,24 @@ class CardGroup:
             return self._card_controls.get_all_values(section)
         
         switch_height = CardSwitch.get_divider_height()
-        switch_width = CardSwitch.get_left_width()
         top_offset = (height - switch_height) / 2
+        
+        def handle_switch_click(e):
+            original_handler = switch_module.on_click
+            if original_handler:
+                original_handler(e)
+            current_state = switch_module.get_state()
+            update_card_state(current_state)
+            if on_switch_change:
+                on_switch_change(current_state)
         
         switch_container = ft.Container(
             content=switch_module,
-            alignment=ft.alignment.Alignment(0.5, 0.5),
+            alignment=ft.alignment.Alignment(0, 0.5),
             top=top_offset,
             left=0,
-            width=switch_width,
+            width=width,
+            on_click=handle_switch_click,
         )
         
         card_stack = ft.Stack([
