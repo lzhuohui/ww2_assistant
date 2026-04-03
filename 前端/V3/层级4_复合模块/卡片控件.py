@@ -244,7 +244,7 @@ class CardControls:
             controls_column.controls.append(row)
     
     def set_enabled(self, enabled: bool):
-        """设置所有控件的启用状态（opacity + disabled）"""
+        """设置所有控件的启用状态"""
         if self._container:
             self._container.opacity = 1.0 if enabled else 0.5
             try:
@@ -253,9 +253,11 @@ class CardControls:
                 pass
         
         for control in self._controls_list:
-            if hasattr(control, 'disabled'):
-                control.disabled = not enabled
-                try:
-                    control.update()
-                except:
-                    pass
+            try:
+                if hasattr(control, 'set_enabled'):
+                    control.set_enabled(enabled)
+                elif hasattr(control, 'disabled'):
+                    control.disabled = not enabled
+                control.update()
+            except:
+                pass

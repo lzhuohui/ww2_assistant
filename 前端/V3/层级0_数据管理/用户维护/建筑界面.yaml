@@ -277,14 +277,16 @@
     icon: SORT
     subtitle: 设置建筑优先顺序
     enabled: false
+    dropdown_width: 100
+    controls_per_row: 1      # 每行控件数
   控件列表:
     - id: 资源建筑
       type: dropdown
-      label: 资源
+      label: "资源建筑:"
       options: ["自动平衡", "钢铁优先", "橡胶优先", "石油优先"]
       default: "自动平衡"
     - id: 塔防建筑
       type: dropdown
-      label: 塔防
+      label: "塔防建筑:"
       options: ["炮塔优先", "岸防优先"]
       default: "炮塔优先"

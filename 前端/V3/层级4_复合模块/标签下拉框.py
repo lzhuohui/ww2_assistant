@@ -89,8 +89,15 @@ class LabeledDropdown:
             width=dropdown_width,
         )
         
-        return ft.Row(
+        row = ft.Row(
             [label_text, dropdown_container],
             spacing=LabeledDropdown.get_spacing(),
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
         )
+        
+        def set_enabled(is_enabled: bool):
+            dropdown_container.set_enabled(is_enabled)
+        
+        row.set_enabled = set_enabled
+        
+        return row

@@ -5,7 +5,7 @@
 界面布局:
   dropdown_width: 100
   input_width: 100
-  controls_per_row: 4
+  controls_per_row: 2
   control_spacing: 6
   card_height: 100
 
@@ -49,6 +49,7 @@
     icon: DOWNLOAD
     subtitle: 设置分城纳租参数
     enabled: false
+    controls_per_row: 1
   控件列表:
     - id: 分城等级
       type: dropdown

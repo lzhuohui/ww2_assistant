@@ -104,7 +104,7 @@ class TaskInterface:
         
         return ft.Row(
             controls=[title, ft.VerticalDivider(width=1, color=text_secondary), hint],
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            vertical_alignment=ft.CrossAxisAlignment.END,
             spacing=12,
         )
     

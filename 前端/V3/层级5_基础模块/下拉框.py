@@ -74,7 +74,7 @@ class Dropdown:
     @staticmethod
     def get_options_padding() -> int:
         Dropdown._check_config_manager()
-        return Dropdown._config_manager.get_ui_size("边距", "小") or 4
+        return Dropdown._config_manager.get_ui_size("边距", "中") or 8
     
     @staticmethod
     def get_options_spacing() -> int:
@@ -89,7 +89,7 @@ class Dropdown:
     @staticmethod
     def get_max_options_height() -> int:
         Dropdown._check_config_manager()
-        return Dropdown._config_manager.get_ui_config("控件", "下拉框最大高度") or 200
+        return Dropdown._config_manager.get_ui_config("控件", "下拉框最大高度") or 300
     
     @classmethod
     def destroy_all_instances(cls):
@@ -239,15 +239,14 @@ class Dropdown:
         options_list = ft.Column(
             [],
             spacing=options_spacing,
-            scroll=ft.ScrollMode.AUTO,
-            expand=True,
+            scroll=ft.ScrollMode.HIDDEN,
+            tight=True,
         )
         
         options_panel = ft.Container(
             content=options_list,
             visible=False,
             bgcolor=bg_card,
-            border=ft.Border.all(1, accent_color),
             border_radius=border_radius,
             padding=options_padding,
             top=height + 2,
@@ -300,25 +299,33 @@ class Dropdown:
         def build_options_list():
             opts = state["options"]
             options_list.controls.clear()
+            current_val = state["current_value"].get("value", "")
+            selected_index = -1
             
-            for opt in opts:
+            for i, opt in enumerate(opts):
+                if opt.get("value", "") == current_val:
+                    selected_index = i
+                
+                is_selected = (opt.get("value", "") == current_val)
                 option_btn = ft.Container(
                     content=ft.Text(opt.get("text", ""), size=font_size, color=text_color),
-                    padding=ft.Padding.symmetric(horizontal=padding, vertical=option_item_padding),
-                    bgcolor=bg_card,
+                    padding=ft.Padding.symmetric(horizontal=padding, vertical=2),
+                    bgcolor=accent_color if is_selected else bg_card,
                     border_radius=border_radius,
                     on_click=lambda e, o=opt: select_option(o),
                 )
                 
-                def on_hover(e, btn=option_btn):
+                def on_hover(e, btn=option_btn, is_sel=is_selected):
                     if e.data == "true":
                         btn.bgcolor = accent_color
                     else:
-                        btn.bgcolor = bg_card
+                        btn.bgcolor = accent_color if is_sel else bg_card
                     btn.update()
                 
                 option_btn.on_hover = on_hover
                 options_list.controls.append(option_btn)
+            
+            return selected_index
         
         def on_tap_down(e):
             if e.global_position and e.local_position:
@@ -350,19 +357,34 @@ class Dropdown:
                     state["options"] = options
                     state["options_loaded"] = True
                 
-                build_options_list()
-                
-                options_panel.top = button_position["top"] + height + 2
-                options_panel.left = button_position["left"]
+                selected_index = build_options_list()
                 
                 opts = state["options"]
-                item_height = font_size + option_item_padding * 2 + options_spacing
+                item_height = font_size + 4 + options_spacing
                 content_height = len(opts) * item_height + options_padding * 2
                 
-                if content_height <= max_options_height:
-                    options_panel.height = content_height
+                button_top = button_position["top"]
+                button_left = button_position["left"]
+                
+                space_below = page.height - button_top - height - 20
+                space_above = button_top - 20
+                
+                if selected_index >= 0:
+                    selected_offset = selected_index * item_height + options_padding
                 else:
-                    options_panel.height = max_options_height
+                    selected_offset = 0
+                
+                panel_top = button_top - selected_offset
+                panel_height = min(content_height, page.height - 40)
+                
+                if panel_top < 20:
+                    panel_top = 20
+                elif panel_top + panel_height > page.height - 20:
+                    panel_top = page.height - panel_height - 20
+                
+                options_panel.top = panel_top
+                options_panel.height = panel_height
+                options_panel.left = button_left
                 
                 options_panel.visible = True
                 overlay_mask.visible = True
@@ -372,6 +394,15 @@ class Dropdown:
                     page.overlay.append(overlay_mask)
                 if options_panel not in page.overlay:
                     page.overlay.append(options_panel)
+                
+                page.update()
+                
+                if selected_index >= 0 and content_height > panel_height:
+                    scroll_offset = selected_index * item_height
+                    try:
+                        page.run_task(options_list.scroll_to, offset=scroll_offset, duration=100)
+                    except Exception:
+                        pass
             else:
                 close_dropdown()
             

@@ -121,14 +121,6 @@ class FunctionCard:
         card_switch = CardSwitch(self._page, self._config_manager)
         card_controls = CardControls(self._page, self._config_manager)
         
-        switch_section = card_switch.create(
-            interface=interface,
-            card=card,
-            card_info=card_info,
-            on_toggle=None,
-            theme_colors=theme_colors,
-        )
-        
         controls_section = card_controls.create(
             interface=interface,
             card=card,
@@ -159,8 +151,7 @@ class FunctionCard:
         switch_height = card_height
         top_offset = 0
         
-        def handle_switch_click(e):
-            new_enabled = not card_switch.is_enabled()
+        def handle_toggle(interface: str, card: str, new_enabled: bool):
             card_switch.set_enabled_state(new_enabled)
             container.opacity = 1.0 if new_enabled else 0.5
             card_controls.set_enabled(new_enabled)
@@ -172,12 +163,19 @@ class FunctionCard:
             except:
                 pass
         
+        switch_section = card_switch.create(
+            interface=interface,
+            card=card,
+            card_info=card_info,
+            on_toggle=handle_toggle,
+            theme_colors=theme_colors,
+        )
+        
         switch_container = ft.Container(
             content=switch_section,
             alignment=ft.alignment.Alignment(0, 0.5),
             top=top_offset,
             left=0,
-            on_click=handle_switch_click,
         )
         
         card_stack = ft.Stack([

@@ -125,7 +125,7 @@ class CardSwitch:
         - interface: 界面名称
         - card: 卡片名称
         - card_info: 卡片信息
-        - on_toggle: 开关状态变更回调（未使用，由功能卡片处理）
+        - on_toggle: 开关状态变更回调
         - theme_colors: 主题颜色
         
         返回：
@@ -141,6 +141,7 @@ class CardSwitch:
         self._card = card
         self._theme_colors = theme_colors
         self._enabled = self._get_enabled(interface, card)
+        self._on_toggle = on_toggle
         
         title = card_info.get("title", card)
         icon_name = card_info.get("icon", "HOME")
@@ -179,11 +180,16 @@ class CardSwitch:
             self._title_text,
         ], spacing=0, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
         
+        def handle_toggle_click(e):
+            if self._on_toggle:
+                self._on_toggle(interface, card, not self._enabled)
+        
         left_container = ft.Container(
             content=left_content,
             width=left_width - 2,
             padding=ft.Padding(padding, 0, padding, 0),
             alignment=ft.alignment.Alignment(0, 0.5),
+            on_click=handle_toggle_click,
         )
         
         divider_height = card_height - padding
@@ -197,6 +203,7 @@ class CardSwitch:
             ),
             height=divider_height,
             alignment=ft.alignment.Alignment(0, 0.5),
+            on_click=handle_toggle_click,
         )
         
         self._subtitle_text = ft.Text(
