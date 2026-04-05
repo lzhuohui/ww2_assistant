@@ -1,0 +1,122 @@
+# ===========================================
+# 注册界面配置
+# 说明：费用说明、注册信息、购买授权、联系方式
+# 维护者：开发团队
+# 最后更新： 2026-04-05
+# ===========================================
+
+界面布局:
+  card_height: 100
+  controls_per_row: 3
+  row_spacing: 2
+
+费用说明:
+  卡片信息:
+    title: 费用说明
+    icon: ATTACH_MONEY
+  控件列表:
+    - id: 基础包说明
+      type: info
+      label: 基础包
+      value: 授权时长，仅限单账号挂机
+    - id: 扩展包说明
+      type: info
+      label: 扩展包
+      value: 多账号次数，可同时挂机多个账号
+    - id: 计费说明
+      type: info
+      label: 计费方式
+      value: 基础包+扩展包=总价，扩展包次数用完可续购
+    - id: 注意事项
+      type: info
+      label: 注意事项
+      value: 授权码一经激活不可退款，请确认信息无误
+
+注册信息:
+  卡片信息:
+    title: 注册信息
+    icon: PERSON
+    row_spacing: 0
+  控件列表:
+    - id: 注册名称
+      type: input
+      label: 注册名称
+      value: ""
+      placeholder: 请输入注册名称（注册后不可更改）
+    - id: 设备码
+      type: info
+      label: 设备码
+      value: 未获取
+      copyable: true
+    - id: 注册状态
+      type: info
+      label: 注册状态
+      value: 试用期
+    - id: 基础包
+      type: dropdown
+      label: 基础包
+      value: 月卡
+      options:
+        - text: 日卡
+          price: 3
+        - text: 周卡
+          price: 18
+        - text: 月卡
+          price: 50
+        - text: 季卡
+          price: 120
+        - text: 年卡
+          price: 300
+    - id: 扩展包
+      type: dropdown
+      label: 扩展包
+      value: 无
+      options:
+        - text: 无
+          price: 0
+        - text: 15次
+          price: 25
+        - text: 30次
+          price: 45
+        - text: 60次
+          price: 80
+        - text: 120次
+          price: 150
+        - text: 240次
+          price: 280
+    - id: 复制信息
+      type: icon_button
+      label: ""
+      value: CONTENT_COPY
+
+购买授权:
+  卡片信息:
+    title: 购买授权
+    icon: KEY
+    row_spacing: 0
+  控件列表:
+    - id: 授权码
+      type: input
+      label: 授权码
+      value: ""
+      placeholder: XXXX-XXXX-XXXX-XXXX
+    - id: 激活按钮
+      type: icon_button
+      label: ""
+      value: PLAY_ARROW
+
+联系方式:
+  卡片信息:
+    title: 联系方式
+    icon: CONTACTS
+  控件列表:
+    - id: 微信
+      type: info
+      label: 微信
+      value: WW2_Helper
+      copyable: true
+    - id: QQ群
+      type: info
+      label: QQ群
+      value: 123456789
+      copyable: true

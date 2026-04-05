@@ -1,8 +1,0 @@
-{
-  "test_card_001.test_dropdown": "测试值",
-  "main_city.enabled": true,
-  "vice_main_city.enabled": true,
-  "sub_city.enabled": true,
-  "legion_city.enabled": true,
-  "priority.enabled": true
-}

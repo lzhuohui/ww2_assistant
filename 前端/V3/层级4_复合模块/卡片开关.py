@@ -14,12 +14,13 @@
 """
 
 import flet as ft
-from typing import Callable, Dict, Any
+from typing import Callable, Dict, Any, List
 
 from 前端.V3.层级0_数据管理.配置管理 import ConfigManager
 from 前端.V3.层级5_基础模块.图标 import Icon
 from 前端.V3.层级5_基础模块.标签 import Label
 from 前端.V3.层级5_基础模块.分割线 import Divider
+
 
 class CardSwitch:
     """
@@ -91,9 +92,9 @@ class CardSwitch:
     def get_icon_title_spacing() -> int:
         """获取图标与标题间距"""
         CardSwitch._check_config_manager()
-        spacing = CardSwitch._config_manager.get_ui_size("边距", "小")
+        spacing = CardSwitch._config_manager.get_ui_size("边距", "控件间距")
         if spacing is None:
-            spacing = 2
+            spacing = 6
         return spacing
     
     def __init__(self, page: ft.Page, config_manager: ConfigManager = None):
@@ -109,6 +110,10 @@ class CardSwitch:
         self._interface: str = ""
         self._card: str = ""
         self._theme_colors: Dict[str, str] = None
+        self._on_toggle: Callable = None
+        self._subtitle_enabled: str = ""
+        self._subtitle_disabled: str = ""
+        self._has_dynamic_subtitle: bool = False
     
     def create(
         self,
@@ -117,6 +122,7 @@ class CardSwitch:
         card_info: Dict = None,
         on_toggle: Callable[[str, str, bool], None] = None,
         theme_colors: Dict[str, str] = None,
+        enabled: bool = None,
     ) -> ft.Container:
         """
         创建卡片开关
@@ -127,6 +133,7 @@ class CardSwitch:
         - card_info: 卡片信息
         - on_toggle: 开关状态变更回调
         - theme_colors: 主题颜色
+        - enabled: 开关状态（None时从配置读取）
         
         返回：
         - ft.Container: 完整的卡片开关组件
@@ -140,12 +147,24 @@ class CardSwitch:
         self._interface = interface
         self._card = card
         self._theme_colors = theme_colors
-        self._enabled = self._get_enabled(interface, card)
+        self._enabled = enabled if enabled is not None else self._get_enabled(interface, card)
         self._on_toggle = on_toggle
         
         title = card_info.get("title", card)
         icon_name = card_info.get("icon", "HOME")
         subtitle = card_info.get("subtitle", "")
+        subtitle_enabled = card_info.get("subtitle_enabled", "")
+        subtitle_disabled = card_info.get("subtitle_disabled", "")
+        no_switch = card_info.get("no_switch", False)
+        
+        self._subtitle_enabled = subtitle_enabled
+        self._subtitle_disabled = subtitle_disabled
+        self._has_dynamic_subtitle = bool(subtitle_enabled and subtitle_disabled)
+        
+        if self._has_dynamic_subtitle:
+            display_subtitle = subtitle_enabled if self._enabled else subtitle_disabled
+        else:
+            display_subtitle = subtitle
         
         icon_size = self.get_icon_size()
         title_size = self.get_title_size()
@@ -172,6 +191,7 @@ class CardSwitch:
             weight=ft.FontWeight.BOLD,
             color=text_primary,
             opacity=1.0 if self._enabled else 0.4,
+            text_align=ft.TextAlign.CENTER,
         )
         
         left_content = ft.Column([
@@ -181,6 +201,8 @@ class CardSwitch:
         ], spacing=0, alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
         
         def handle_toggle_click(e):
+            if no_switch:
+                return
             if self._on_toggle:
                 self._on_toggle(interface, card, not self._enabled)
         
@@ -189,7 +211,7 @@ class CardSwitch:
             width=left_width - 2,
             padding=ft.Padding(padding, 0, padding, 0),
             alignment=ft.alignment.Alignment(0, 0.5),
-            on_click=handle_toggle_click,
+            on_click=None if no_switch else handle_toggle_click,
         )
         
         divider_height = card_height - padding
@@ -203,27 +225,28 @@ class CardSwitch:
             ),
             height=divider_height,
             alignment=ft.alignment.Alignment(0, 0.5),
-            on_click=handle_toggle_click,
+            on_click=None if no_switch else handle_toggle_click,
         )
         
         self._subtitle_text = ft.Text(
-            subtitle,
+            display_subtitle.replace(" | ", "\n").replace("|", "\n"),
             size=subtitle_size,
             color=text_secondary,
             opacity=0.8 if self._enabled else 0.4,
-            max_lines=2,
+            max_lines=4,
             overflow=ft.TextOverflow.ELLIPSIS,
-        ) if subtitle else None
+            no_wrap=False,
+        ) if display_subtitle else None
         
         right_content = ft.Column([
-            ft.Container(expand=True),
             self._subtitle_text if self._subtitle_text else ft.Container(),
-        ], spacing=0, alignment=ft.MainAxisAlignment.END) if self._subtitle_text else ft.Container(expand=True)
+        ], spacing=0, alignment=ft.MainAxisAlignment.END, tight=True) if self._subtitle_text else ft.Container()
         
         right_container = ft.Container(
             content=right_content,
-            expand=True,
+            expand=True if self._subtitle_text else False,
             padding=ft.Padding(8, 0, padding, 0),
+            alignment=ft.alignment.Alignment(-1, 1),
         )
         
         self._switch_row = ft.Row([
@@ -246,8 +269,13 @@ class CardSwitch:
         
         self._icon_control.opacity = 1.0 if enabled else 0.4
         self._title_text.opacity = 1.0 if enabled else 0.4
+        
         if self._subtitle_text:
             self._subtitle_text.opacity = 0.8 if enabled else 0.4
+            
+            if self._has_dynamic_subtitle:
+                new_subtitle = self._subtitle_enabled if enabled else self._subtitle_disabled
+                self._subtitle_text.value = new_subtitle.replace(" | ", "\n").replace("|", "\n")
         
         try:
             self._icon_control.update()
@@ -260,6 +288,37 @@ class CardSwitch:
     def set_controls_ref(self, controls_ref: Any):
         """设置控件区引用"""
         self._controls_ref = controls_ref
+    
+    def set_subtitle(self, subtitle: str):
+        """更新副标题"""
+        formatted_subtitle = subtitle.replace(" | ", "\n").replace("|", "\n") if subtitle else ""
+        if self._subtitle_text:
+            self._subtitle_text.value = formatted_subtitle
+        else:
+            subtitle_size = self.get_subtitle_size()
+            text_secondary = self._theme_colors.get("text_secondary", "#B0B0B0")
+            self._subtitle_text = ft.Text(
+                formatted_subtitle,
+                size=subtitle_size,
+                color=text_secondary,
+                opacity=0.8 if self._enabled else 0.4,
+                max_lines=4,
+                overflow=ft.TextOverflow.ELLIPSIS,
+            )
+            if self._switch_row and len(self._switch_row.controls) >= 3:
+                right_container = self._switch_row.controls[2]
+                right_container.expand = True
+                right_content = ft.Column([
+                    ft.Container(expand=True),
+                    self._subtitle_text,
+                ], spacing=0, alignment=ft.MainAxisAlignment.END)
+                right_container.content = right_content
+        
+        try:
+            if self._container:
+                self._container.update()
+        except:
+            pass
     
     def _get_theme_colors(self) -> Dict[str, str]:
         """获取主题颜色"""

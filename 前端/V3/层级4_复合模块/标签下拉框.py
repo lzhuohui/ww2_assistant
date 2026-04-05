@@ -50,9 +50,9 @@ class LabeledDropdown:
     def get_spacing() -> int:
         """获取标签与下拉框间距"""
         LabeledDropdown._check_config_manager()
-        spacing = LabeledDropdown._config_manager.get_ui_size("边距", "小")
+        spacing = LabeledDropdown._config_manager.get_ui_size("边距", "标签控件间距")
         if spacing is None:
-            spacing = 4
+            spacing = 6
         return spacing
     
     @staticmethod
@@ -65,7 +65,25 @@ class LabeledDropdown:
         on_change: Callable[[str, str, str, Dict[str, str]], None] = None,
         label_size: int = None,
         dropdown_width: int = None,
+        use_defaults: bool = False,
     ) -> ft.Row:
+        """
+        创建标签下拉框
+        
+        参数：
+        - interface: 界面名称
+        - card: 卡片名称
+        - control_id: 控件ID
+        - label: 标签文本
+        - enabled: 是否启用
+        - on_change: 值变更回调
+        - label_size: 标签字体大小
+        - dropdown_width: 下拉框宽度
+        - use_defaults: 是否使用默认值（True时忽略方案值）
+        
+        返回：
+        - ft.Row: 标签+下拉框组合
+        """
         LabeledDropdown._check_config_manager()
         
         if LabeledDropdown._dropdown_instance is None:
@@ -87,6 +105,7 @@ class LabeledDropdown:
             enabled=enabled,
             on_change=on_change,
             width=dropdown_width,
+            use_defaults=use_defaults,
         )
         
         row = ft.Row(

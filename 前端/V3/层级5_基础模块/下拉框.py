@@ -2,40 +2,63 @@
 
 """
 模块名称：下拉框.py
-模块功能：下拉框组件，使用自定义组件实现真正的懒加载
+模块功能：高性能下拉框组件，针对大量选项场景优化
 
-实现步骤：
-- 调用时只加载当前值（不加载选项列表）
-- 点击时才加载选项列表并显示
-- 点击另一个下拉框时，销毁上一个下拉框的选项列表
-- 切换界面时，销毁所有下拉框的选项数据和实例引用
+优化策略：
+1. 界面级缓存 - 同界面内复用选项数据，切换界面时清空
+2. 搜索功能 - 选项超过阈值时显示搜索框
+3. 隐藏滚动条 - 使用ScrollMode.HIDDEN实现Win11风格
+4. 聚焦功能 - 使用offset方式scroll_to，可靠稳定
 
-销毁说明：
-- options: 选项列表数据（内存）
-- options_loaded: 是否已加载标志
-- _all_dropdowns: 类变量，存储所有实例引用
-- 不销毁：控件本身（Flet管理）、配置数据（持久化）
+使用方式：
+- 通过 DropdownOptimized.set_config_manager() 初始化
+- 通过 create() 方法创建下拉框
 """
 
+from typing import List, Dict, Callable, Optional
+
 import flet as ft
-from typing import List, Dict, Callable
 
 from 前端.V3.层级0_数据管理.配置管理 import ConfigManager
 
+try:
+    from pypinyin import lazy_pinyin
+    PINYIN_AVAILABLE = True
+except ImportError:
+    PINYIN_AVAILABLE = False
 
-class Dropdown:
+OPTION_ITEM_PADDING_V = 2
+TEXT_HEIGHT_OFFSET = 4
+SCROLL_DURATION = 100
+
+SEARCH_THRESHOLD = 25
+CACHE_ENABLED = True
+
+SEARCH_BOX_HEIGHT = 32
+DEFAULT_MAX_MENU_HEIGHT = 540
+
+
+def _calculate_item_height(font_size: int) -> int:
+    return font_size + TEXT_HEIGHT_OFFSET + 2 * OPTION_ITEM_PADDING_V
+
+
+class DropdownOptimized:
     """
-    下拉框组件 - 使用自定义组件实现真正的懒加载
+    高性能下拉框组件
     
-    实现步骤：
-    1. 调用时只加载当前值（不加载选项列表）
-    2. 点击时才加载选项列表并显示
-    3. 销毁时清理选项数据
+    优化特性：
+    1. 界面级缓存：同界面内复用选项数据
+    2. 搜索功能：选项超过阈值时启用
+    3. 隐藏滚动条：Win11风格
+    4. 聚焦功能：offset方式scroll_to
     """
     
     _config_manager: ConfigManager = None
     _current_open_key: str = None
-    _all_dropdowns: Dict[str, 'Dropdown'] = {}
+    _all_dropdowns: Dict[str, 'DropdownOptimized'] = {}
+    
+    _interface_cache: Dict[str, Dict[str, List[Dict]]] = {}
+    _current_interface: str = None
     
     @classmethod
     def set_config_manager(cls, config_manager: ConfigManager):
@@ -43,69 +66,158 @@ class Dropdown:
     
     @staticmethod
     def _check_config_manager():
-        if Dropdown._config_manager is None:
-            raise RuntimeError("Dropdown模块未设置config_manager")
+        if DropdownOptimized._config_manager is None:
+            raise RuntimeError("DropdownOptimized模块未设置config_manager")
     
     @staticmethod
     def get_font_size() -> int:
-        Dropdown._check_config_manager()
-        return Dropdown._config_manager.get_ui_size("字体", "正文字体") or 16
+        DropdownOptimized._check_config_manager()
+        return DropdownOptimized._config_manager.get_ui_size("字体", "正文字体") or 16
     
     @staticmethod
     def get_icon_size() -> int:
-        Dropdown._check_config_manager()
-        return Dropdown._config_manager.get_ui_size("字体", "图标大小") or 18
+        DropdownOptimized._check_config_manager()
+        return DropdownOptimized._config_manager.get_ui_size("字体", "图标大小") or 18
     
     @staticmethod
     def get_border_radius() -> int:
-        Dropdown._check_config_manager()
-        return Dropdown._config_manager.get_radius("小") or 3
+        DropdownOptimized._check_config_manager()
+        return DropdownOptimized._config_manager.get_radius("小") or 3
     
     @staticmethod
     def get_padding() -> int:
-        Dropdown._check_config_manager()
-        return Dropdown._config_manager.get_ui_size("边距", "中") or 8
-    
-    @staticmethod
-    def get_placeholder_text() -> str:
-        Dropdown._check_config_manager()
-        return Dropdown._config_manager.get_text_config("下拉框", "占位符") or "点击加载选项..."
+        DropdownOptimized._check_config_manager()
+        return DropdownOptimized._config_manager.get_ui_size("边距", "下拉框内边距") or 8
     
     @staticmethod
     def get_options_padding() -> int:
-        Dropdown._check_config_manager()
-        return Dropdown._config_manager.get_ui_size("边距", "中") or 8
+        DropdownOptimized._check_config_manager()
+        return DropdownOptimized._config_manager.get_ui_size("边距", "下拉框内边距") or 8
     
     @staticmethod
     def get_options_spacing() -> int:
-        Dropdown._check_config_manager()
-        return Dropdown._config_manager.get_ui_size("边距", "小") or 2
-    
-    @staticmethod
-    def get_option_item_padding() -> int:
-        Dropdown._check_config_manager()
-        return Dropdown._config_manager.get_ui_size("边距", "中") or 6
+        DropdownOptimized._check_config_manager()
+        return DropdownOptimized._config_manager.get_ui_size("边距", "下拉框选项间距") or 4
     
     @staticmethod
     def get_max_options_height() -> int:
-        Dropdown._check_config_manager()
-        return Dropdown._config_manager.get_ui_config("控件", "下拉框最大高度") or 300
+        DropdownOptimized._check_config_manager()
+        return DropdownOptimized._config_manager.get_ui_config("控件", "下拉框最大菜单高度") or DEFAULT_MAX_MENU_HEIGHT
+    
+    @staticmethod
+    def get_shadow_config() -> Dict:
+        DropdownOptimized._check_config_manager()
+        return DropdownOptimized._config_manager.get_shadow_config("菜单")
+    
+    @classmethod
+    def set_current_interface(cls, interface: str):
+        if cls._current_interface and cls._current_interface != interface:
+            cls._clear_interface_cache(cls._current_interface)
+        cls._current_interface = interface
+    
+    @classmethod
+    def _clear_interface_cache(cls, interface: str):
+        if interface in cls._interface_cache:
+            cls._interface_cache[interface].clear()
+            del cls._interface_cache[interface]
+    
+    @classmethod
+    def get_cached_options(cls, interface: str, key: str) -> Optional[List[Dict]]:
+        if not CACHE_ENABLED:
+            return None
+        if interface in cls._interface_cache:
+            return cls._interface_cache[interface].get(key)
+        return None
+    
+    @classmethod
+    def cache_options(cls, interface: str, key: str, options: List[Dict]):
+        if not CACHE_ENABLED:
+            return
+        if interface not in cls._interface_cache:
+            cls._interface_cache[interface] = {}
+        cls._interface_cache[interface][key] = options
     
     @classmethod
     def destroy_all_instances(cls):
-        """销毁所有下拉框实例的选项数据（类方法，供层级1调用）"""
-        for key in list(cls._all_dropdowns.keys()):
-            dropdown_instance = cls._all_dropdowns[key]
-            dropdown_instance.destroy_all()
+        keys_to_process = list(cls._all_dropdowns.keys())
+        for key in keys_to_process:
+            if key in cls._all_dropdowns:
+                instance = cls._all_dropdowns[key]
+                instance._destroy_instance(key)
         cls._all_dropdowns.clear()
         cls._current_open_key = None
     
+    @classmethod
+    def destroy_interface_instances(cls, interface: str):
+        keys_to_remove = [k for k in list(cls._all_dropdowns.keys()) if k.startswith(f"{interface}.")]
+        for key in keys_to_remove:
+            if key in cls._all_dropdowns:
+                instance = cls._all_dropdowns[key]
+                instance._destroy_instance(key)
+                del cls._all_dropdowns[key]
+        cls._clear_interface_cache(interface)
+    
+    @classmethod
+    def cleanup_page_overlay(cls, page: ft.Page):
+        panels_to_remove = []
+        masks_to_remove = []
+        for key in list(cls._all_dropdowns.keys()):
+            if key not in cls._all_dropdowns:
+                continue
+            instance = cls._all_dropdowns[key]
+            for panel_key, panel in list(instance._options_panels.items()):
+                try:
+                    if panel in page.overlay:
+                        panels_to_remove.append(panel)
+                except:
+                    pass
+            for container_key, container in instance._dropdowns.items():
+                try:
+                    if hasattr(container, '_overlay_mask') and container._overlay_mask in page.overlay:
+                        masks_to_remove.append(container._overlay_mask)
+                except:
+                    pass
+        for panel in panels_to_remove:
+            try:
+                if panel in page.overlay:
+                    page.overlay.remove(panel)
+            except:
+                pass
+        for mask in masks_to_remove:
+            try:
+                if mask in page.overlay:
+                    page.overlay.remove(mask)
+            except:
+                pass
+        try:
+            page.update()
+        except:
+            pass
+    
     def __init__(self, page: ft.Page = None, config_manager: ConfigManager = None):
         self._page = page
-        self._config_manager = config_manager or Dropdown._config_manager
+        self._config_manager = config_manager or DropdownOptimized._config_manager
         self._dropdowns: Dict[str, ft.Container] = {}
         self._dropdown_states: Dict[str, Dict] = {}
         self._options_panels: Dict[str, ft.Container] = {}
+    
+    def _destroy_instance(self, key: str):
+        if key in self._dropdown_states:
+            state = self._dropdown_states[key]
+            state["options"] = []
+            state["options_loaded"] = False
+            state["is_open"] = False
+        
+        if key in self._options_panels:
+            panel = self._options_panels[key]
+            panel.visible = False
+            if hasattr(panel.content, 'controls'):
+                panel.content.controls.clear()
+        
+        if key in self._dropdowns:
+            container = self._dropdowns[key]
+            if hasattr(container, '_overlay_mask'):
+                container._overlay_mask.visible = False
     
     def create(
         self,
@@ -117,6 +229,7 @@ class Dropdown:
         theme_colors: Dict[str, str] = None,
         width: int = None,
         height: int = None,
+        use_defaults: bool = False,
     ) -> ft.Container:
         if width is None:
             width = self._config_manager.get_layout_value(interface, card, "dropdown_width", control_id)
@@ -126,12 +239,12 @@ class Dropdown:
         if height is None:
             height = self._config_manager.get_ui_config("控件", "下拉框高度", 30)
         
-        border_radius = Dropdown.get_border_radius()
+        border_radius = DropdownOptimized.get_border_radius()
         
         if theme_colors is None:
             theme_colors = self._config_manager.get_theme_colors()
         
-        current_value = self._get_current_value(interface, card, control_id)
+        current_value = self._get_current_value(interface, card, control_id, use_defaults)
         
         container = self._build_dropdown(
             current_value, enabled,
@@ -141,45 +254,77 @@ class Dropdown:
         
         key = f"{interface}.{card}.{control_id}" if interface and card and control_id else f"dropdown_{len(self._dropdowns)}"
         self._dropdowns[key] = container
-        Dropdown._all_dropdowns[key] = self
+        DropdownOptimized._all_dropdowns[key] = self
         
         return container
     
-    def _get_current_value(self, interface: str, card: str, control_id: str) -> Dict[str, str]:
+    def _get_current_value(self, interface: str, card: str, control_id: str, use_defaults: bool = False) -> Dict[str, str]:
         if self._config_manager:
-            raw_value = self._config_manager.get_raw_value(interface, card, control_id)
-            if raw_value:
-                return {"text": raw_value, "value": raw_value}
-        return {"text": Dropdown.get_placeholder_text(), "value": ""}
+            if use_defaults:
+                default_value = self._config_manager.get_default(interface, card, control_id)
+                if default_value:
+                    return {"text": default_value, "value": default_value}
+            else:
+                raw_value = self._config_manager.get_raw_value(interface, card, control_id)
+                if raw_value:
+                    return {"text": raw_value, "value": raw_value}
+            
+            control_config = self._config_manager.get_control_config(interface, card, control_id)
+            dynamic_options = control_config.get("dynamic_options", "")
+            
+            if dynamic_options in ("commanders", "commanders_exclude_primary"):
+                if dynamic_options == "commanders":
+                    state = self._config_manager.get_commander_dropdown_state(interface, card, control_id)
+                else:
+                    key = f"{interface}.{card}.{control_id}"
+                    primary_key = key.replace("次要统帅", "主要统帅")
+                    primary_commander = self._config_manager._exclude_values.get(primary_key, [""])[0] if primary_key in self._config_manager._exclude_values else ""
+                    state = self._config_manager.get_commander_dropdown_state(interface, card, control_id, primary_commander)
+                
+                return state["current_value"]
+        
+        return {"text": "点击加载选项...", "value": ""}
     
     def _load_options(self, interface: str, card: str, control_id: str) -> List[Dict[str, str]]:
-        if self._config_manager is None:
-            return []
-        return self._config_manager.get_options(interface, card, control_id)
+        key = f"{interface}.{card}.{control_id}"
+        
+        cached = DropdownOptimized.get_cached_options(interface, key)
+        if cached is not None:
+            return cached
+        
+        options = self._config_manager.get_options(interface, card, control_id)
+        
+        DropdownOptimized.cache_options(interface, key, options)
+        
+        return options
     
     def _save_value(self, interface: str, card: str, control_id: str, value: Dict[str, str]):
         if self._config_manager:
             self._config_manager.set_value(interface, card, control_id, value)
     
     def _close_all_dropdowns(self, current_key: str = None):
-        for key, dropdown_instance in Dropdown._all_dropdowns.items():
+        pages_to_update = set()
+        for key, dropdown_instance in DropdownOptimized._all_dropdowns.items():
             if key != current_key and key in dropdown_instance._dropdown_states:
                 state = dropdown_instance._dropdown_states[key]
                 if state.get("is_open", False):
                     state["is_open"] = False
-                    state["options"] = []
-                    state["options_loaded"] = False
                     if key in dropdown_instance._options_panels:
-                        options_panel = dropdown_instance._options_panels[key]
-                        options_panel.visible = False
+                        panel = dropdown_instance._options_panels[key]
+                        panel.visible = False
+                        if hasattr(panel.content, 'controls'):
+                            panel.content.controls.clear()
                     if key in dropdown_instance._dropdowns:
                         container = dropdown_instance._dropdowns[key]
                         if hasattr(container, '_overlay_mask'):
                             container._overlay_mask.visible = False
                     if dropdown_instance._page:
-                        dropdown_instance._page.update()
+                        pages_to_update.add(dropdown_instance._page)
         
-        Dropdown._current_open_key = current_key
+        for page in pages_to_update:
+            page.update()
+        
+        DropdownOptimized._current_open_key = current_key
     
     def _build_dropdown(
         self,
@@ -200,14 +345,16 @@ class Dropdown:
         bg_card = theme_colors.get("bg_card", "#2D2D2D")
         border_color = theme_colors.get("border", "#3D3D3D")
         accent_color = theme_colors.get("accent", "#0078D4")
+        hover_color = "#3A3A3A"
         
-        font_size = Dropdown.get_font_size()
-        icon_size = Dropdown.get_icon_size()
-        padding = Dropdown.get_padding()
-        options_padding = Dropdown.get_options_padding()
-        options_spacing = Dropdown.get_options_spacing()
-        option_item_padding = Dropdown.get_option_item_padding()
-        max_options_height = Dropdown.get_max_options_height()
+        font_size = DropdownOptimized.get_font_size()
+        icon_size = DropdownOptimized.get_icon_size()
+        padding = DropdownOptimized.get_padding()
+        options_padding = DropdownOptimized.get_options_padding()
+        options_spacing = DropdownOptimized.get_options_spacing()
+        max_options_height = DropdownOptimized.get_max_options_height()
+        shadow_config = DropdownOptimized.get_shadow_config()
+        item_height = _calculate_item_height(font_size)
         
         key = f"{interface}.{card}.{control_id}"
         
@@ -236,6 +383,21 @@ class Dropdown:
             color=text_secondary if enabled else disabled_color,
         )
         
+        search_box = ft.Container(
+            content=ft.TextField(
+                hint_text="搜索...",
+                border=ft.InputBorder.NONE,
+                filled=True,
+                bgcolor="transparent",
+                text_size=font_size,
+                color=text_color,
+                hint_style=ft.TextStyle(color=text_secondary),
+                on_change=lambda e: self._on_search(e, key),
+            ),
+            padding=ft.Padding.symmetric(horizontal=padding, vertical=4),
+            height=0,
+        )
+        
         options_list = ft.Column(
             [],
             spacing=options_spacing,
@@ -247,11 +409,18 @@ class Dropdown:
             content=options_list,
             visible=False,
             bgcolor=bg_card,
+            border=ft.Border.all(1, border_color),
             border_radius=border_radius,
-            padding=options_padding,
-            top=height + 2,
+            padding=ft.Padding.symmetric(horizontal=0, vertical=options_padding),
+            top=0,
             left=0,
             opacity=1.0,
+            shadow=ft.BoxShadow(
+                spread_radius=shadow_config["spread_radius"],
+                blur_radius=shadow_config["blur_radius"],
+                color=ft.Colors.with_opacity(shadow_config["opacity"], ft.Colors.BLACK),
+                offset=ft.Offset(shadow_config["offset_x"], shadow_config["offset_y"]),
+            ),
         )
         self._options_panels[key] = options_panel
         
@@ -271,7 +440,6 @@ class Dropdown:
         )
         
         button_position = {"top": 0, "left": 0}
-        
         current_page = [self._page]
         
         overlay_mask = ft.Container(
@@ -281,13 +449,16 @@ class Dropdown:
         )
         
         def close_dropdown():
+            if not state["is_open"]:
+                return
             options_panel.visible = False
             overlay_mask.visible = False
             state["is_open"] = False
+            options_list.controls.clear()
             if current_page[0]:
                 current_page[0].update()
         
-        def select_option(option: Dict):
+        def select_option(option: Dict, from_search: bool = False):
             state["current_value"] = option
             display_text.value = option.get("text", "")
             display_text.color = text_color
@@ -296,53 +467,70 @@ class Dropdown:
                 on_change(interface, card, control_id, option)
             close_dropdown()
         
-        def build_options_list():
-            opts = state["options"]
+        def create_option_button(opt: Dict, is_selected: bool, from_search: bool = False) -> ft.Container:
+            btn = ft.Container(
+                content=ft.Text(opt.get("text", ""), size=font_size, color=text_color),
+                padding=ft.Padding.symmetric(horizontal=padding, vertical=OPTION_ITEM_PADDING_V),
+                height=item_height,
+                width=float('inf'),
+                bgcolor=hover_color if is_selected else "transparent",
+                border_radius=border_radius,
+                on_click=lambda e, o=opt, fs=from_search: select_option(o, fs),
+            )
+            
+            def on_hover(e, button=btn, sel=is_selected):
+                try:
+                    if e.data == "true":
+                        button.bgcolor = hover_color
+                    else:
+                        button.bgcolor = hover_color if sel else "transparent"
+                    button.update()
+                except RuntimeError:
+                    pass
+            
+            btn.on_hover = on_hover
+            return btn
+        
+        def build_options_list(opts: List[Dict], need_search: bool, from_search: bool = False):
             options_list.controls.clear()
+            
+            if need_search:
+                options_list.controls.append(search_box)
+            
             current_val = state["current_value"].get("value", "")
             selected_index = -1
             
             for i, opt in enumerate(opts):
-                if opt.get("value", "") == current_val:
-                    selected_index = i
-                
                 is_selected = (opt.get("value", "") == current_val)
-                option_btn = ft.Container(
-                    content=ft.Text(opt.get("text", ""), size=font_size, color=text_color),
-                    padding=ft.Padding.symmetric(horizontal=padding, vertical=2),
-                    bgcolor=accent_color if is_selected else bg_card,
-                    border_radius=border_radius,
-                    on_click=lambda e, o=opt: select_option(o),
-                )
-                
-                def on_hover(e, btn=option_btn, is_sel=is_selected):
-                    if e.data == "true":
-                        btn.bgcolor = accent_color
-                    else:
-                        btn.bgcolor = accent_color if is_sel else bg_card
-                    btn.update()
-                
-                option_btn.on_hover = on_hover
-                options_list.controls.append(option_btn)
+                if is_selected:
+                    selected_index = i
+                btn = create_option_button(opt, is_selected, from_search)
+                options_list.controls.append(btn)
             
             return selected_index
         
         def on_tap_down(e):
-            if e.global_position and e.local_position:
-                button_position["top"] = e.global_position.y - e.local_position.y
-                button_position["left"] = e.global_position.x - e.local_position.x
+            try:
+                if e.global_position and e.local_position:
+                    button_position["top"] = e.global_position.y - e.local_position.y
+                    button_position["left"] = e.global_position.x - e.local_position.x
+            except Exception:
+                pass
         
         def toggle_dropdown(e):
             if not state["enabled"]:
                 return
             
             page = None
-            if e.control and hasattr(e.control, 'page') and e.control.page:
-                page = e.control.page
-            elif e.control and hasattr(e.control, 'content') and e.control.content:
-                content = e.control.content
-                if hasattr(content, 'page') and content.page:
-                    page = content.page
+            ctrl = e.control
+            while ctrl:
+                if hasattr(ctrl, 'page') and ctrl.page:
+                    page = ctrl.page
+                    break
+                if hasattr(ctrl, 'content'):
+                    ctrl = ctrl.content
+                else:
+                    break
             
             if page is None:
                 return
@@ -357,34 +545,61 @@ class Dropdown:
                     state["options"] = options
                     state["options_loaded"] = True
                 
-                selected_index = build_options_list()
-                
                 opts = state["options"]
-                item_height = font_size + 4 + options_spacing
-                content_height = len(opts) * item_height + options_padding * 2
+                opts_count = len(opts)
+                
+                need_search = opts_count >= SEARCH_THRESHOLD
+                
+                search_box.height = SEARCH_BOX_HEIGHT if need_search else 0
+                
+                selected_index = build_options_list(opts, need_search)
+                
+                total_options_height = opts_count * item_height
+                total_spacing_height = max(0, opts_count - 1) * options_spacing
+                search_height = SEARCH_BOX_HEIGHT if need_search else 0
+                estimated_content_height = total_options_height + total_spacing_height + 2 * options_padding + search_height
                 
                 button_top = button_position["top"]
                 button_left = button_position["left"]
                 
-                space_below = page.height - button_top - height - 20
-                space_above = button_top - 20
+                space_down = page.height - (button_top + height)
+                space_up = button_top
                 
-                if selected_index >= 0:
-                    selected_offset = selected_index * item_height + options_padding
+                expand_down = None
+                panel_height = None
+                
+                if estimated_content_height <= space_down:
+                    expand_down = True
+                elif estimated_content_height <= space_up:
+                    expand_down = False
                 else:
-                    selected_offset = 0
+                    expand_down = space_down >= space_up
                 
-                panel_top = button_top - selected_offset
-                panel_height = min(content_height, page.height - 40)
+                if expand_down:
+                    panel_top = button_top + height
+                    available_height = space_down
+                else:
+                    available_height = space_up
+                    panel_top = max(0, button_top - estimated_content_height)
                 
-                if panel_top < 20:
-                    panel_top = 20
-                elif panel_top + panel_height > page.height - 20:
-                    panel_top = page.height - panel_height - 20
+                if estimated_content_height > available_height:
+                    panel_height = min(available_height, max_options_height)
+                elif estimated_content_height > max_options_height:
+                    panel_height = max_options_height
+                else:
+                    panel_height = estimated_content_height
+                
+                min_height = item_height + 2 * options_padding + search_height
+                if panel_height is not None and panel_height < min_height:
+                    panel_height = min_height
                 
                 options_panel.top = panel_top
-                options_panel.height = panel_height
+                if panel_height is not None:
+                    options_panel.height = panel_height
+                else:
+                    options_panel.height = None
                 options_panel.left = button_left
+                options_panel.width = width - icon_size
                 
                 options_panel.visible = True
                 overlay_mask.visible = True
@@ -397,16 +612,21 @@ class Dropdown:
                 
                 page.update()
                 
-                if selected_index >= 0 and content_height > panel_height:
-                    scroll_offset = selected_index * item_height
+                if selected_index >= 0 and panel_height is not None:
+                    search_offset = SEARCH_BOX_HEIGHT if need_search else 0
+                    scroll_offset = search_offset + selected_index * (item_height + options_spacing)
                     try:
-                        page.run_task(options_list.scroll_to, offset=scroll_offset, duration=100)
-                    except Exception:
+                        import asyncio
+                        loop = asyncio.get_event_loop()
+                        if loop.is_running():
+                            asyncio.create_task(options_list.scroll_to(offset=scroll_offset, duration=SCROLL_DURATION))
+                        else:
+                            loop.run_until_complete(options_list.scroll_to(offset=scroll_offset, duration=SCROLL_DURATION))
+                    except:
                         pass
             else:
                 close_dropdown()
-            
-            page.update()
+                page.update()
         
         gesture_detector = ft.GestureDetector(
             content=button_container,
@@ -416,6 +636,8 @@ class Dropdown:
         
         def on_mask_click(e):
             close_dropdown()
+            if current_page[0]:
+                current_page[0].update()
         
         overlay_mask.on_click = on_mask_click
         
@@ -446,8 +668,6 @@ class Dropdown:
         def set_value(value: Dict[str, str]):
             state["current_value"] = value
             display_text.value = value.get("text", "")
-            if self._page:
-                self._page.update()
         
         def set_enabled(is_enabled: bool):
             state["enabled"] = is_enabled
@@ -471,6 +691,103 @@ class Dropdown:
         
         return container
     
+    def _on_search(self, e, key: str):
+        if key not in self._dropdown_states:
+            return
+        
+        state = self._dropdown_states[key]
+        keyword = e.control.value.lower().strip()
+        
+        if not keyword:
+            self._rebuild_options_list(key, state["options"])
+            return
+        
+        filtered = [
+            opt for opt in state["options"]
+            if self._match_option(opt, keyword)
+        ]
+        
+        self._rebuild_options_list(key, filtered)
+    
+    def _match_option(self, opt: Dict, keyword: str) -> bool:
+        text = opt.get("text", "").lower()
+        if keyword in text:
+            return True
+        
+        if PINYIN_AVAILABLE:
+            pinyin = ''.join(lazy_pinyin(text))
+            return keyword in pinyin
+        
+        return False
+    
+    def _rebuild_options_list(self, key: str, options: List[Dict]):
+        if key not in self._options_panels:
+            return
+        
+        panel = self._options_panels[key]
+        options_list = panel.content
+        
+        if options_list is None:
+            return
+        
+        search_box = None
+        if options_list.controls and hasattr(options_list.controls[0], 'content'):
+            if isinstance(options_list.controls[0].content, ft.TextField):
+                search_box = options_list.controls[0]
+        
+        options_list.controls.clear()
+        
+        if search_box:
+            options_list.controls.append(search_box)
+        
+        current_val = self._dropdown_states[key]["current_value"].get("value", "")
+        
+        font_size = DropdownOptimized.get_font_size()
+        padding = DropdownOptimized.get_padding()
+        text_color = self._config_manager.get_theme_colors().get("text_primary", "#FFFFFF")
+        hover_color = "#3A3A3A"
+        border_radius = DropdownOptimized.get_border_radius()
+        item_height = _calculate_item_height(font_size)
+        
+        for opt in options:
+            is_selected = (opt.get("value", "") == current_val)
+            btn = ft.Container(
+                content=ft.Text(opt.get("text", ""), size=font_size, color=text_color),
+                padding=ft.Padding.symmetric(horizontal=padding, vertical=OPTION_ITEM_PADDING_V),
+                height=item_height,
+                width=float('inf'),
+                bgcolor=hover_color if is_selected else "transparent",
+                border_radius=border_radius,
+                on_click=lambda e, o=opt: self._select_option_from_search(key, o),
+            )
+            options_list.controls.append(btn)
+        
+        options_list.update()
+    
+    def _select_option_from_search(self, key: str, option: Dict):
+        if key not in self._dropdown_states:
+            return
+        
+        state = self._dropdown_states[key]
+        interface = state["interface"]
+        card = state["card"]
+        control_id = state["control_id"]
+        
+        state["current_value"] = option
+        
+        if key in self._dropdowns:
+            container = self._dropdowns[key]
+            if hasattr(container, '_button_container'):
+                display_text = container._button_container.content.controls[0]
+                display_text.value = option.get("text", "")
+        
+        self._save_value(interface, card, control_id, option)
+        
+        self._close_all_dropdowns()
+        
+        if self._page:
+            self._page.update()
+    
     def get_value(self, interface: str, card: str, control_id: str) -> Dict[str, str]:
         key = f"{interface}.{card}.{control_id}"
         if key in self._dropdowns:
@@ -478,69 +795,6 @@ class Dropdown:
             if hasattr(container, 'get_value'):
                 return container.get_value()
         return {"text": "", "value": ""}
-    
-    def destroy_all(self):
-        for key in list(self._dropdown_states.keys()):
-            self._dropdown_states[key]["options"] = []
-            self._dropdown_states[key]["options_loaded"] = False
-            self._dropdown_states[key]["is_open"] = False
-            if key in self._options_panels:
-                self._options_panels[key].visible = False
-            if key in self._dropdowns:
-                container = self._dropdowns[key]
-                if hasattr(container, '_overlay_mask'):
-                    container._overlay_mask.visible = False
-        
-        self._dropdowns.clear()
-        self._dropdown_states.clear()
-        self._options_panels.clear()
-        Dropdown._current_open_key = None
 
 
-if __name__ == "__main__":
-    from 前端.V3.层级0_数据管理.配置管理 import ConfigManager
-    
-    def main(page: ft.Page):
-        page.title = "下拉框懒加载测试"
-        
-        config_manager = ConfigManager()
-        Dropdown.set_config_manager(config_manager)
-        dropdown = Dropdown(page, config_manager)
-        
-        theme_colors = config_manager.get_theme_colors()
-        page.bgcolor = theme_colors.get("bg_primary", "#202020")
-        
-        def on_change(interface, card, control_id, value):
-            print(f"选择变更: {value}")
-        
-        container1 = dropdown.create(
-            interface="系统界面",
-            card="挂机模式",
-            control_id="挂机模式",
-            enabled=True,
-            on_change=on_change,
-        )
-        
-        container2 = dropdown.create(
-            interface="系统界面",
-            card="指令速度",
-            control_id="指令速度",
-            enabled=True,
-            on_change=on_change,
-        )
-        
-        page.add(ft.Column([
-            ft.Text("下拉框懒加载测试", size=20, weight=ft.FontWeight.BOLD, color=theme_colors.get("text_primary", "#FFFFFF")),
-            ft.Container(height=20),
-            ft.Row([ft.Text("挂机模式:", color=theme_colors.get("text_secondary", "#B0B0B0")), container1], spacing=8),
-            ft.Container(height=10),
-            ft.Row([ft.Text("指令速度:", color=theme_colors.get("text_secondary", "#B0B0B0")), container2], spacing=8),
-            ft.Container(height=20),
-            ft.Text("测试说明：", size=16, weight=ft.FontWeight.BOLD, color=theme_colors.get("text_primary", "#FFFFFF")),
-            ft.Text("1. 进入界面时，下拉框只显示当前值，不加载选项", size=14, color=theme_colors.get("text_secondary", "#B0B0B0")),
-            ft.Text("2. 点击下拉框时，才加载选项列表并直接显示", size=14, color=theme_colors.get("text_secondary", "#B0B0B0")),
-            ft.Text("3. 点击另一个下拉框时，自动关闭上一个", size=14, color=theme_colors.get("text_secondary", "#B0B0B0")),
-            ft.Text("4. 点击菜单外关闭菜单", size=14, color=theme_colors.get("text_secondary", "#B0B0B0")),
-        ], alignment=ft.MainAxisAlignment.CENTER))
-    
-    ft.run(main)
+Dropdown = DropdownOptimized

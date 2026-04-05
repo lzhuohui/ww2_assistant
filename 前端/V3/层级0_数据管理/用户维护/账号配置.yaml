@@ -1,0 +1,502 @@
+# ===========================================
+# 账号界面配置
+# 说明：管理多个游戏账号信息
+# 维护者：开发团队
+# 最后更新：2026-04-05
+# ===========================================
+
+# -------------------------------------------
+# 界面级布局（全局默认值）
+# 所有卡片和控件未单独设置时使用此配置
+# -------------------------------------------
+界面布局:
+  card_height: 100
+  dropdown_width: 70
+  input_width: 180
+  controls_per_row: 6
+
+# -------------------------------------------
+# 账号01卡片（主帅）
+# -------------------------------------------
+账号01:
+  卡片信息:
+    title: 账号01
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 主帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+# -------------------------------------------
+# 账号02-15卡片（副帅）
+# -------------------------------------------
+账号02:
+  卡片信息:
+    title: 账号02
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+账号03:
+  卡片信息:
+    title: 账号03
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+账号04:
+  卡片信息:
+    title: 账号04
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+账号05:
+  卡片信息:
+    title: 账号05
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+账号06:
+  卡片信息:
+    title: 账号06
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+账号07:
+  卡片信息:
+    title: 账号07
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+账号08:
+  卡片信息:
+    title: 账号08
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+账号09:
+  卡片信息:
+    title: 账号09
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+账号10:
+  卡片信息:
+    title: 账号10
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+账号11:
+  卡片信息:
+    title: 账号11
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+账号12:
+  卡片信息:
+    title: 账号12
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+账号13:
+  卡片信息:
+    title: 账号13
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+账号14:
+  卡片信息:
+    title: 账号14
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap
+
+账号15:
+  卡片信息:
+    title: 账号15
+    icon: ACCOUNT_CIRCLE
+    subtitle: 请完善账号信息
+    enabled: true
+  控件列表:
+    - id: 类型
+      type: dropdown
+      options: ["主帅", "副帅"]
+      default: 副帅
+    - id: 名称
+      type: input
+      hint: 输入统帅名称
+    - id: 账号
+      type: input
+      hint: 输入登录账号
+      password: true
+    - id: 密码
+      type: input
+      hint: 输入登录密码
+      password: true
+    - id: 方案
+      type: dropdown
+      dynamic_options: schemes
+      default: 方案01
+      dropdown_width: 90
+    - id: 平台
+      type: dropdown
+      options: ["Tap", "九游", "Fan", "小7", "Vivo", "Opop"]
+      default: Tap

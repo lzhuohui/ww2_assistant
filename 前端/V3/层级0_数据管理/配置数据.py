@@ -29,9 +29,14 @@ CONFIG_DIR = "前端/V3/层级0_数据管理"
 USER_MAINTAIN_DIR = "前端/V3/层级0_数据管理/用户维护"
 SCHEME_DIR = "前端/V3/层级0_数据管理/配置方案"
 PERSONALIZE_DIR = "前端/V3/层级0_数据管理/个性化数据"
+
+# 数据文件路径（分离后）
+USER_DATA_FILE = "前端/V3/层级0_数据管理/个性化数据/用户数据.yaml"
+WIN11_RENDER_FILE = "前端/V3/层级0_数据管理/个性化数据/渲染规范.yaml"
+
+# 兼容旧代码（将废弃）
 USER_PREFERENCE_FILE = "前端/V3/层级0_数据管理/个性化数据/用户偏好.yaml"
-USER_CONFIG_FILE = "前端/V3/层级0_数据管理/配置方案/默认方案.json"
-SCHEME_LIST_FILE = "前端/V3/层级0_数据管理/配置方案/方案列表.json"
+USER_CONFIG_FILE = "前端/V3/层级0_数据管理/配置方案/方案01.json"
 
 # ============================================
 # 公开接口
@@ -57,6 +62,71 @@ class ConfigData:
         self._cache: Dict[str, Any] = {}
         self._id_map: Dict[str, Any] = None
         self._interface_cache: Dict[str, Dict] = {}
+        
+        self._ensure_default_scheme()
+        
+        global USER_CONFIG_FILE
+        current_scheme = self._get_initial_scheme()
+        USER_CONFIG_FILE = f"{SCHEME_DIR}/{current_scheme}.json"
+    
+    def _get_initial_scheme(self) -> str:
+        """获取初始方案名称（从用户数据读取）"""
+        try:
+            user_data = self._read_yaml(USER_DATA_FILE, {})
+            return user_data.get("当前方案", "方案01")
+        except:
+            return "方案01"
+    
+    def _ensure_default_scheme(self):
+        """确保至少存在一个默认方案文件"""
+        scheme_names = self.get_scheme_names()
+        if not scheme_names:
+            self._create_default_scheme("方案01")
+    
+    def _create_default_scheme(self, scheme_name: str):
+        """创建默认方案文件（包含所有界面的完整默认配置）"""
+        default_config = self.generate_default_config()
+        self.save_scheme(scheme_name, default_config)
+    
+    def generate_default_config(self) -> Dict[str, Any]:
+        """
+        生成所有界面的完整默认配置
+        
+        遍历所有界面配置，提取每个卡片的默认值
+        确保新创建的方案包含所有界面的配置
+        """
+        config = {
+            "说明": "用户配置文件V3 - 按卡片分组，包含开关状态和控件值",
+            "版本": "3.0"
+        }
+        
+        for interface_name in self.get_interface_names():
+            interface_config = self.load_interface_config(interface_name)
+            interface_data = {}
+            
+            for card_name, card_data in interface_config.items():
+                if card_name == "界面布局":
+                    continue
+                
+                card_info = card_data.get("卡片信息", {})
+                controls = card_data.get("控件列表", [])
+                
+                card_config = {
+                    "enabled": card_info.get("enabled", True)
+                }
+                
+                for control in controls:
+                    control_id = control.get("id", "")
+                    default_value = control.get("default", "")
+                    if control_id and default_value:
+                        card_config[control_id] = default_value
+                
+                interface_data[card_name] = card_config
+            
+            if interface_data:
+                config[interface_name] = interface_data
+        
+        return config
     
     def _get_full_path(self, relative_path: str) -> str:
         """获取完整路径"""
@@ -125,7 +195,8 @@ class ConfigData:
         if interface_name in self._interface_cache:
             return self._interface_cache[interface_name]
         
-        file_path = f"{USER_MAINTAIN_DIR}/{interface_name}.yaml"
+        file_name = interface_name.replace("界面", "配置")
+        file_path = f"{USER_MAINTAIN_DIR}/{file_name}.yaml"
         data = self._read_yaml(file_path, {})
         self._interface_cache[interface_name] = data
         return data
@@ -142,7 +213,7 @@ class ConfigData:
             "打扫界面",
             "打野界面",
             "个性化界面",
-            "配置方案界面",
+            "注册界面",
             "关于界面",
         ]
         
@@ -153,25 +224,88 @@ class ConfigData:
         existing_names = set()
         for file_name in os.listdir(interface_dir):
             if file_name.endswith('.yaml'):
-                existing_names.add(file_name[:-5])
+                interface_name = file_name[:-5].replace("配置", "界面")
+                existing_names.add(interface_name)
         
         ordered_names = [name for name in V2_INTERFACE_ORDER if name in existing_names]
         
         return ordered_names
     
+    def load_user_data(self) -> Dict[str, Any]:
+        """加载用户数据（YAML格式）"""
+        if "user_data" in self._cache:
+            return self._cache["user_data"]
+        
+        data = self._read_yaml(USER_DATA_FILE, {})
+        self._cache["user_data"] = data
+        return data
+    
+    def save_user_data(self, data: Dict[str, Any]) -> bool:
+        """保存用户数据"""
+        self._cache["user_data"] = data
+        return self._write_yaml(USER_DATA_FILE, data)
+    
+    def load_win11_render(self) -> Dict[str, Any]:
+        """加载渲染规范（YAML格式）"""
+        if "win11_render" in self._cache:
+            return self._cache["win11_render"]
+        
+        data = self._read_yaml(WIN11_RENDER_FILE, {})
+        self._cache["win11_render"] = data
+        return data
+    
     def load_user_preference(self) -> Dict[str, Any]:
-        """加载用户偏好（YAML格式）"""
+        """
+        加载用户偏好（兼容方法，合并用户数据和渲染规范）
+        
+        返回合并后的数据，保持向后兼容
+        """
         if "user_preference" in self._cache:
             return self._cache["user_preference"]
         
-        data = self._read_yaml(USER_PREFERENCE_FILE, {})
-        self._cache["user_preference"] = data
-        return data
+        user_data = self.load_user_data()
+        win11_render = self.load_win11_render()
+        
+        merged = {}
+        
+        if "用户信息" in user_data:
+            merged["用户信息"] = user_data["用户信息"]
+        if "当前方案" in user_data:
+            merged["当前方案"] = user_data["当前方案"]
+        
+        if "主题配置" in win11_render:
+            merged["主题配置"] = win11_render["主题配置"]
+        if "强调色配置" in win11_render:
+            merged["强调色配置"] = win11_render["强调色配置"]
+        if "UI配置" in win11_render:
+            merged["UI配置"] = win11_render["UI配置"]
+        if "文本配置" in win11_render:
+            merged["文本配置"] = win11_render["文本配置"]
+        
+        if "用户偏好" in user_data:
+            theme_mode = user_data["用户偏好"].get("主题模式", "dark")
+            accent_color = user_data["用户偏好"].get("强调色", "blue")
+            merged["用户偏好"] = {
+                "主题模式": theme_mode,
+                "强调色": accent_color,
+            }
+        
+        self._cache["user_preference"] = merged
+        return merged
     
     def save_user_preference(self, data: Dict[str, Any]) -> bool:
-        """保存用户偏好"""
+        """保存用户偏好（兼容方法，分离保存）"""
+        user_data = self.load_user_data()
+        
+        if "用户信息" in data:
+            user_data["用户信息"] = data["用户信息"]
+        if "当前方案" in data:
+            user_data["当前方案"] = data["当前方案"]
+        if "用户偏好" in data:
+            user_data["用户偏好"] = data["用户偏好"]
+        
         self._cache["user_preference"] = data
-        return self._write_yaml(USER_PREFERENCE_FILE, data)
+        return self.save_user_data(user_data)
     
     def load_user_config(self) -> Dict[str, Any]:
         """加载用户配置"""
@@ -215,11 +349,28 @@ class ConfigData:
         return self.save_user_config(config)
     
     def get_user_enabled(self, interface: str, card: str, default: bool = True) -> bool:
-        """获取用户配置的开关状态"""
+        """获取用户配置的开关状态
+        
+        优先级：
+        1. 用户配置文件中的 enabled
+        2. 配置文件中的 enabled 默认值
+        3. 参数 default
+        """
         config = self.load_user_config()
         interface_data = config.get(interface, {})
         card_data = interface_data.get(card, {})
-        return card_data.get("enabled", default)
+        
+        if "enabled" in card_data:
+            return card_data["enabled"]
+        
+        interface_config = self.load_interface_config(interface)
+        card_config = interface_config.get(card, {})
+        card_info = card_config.get("卡片信息", {})
+        
+        if "enabled" in card_info:
+            return card_info["enabled"]
+        
+        return default
     
     def set_user_enabled(self, interface: str, card: str, enabled: bool) -> bool:
         """设置用户配置的开关状态"""
@@ -232,6 +383,192 @@ class ConfigData:
         
         config[interface][card]["enabled"] = enabled
         return self.save_user_config(config)
+    
+    def get_scheme_names(self) -> List[str]:
+        """获取所有方案名称列表（扫描目录中的.json文件）"""
+        scheme_dir = self._get_full_path(SCHEME_DIR)
+        if not os.path.exists(scheme_dir):
+            return []
+        
+        scheme_names = []
+        for file_name in os.listdir(scheme_dir):
+            if file_name.endswith('.json'):
+                scheme_name = file_name[:-5]
+                scheme_names.append(scheme_name)
+        
+        scheme_names.sort()
+        return scheme_names
+    
+    def get_current_scheme(self) -> str:
+        """获取当前方案名称（从用户偏好读取）"""
+        preference = self.load_user_preference()
+        return preference.get("当前方案", "方案01")
+    
+    def set_current_scheme(self, scheme_name: str) -> bool:
+        """设置当前方案（保存到用户偏好）"""
+        preference = self.load_user_preference()
+        preference["当前方案"] = scheme_name
+        return self.save_user_preference(preference)
+    
+    def get_scheme_file(self, scheme_name: str) -> str:
+        """获取方案文件名（方案名.json）"""
+        return f"{scheme_name}.json"
+    
+    def load_scheme(self, scheme_name: str) -> Dict[str, Any]:
+        """加载指定方案的配置"""
+        file_path = f"{SCHEME_DIR}/{scheme_name}.json"
+        return self._read_json(file_path, {})
+    
+    def save_scheme(self, scheme_name: str, config: Dict[str, Any]) -> bool:
+        """保存配置到指定方案"""
+        file_path = f"{SCHEME_DIR}/{scheme_name}.json"
+        return self._write_json(file_path, config)
+    
+    def save_scheme_with_merge(self, scheme_name: str, current_config: Dict[str, Any], visited_interfaces: set = None) -> bool:
+        """
+        保存配置到指定方案（合并模式）
+        
+        合并逻辑：
+        1. 加载现有方案配置
+        2. 如果方案不存在，使用完整默认配置作为基础
+        3. 只合并访问过的界面配置
+        4. 未访问界面保留原有配置
+        
+        参数:
+            scheme_name: 方案名称
+            current_config: 当前配置（可能不完整）
+            visited_interfaces: 已访问的界面集合（None表示全部合并）
+        
+        返回:
+            是否成功
+        """
+        existing_config = self.load_scheme(scheme_name)
+        
+        if not existing_config:
+            existing_config = self.generate_default_config()
+        
+        merged_config = self._merge_configs(existing_config, current_config, visited_interfaces)
+        
+        return self.save_scheme(scheme_name, merged_config)
+    
+    def _merge_configs(self, base_config: Dict[str, Any], new_config: Dict[str, Any], visited_interfaces: set = None) -> Dict[str, Any]:
+        """
+        合并两个配置（深度合并）
+        
+        规则：
+        - 只合并 visited_interfaces 中的界面
+        - 未访问界面保留 base_config 的配置
+        - 说明和版本字段始终更新
+        """
+        result = base_config.copy()
+        
+        for key, value in new_config.items():
+            if key in ("说明", "版本"):
+                result[key] = value
+            elif key.endswith("界面"):
+                # 只合并访问过的界面
+                if visited_interfaces is None or key in visited_interfaces:
+                    if isinstance(value, dict) and key in result and isinstance(result[key], dict):
+                        result[key] = self._merge_card_configs(result[key], value)
+                    else:
+                        result[key] = value
+                # 未访问的界面保留 base_config 中的值（不覆盖）
+            else:
+                if isinstance(value, dict) and key in result and isinstance(result[key], dict):
+                    result[key] = self._merge_card_configs(result[key], value)
+                else:
+                    result[key] = value
+        
+        return result
+    
+    def _merge_card_configs(self, base_cards: Dict[str, Any], new_cards: Dict[str, Any]) -> Dict[str, Any]:
+        """合并卡片级别的配置"""
+        result = base_cards.copy()
+        
+        for card_name, card_data in new_cards.items():
+            if isinstance(card_data, dict) and card_name in result and isinstance(result[card_name], dict):
+                merged_card = result[card_name].copy()
+                for k, v in card_data.items():
+                    merged_card[k] = v
+                result[card_name] = merged_card
+            else:
+                result[card_name] = card_data
+        
+        return result
+    
+    def switch_scheme(self, scheme_name: str) -> bool:
+        """切换方案"""
+        global USER_CONFIG_FILE
+        USER_CONFIG_FILE = f"{SCHEME_DIR}/{scheme_name}.json"
+        
+        self._cache.pop("user_config", None)
+        
+        self.set_current_scheme(scheme_name)
+        return True
+    
+    def rename_scheme(self, old_name: str, new_name: str) -> bool:
+        """
+        重命名方案（重命名文件）
+        
+        参数:
+            old_name: 原方案名称
+            new_name: 新方案名称
+        
+        返回:
+            是否成功
+        """
+        if new_name in self.get_scheme_names():
+            return False
+        
+        old_path = self._get_full_path(f"{SCHEME_DIR}/{old_name}.json")
+        new_path = self._get_full_path(f"{SCHEME_DIR}/{new_name}.json")
+        
+        if not os.path.exists(old_path):
+            return False
+        
+        os.rename(old_path, new_path)
+        
+        if self.get_current_scheme() == old_name:
+            self.set_current_scheme(new_name)
+        
+        return True
+    
+    def create_scheme(self, scheme_name: str) -> bool:
+        """
+        创建新方案（包含所有界面的完整默认配置）
+        
+        参数:
+            scheme_name: 方案名称
+        
+        返回:
+            是否成功
+        """
+        if scheme_name in self.get_scheme_names():
+            return False
+        
+        default_config = self.generate_default_config()
+        return self.save_scheme(scheme_name, default_config)
+    
+    def delete_scheme(self, scheme_name: str) -> bool:
+        """
+        删除方案
+        
+        参数:
+            scheme_name: 方案名称
+        
+        返回:
+            是否成功
+        """
+        if scheme_name not in self.get_scheme_names():
+            return False
+        
+        file_path = self._get_full_path(f"{SCHEME_DIR}/{scheme_name}.json")
+        
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            return True
+        
+        return False
     
     def load_id_map(self) -> Dict[str, Any]:
         """

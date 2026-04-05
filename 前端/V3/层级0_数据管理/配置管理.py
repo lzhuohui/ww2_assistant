@@ -46,6 +46,8 @@ class ConfigManager:
         self._data = ConfigData()
         self._on_change_callbacks: List[Callable] = []
         self._layout_cache: Dict[str, Any] = {}
+        self._exclude_values: Dict[str, List[str]] = {}
+        self._visited_interfaces: set = set()  # 追踪已访问的界面
     
     # ============================================
     # 界面配置接口
@@ -54,6 +56,18 @@ class ConfigManager:
     def get_interface_names(self) -> List[str]:
         """获取所有界面名称列表"""
         return self._data.get_interface_names()
+    
+    def mark_interface_visited(self, interface: str):
+        """标记界面已访问（用于保存时只合并访问过的界面）"""
+        self._visited_interfaces.add(interface)
+    
+    def get_visited_interfaces(self) -> set:
+        """获取已访问的界面集合"""
+        return self._visited_interfaces.copy()
+    
+    def clear_visited_interfaces(self):
+        """清空已访问界面记录（切换方案时调用）"""
+        self._visited_interfaces.clear()
     
     def get_interface_layout(self, interface: str) -> Dict[str, Any]:
         """
@@ -65,6 +79,7 @@ class ConfigManager:
         返回:
             {"下拉框宽度": 70, "输入框宽度": 100, "每行控件数": 3}
         """
+        self.mark_interface_visited(interface)
         config = self._data.load_interface_config(interface)
         return config.get("界面布局", {})
     
@@ -224,8 +239,13 @@ class ConfigManager:
         return result
     
     def get_enabled(self, interface: str, card: str, default: bool = True) -> bool:
-        """获取卡片开关状态"""
+        """获取卡片开关状态（从用户数据读取）"""
         return self._data.get_user_enabled(interface, card, default)
+    
+    def get_enabled_default(self, interface: str, card: str) -> bool:
+        """获取卡片开关默认值（从配置文件读取）"""
+        card_info = self.get_card_info(interface, card)
+        return card_info.get("enabled", True)
     
     def set_enabled(self, interface: str, card: str, enabled: bool) -> bool:
         """设置卡片开关状态"""
@@ -243,8 +263,65 @@ class ConfigManager:
             control_id: 控件ID
         """
         control_config = self.get_control_config(interface, card, control_id)
-        raw_options = control_config.get("options", [])
-        return [{"text": str(opt), "value": str(opt)} for opt in raw_options]
+        
+        dynamic_options = control_config.get("dynamic_options", "")
+        
+        if dynamic_options == "commanders":
+            state = self.get_commander_dropdown_state(interface, card, control_id)
+            return state["options"]
+        elif dynamic_options == "commanders_exclude_primary":
+            key = f"{interface}.{card}.{control_id}"
+            primary_key = key.replace("次要统帅", "主要统帅")
+            primary_commander = ""
+            if primary_key in self._exclude_values:
+                exclude_list = self._exclude_values[primary_key]
+                if exclude_list:
+                    primary_commander = exclude_list[0]
+            state = self.get_commander_dropdown_state(interface, card, control_id, primary_commander)
+            return state["options"]
+        elif dynamic_options == "schemes":
+            scheme_names = self.get_scheme_names()
+            return [{"text": name, "value": name} for name in scheme_names]
+        else:
+            raw_options = control_config.get("options", [])
+            return [{"text": str(opt), "value": str(opt)} for opt in raw_options]
+    
+    def set_exclude_value(self, interface: str, card: str, control_id: str, exclude_values: List[str]):
+        """
+        设置控件的排除值（用于联动下拉框）
+        
+        参数:
+            interface: 界面名称
+            card: 卡片名称
+            control_id: 控件ID
+            exclude_values: 要排除的值列表
+        """
+        key = f"{interface}.{card}.{control_id}"
+        self._exclude_values[key] = exclude_values
+    
+    def clear_exclude_value(self, interface: str = None, card: str = None, control_id: str = None):
+        """
+        清除排除值
+        
+        参数:
+            interface: 界面名称（可选，不传则清除所有）
+            card: 卡片名称（可选）
+            control_id: 控件ID（可选）
+        """
+        if interface is None:
+            self._exclude_values.clear()
+        elif card is None:
+            keys_to_remove = [k for k in self._exclude_values if k.startswith(f"{interface}.")]
+            for k in keys_to_remove:
+                del self._exclude_values[k]
+        elif control_id is None:
+            keys_to_remove = [k for k in self._exclude_values if k.startswith(f"{interface}.{card}.")]
+            for k in keys_to_remove:
+                del self._exclude_values[k]
+        else:
+            key = f"{interface}.{card}.{control_id}"
+            if key in self._exclude_values:
+                del self._exclude_values[key]
     
     def get_default(self, interface: str, card: str, control_id: str) -> str:
         """获取控件默认值"""
@@ -306,18 +383,12 @@ class ConfigManager:
     # ============================================
     
     def get_current_theme(self) -> str:
-        """获取当前主题名称"""
-        prefs = self._data.load_user_preference()
-        theme_section = prefs.get("主题", {})
-        return theme_section.get("当前主题", "dark")
+        """获取当前主题名称（从方案文件读取）"""
+        return self.get_raw_value("个性化界面", "主题模式", "theme_selector") or "dark"
     
     def set_current_theme(self, theme_name: str) -> bool:
-        """设置当前主题"""
-        prefs = self._data.load_user_preference()
-        if "主题" not in prefs:
-            prefs["主题"] = {}
-        prefs["主题"]["当前主题"] = theme_name
-        result = self._data.save_user_preference(prefs)
+        """设置当前主题（保存到方案文件）"""
+        result = self.set_value("个性化界面", "主题模式", "theme_selector", theme_name)
         self._notify_change("theme", theme_name)
         return result
     
@@ -355,10 +426,8 @@ class ConfigManager:
         return colors
     
     def get_current_accent(self) -> str:
-        """获取当前强调色名称"""
-        prefs = self._data.load_user_preference()
-        theme_section = prefs.get("主题", {})
-        return theme_section.get("当前强调色", "blue")
+        """获取当前强调色名称（从方案文件读取）"""
+        return self.get_raw_value("个性化界面", "强调色", "accent_selector") or "blue"
     
     def get_accent_color(self, accent_name: str = None) -> str:
         """获取强调色值"""
@@ -372,6 +441,135 @@ class ConfigManager:
         if isinstance(accent_data, dict):
             return accent_data.get("value", "#0078D4")
         return "#0078D4"
+    
+    def set_current_accent(self, accent_name: str) -> bool:
+        """设置当前强调色（保存到方案文件）"""
+        result = self.set_value("个性化界面", "强调色", "accent_selector", accent_name)
+        self._notify_change("accent", accent_name)
+        return result
+    
+    def get_accent_list(self) -> List[Dict[str, str]]:
+        """获取强调色列表"""
+        prefs = self._data.load_user_preference()
+        accent_configs = prefs.get("强调色配置", {})
+        result = []
+        for key, data in accent_configs.items():
+            if isinstance(data, dict):
+                result.append({
+                    "key": key,
+                    "name": data.get("name", key),
+                    "value": data.get("value", "#0078D4"),
+                })
+        return result
+    
+    def get_theme_list(self) -> List[Dict[str, str]]:
+        """获取主题列表"""
+        return [
+            {"key": "light", "name": "浅色", "value": "#FFFFFF"},
+            {"key": "dark", "name": "深色", "value": "#202020"},
+        ]
+    
+    def get_active_commanders(self) -> List[str]:
+        """从账号配置中获取参与挂机的主帅列表"""
+        commanders = []
+        scheme_name = self.get_current_scheme()
+        scheme_data = self._data.load_scheme(scheme_name)
+        account_section = scheme_data.get("账号界面", {})
+        
+        for i in range(1, 16):
+            card_id = f"账号{i:02d}"
+            account_data = account_section.get(card_id, {})
+            
+            account_type = account_data.get("类型", "")
+            is_enabled = account_data.get("enabled", False)
+            name = account_data.get("名称", "")
+            
+            if account_type == "主帅" and is_enabled and name:
+                commanders.append(name)
+        return commanders
+    
+    def get_commander_options(self, exclude_values: List[str] = None) -> List[Dict[str, str]]:
+        """
+        获取主帅选项列表（带"没有主帅"提示）
+        
+        参数:
+            exclude_values: 需要排除的值列表
+        
+        返回:
+            选项列表，如果没有主帅则返回提示选项
+        """
+        commanders = self.get_active_commanders()
+        
+        if exclude_values:
+            commanders = [c for c in commanders if c not in exclude_values]
+        
+        if not commanders:
+            return [{"text": "没有主帅", "value": ""}]
+        
+        return [{"text": c, "value": c} for c in commanders]
+    
+    def get_commander_dropdown_state(
+        self,
+        interface: str,
+        card: str,
+        control_id: str,
+        primary_commander: str = None
+    ) -> Dict[str, Any]:
+        """
+        获取统帅下拉框的完整状态（初始值 + 选项列表）
+        
+        场景逻辑：
+        1. 加载方案值
+        2. 如方案值没有，且账号没有主帅，显示"没有主帅"
+        3. 如方案值没有，而账号有主帅，显示第一个主帅
+        4. 次要统帅排除主要统帅
+        
+        参数:
+            interface: 界面名称
+            card: 卡片名称
+            control_id: 控件ID ("主要统帅" 或 "次要统帅")
+            primary_commander: 主要统帅值（用于次要统帅排除）
+        
+        返回:
+            {
+                "current_value": {"text": "...", "value": "..."},
+                "options": [{"text": "...", "value": "..."}, ...]
+            }
+        """
+        all_commanders = self.get_active_commanders()
+        
+        is_secondary = (control_id == "次要统帅")
+        
+        if is_secondary and primary_commander:
+            available_commanders = [c for c in all_commanders if c != primary_commander]
+        else:
+            available_commanders = all_commanders
+        
+        if not all_commanders:
+            return {
+                "current_value": {"text": "没有主帅", "value": ""},
+                "options": [{"text": "没有主帅", "value": ""}]
+            }
+        
+        if not available_commanders:
+            return {
+                "current_value": {"text": "没有可选主帅", "value": ""},
+                "options": [{"text": "没有可选主帅", "value": ""}]
+            }
+        
+        options = [{"text": c, "value": c} for c in available_commanders]
+        
+        saved_value = self.get_raw_value(interface, card, control_id)
+        
+        if saved_value and saved_value in available_commanders:
+            current_value = {"text": saved_value, "value": saved_value}
+        else:
+            current_value = {"text": available_commanders[0], "value": available_commanders[0]}
+        
+        return {
+            "current_value": current_value,
+            "options": options
+        }
     
     def get_ui_config(self, category: str, key: str, default: Any = None) -> Any:
         """获取UI配置值"""
@@ -412,6 +610,73 @@ class ConfigManager:
         radius_config = ui_config.get("规格", {}).get("圆角", {})
         return radius_config.get(size, 6)
     
+    def get_shadow_config(self, shadow_type: str = "菜单") -> Dict[str, Any]:
+        """
+        获取阴影配置
+        
+        参数:
+            shadow_type: 阴影类型，可选 "菜单"、"卡片"、"对话框"
+        
+        返回:
+            {
+                "blur_radius": int,
+                "spread_radius": int,
+                "offset_x": int,
+                "offset_y": int,
+                "opacity": float
+            }
+        """
+        defaults = {
+            "菜单": {"blur_radius": 16, "spread_radius": 0, "offset_x": 0, "offset_y": 4, "opacity": 0.16},
+            "卡片": {"blur_radius": 8, "spread_radius": 1, "offset_x": 0, "offset_y": 2, "opacity": 0.12},
+            "对话框": {"blur_radius": 32, "spread_radius": 0, "offset_x": 0, "offset_y": 8, "opacity": 0.20},
+        }
+        
+        prefs = self._data.load_user_preference()
+        ui_config = prefs.get("UI配置", {})
+        shadow_config = ui_config.get("阴影", {})
+        type_config = shadow_config.get(shadow_type, {})
+        
+        default = defaults.get(shadow_type, defaults["菜单"])
+        
+        return {
+            "blur_radius": type_config.get("blur_radius", default["blur_radius"]),
+            "spread_radius": type_config.get("spread_radius", default["spread_radius"]),
+            "offset_x": type_config.get("offset_x", default["offset_x"]),
+            "offset_y": type_config.get("offset_y", default["offset_y"]),
+            "opacity": type_config.get("opacity", default["opacity"]),
+        }
+    
+    def get_animation_config(self) -> Dict[str, Any]:
+        """
+        获取动画配置
+        
+        返回:
+            {
+                "transition_duration": int,  # 过渡时长 ms
+                "fast_transition": int,      # 快速过渡 ms
+                "slow_transition": int,      # 慢速过渡 ms
+                "easing": str                # 缓动函数
+            }
+        """
+        defaults = {
+            "transition_duration": 167,
+            "fast_transition": 83,
+            "slow_transition": 250,
+            "easing": "easeOut",
+        }
+        
+        prefs = self._data.load_user_preference()
+        ui_config = prefs.get("UI配置", {})
+        animation_config = ui_config.get("动画", {})
+        
+        return {
+            "transition_duration": animation_config.get("过渡时长", defaults["transition_duration"]),
+            "fast_transition": animation_config.get("快速过渡", defaults["fast_transition"]),
+            "slow_transition": animation_config.get("慢速过渡", defaults["slow_transition"]),
+            "easing": animation_config.get("缓动函数", defaults["easing"]),
+        }
+    
     def get_nav_config(self, key: str, default: Any = None) -> Any:
         """
         获取导航配置值，通用项使用全局UI配置
@@ -433,8 +698,8 @@ class ConfigManager:
         global_mapping = {
             "图标大小": lambda: self.get_ui_size("字体", "图标大小"),
             "字体大小": lambda: self.get_ui_size("字体", "正文字体"),
-            "项间距": lambda: self.get_ui_size("边距", "中"),
-            "项内边距": lambda: self.get_ui_size("边距", "中"),
+            "项间距": lambda: self.get_ui_size("边距", "控件间距"),
+            "项内边距": lambda: self.get_ui_size("边距", "控件区内边距"),
             "项圆角": lambda: self.get_ui_size("圆角", "卡片圆角"),
         }
         
@@ -540,6 +805,148 @@ class ConfigManager:
         """清空所有缓存（退出时调用）"""
         self._layout_cache.clear()
         self._data.clear_cache()
+    
+    # ============================================
+    # 方案管理接口
+    # ============================================
+    
+    def get_scheme_names(self) -> List[str]:
+        """获取所有方案名称列表"""
+        return self._data.get_scheme_names()
+    
+    def get_current_scheme(self) -> str:
+        """获取当前方案名称"""
+        return self._data.get_current_scheme()
+    
+    def switch_scheme(self, scheme_name: str) -> bool:
+        """
+        切换方案
+        
+        参数:
+            scheme_name: 方案名称
+        
+        返回:
+            是否成功
+        """
+        if scheme_name not in self.get_scheme_names():
+            return False
+        
+        self._data.switch_scheme(scheme_name)
+        self._layout_cache.clear()
+        self.clear_visited_interfaces()  # 切换方案时清空已访问界面记录
+        self._notify_change("scheme", scheme_name)
+        return True
+    
+    def save_current_to_scheme(self, scheme_name: str) -> bool:
+        """
+        保存当前配置到指定方案（合并模式）
+        
+        只合并已访问过的界面配置，未访问界面保留原有值
+        
+        参数:
+            scheme_name: 方案名称
+        
+        返回:
+            是否成功
+        """
+        current_config = self._data.load_user_config()
+        visited = self.get_visited_interfaces()
+        return self._data.save_scheme_with_merge(scheme_name, current_config, visited)
+    
+    def create_scheme(self, scheme_name: str) -> bool:
+        """
+        创建新方案（基于当前配置，合并默认配置）
+        
+        参数:
+            scheme_name: 方案名称
+        
+        返回:
+            是否成功
+        """
+        scheme_list = self._data.load_scheme_list()
+        
+        for scheme in scheme_list.get("方案列表", []):
+            if scheme.get("名称") == scheme_name:
+                return False
+        
+        scheme_list["方案列表"].append({
+            "名称": scheme_name,
+            "文件": f"{scheme_name}.json"
+        })
+        
+        self._data.save_scheme_list(scheme_list)
+        
+        current_config = self._data.load_user_config()
+        visited = self.get_visited_interfaces()
+        self._data.save_scheme_with_merge(scheme_name, current_config, visited)
+        
+        return True
+    
+    def delete_scheme(self, scheme_name: str) -> bool:
+        """
+        删除方案
+        
+        参数:
+            scheme_name: 方案名称
+        
+        返回:
+            是否成功
+        """
+        if scheme_name == "默认方案":
+            return False
+        
+        scheme_list = self._data.load_scheme_list()
+        new_list = [s for s in scheme_list.get("方案列表", []) if s.get("名称") != scheme_name]
+        
+        if len(new_list) == len(scheme_list.get("方案列表", [])):
+            return False
+        
+        scheme_list["方案列表"] = new_list
+        self._data.save_scheme_list(scheme_list)
+        
+        return True
+    
+    def rename_scheme(self, old_name: str, new_name: str) -> bool:
+        """
+        重命名方案
+        
+        参数:
+            old_name: 原方案名称
+            new_name: 新方案名称
+        
+        返回:
+            是否成功
+        """
+        if not new_name.strip():
+            return False
+        
+        result = self._data.rename_scheme(old_name, new_name)
+        if result:
+            self._layout_cache.clear()
+            self._notify_change("scheme", new_name)
+        return result
+    
+    def save_and_rename_scheme(self, old_name: str, new_name: str) -> bool:
+        """
+        保存当前配置到方案并重命名
+        
+        参数:
+            old_name: 原方案名称
+            new_name: 新方案名称
+        
+        返回:
+            是否成功
+        """
+        if not new_name.strip():
+            return False
+        
+        if not self.save_current_to_scheme(old_name):
+            return False
+        
+        if old_name != new_name:
+            return self.rename_scheme(old_name, new_name)
+        
+        return True
     
     # ============================================
     # 回调机制

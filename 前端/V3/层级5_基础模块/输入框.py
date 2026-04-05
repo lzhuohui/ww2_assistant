@@ -54,40 +54,34 @@ class InputBox:
     
     @staticmethod
     def get_width() -> int:
-        """获取输入框宽度（从用户偏好.yaml获取）"""
         InputBox._check_config_manager()
-        width = InputBox._config_manager.get_ui_config("输入框", "宽度")
+        width = InputBox._config_manager.get_ui_config("控件", "输入框宽度")
         if width is None:
             width = 120
         return width
     
     @staticmethod
     def get_height() -> int:
-        """获取输入框高度（从用户偏好.yaml获取）"""
         InputBox._check_config_manager()
-        height = InputBox._config_manager.get_ui_config("输入框", "高度")
+        height = InputBox._config_manager.get_ui_config("控件", "输入框高度")
         if height is None:
             height = 30
         return height
     
     @staticmethod
     def get_border_radius() -> int:
-        """获取输入框圆角（从用户偏好.yaml获取）"""
         InputBox._check_config_manager()
-        radius = InputBox._config_manager.get_ui_config("输入框", "圆角")
+        radius = InputBox._config_manager.get_radius("小")
         if radius is None:
-            radius = InputBox._config_manager.get_ui_config("圆角", "小")
-        if radius is None:
-            radius = 4
+            radius = 3
         return radius
     
     @staticmethod
     def get_text_size() -> int:
-        """获取输入框字体大小（从用户偏好.yaml获取）"""
         InputBox._check_config_manager()
-        size = InputBox._config_manager.get_ui_size("字体", "小")
+        size = InputBox._config_manager.get_ui_size("字体", "正文字体")
         if size is None:
-            size = 14
+            size = 16
         return size
     
     def __init__(self, page: ft.Page = None, config_manager: ConfigManager = None):
@@ -108,6 +102,7 @@ class InputBox:
         password_mode: Optional[bool] = None,
         width: int = None,
         height: int = None,
+        use_defaults: bool = False,
     ) -> ft.TextField:
         """
         创建输入框
@@ -124,6 +119,7 @@ class InputBox:
         - password_mode: 密码模式
         - width: 宽度（可选）
         - height: 高度（可选）
+        - use_defaults: 是否使用默认值（True时忽略方案值）
         """
         if width is None:
             width = InputBox.get_width()
@@ -134,7 +130,7 @@ class InputBox:
         if theme_colors is None:
             theme_colors = self._get_theme_colors()
         
-        current_value = self._get_current_value(interface, card, control_id)
+        current_value = self._get_current_value(interface, card, control_id, use_defaults)
         
         if hint_text is None:
             hint_text = self._get_hint(interface, card, control_id)
@@ -159,10 +155,13 @@ class InputBox:
             raise RuntimeError("InputBox模块未设置config_manager")
         return self._config_manager.get_theme_colors()
     
-    def _get_current_value(self, interface: str, card: str, control_id: str) -> str:
+    def _get_current_value(self, interface: str, card: str, control_id: str, use_defaults: bool = False) -> str:
         """从配置管理获取当前值"""
         if self._config_manager:
-            return self._config_manager.get_value(interface, card, control_id, "")
+            if use_defaults:
+                return self._config_manager.get_default(interface, card, control_id) or ""
+            else:
+                return self._config_manager.get_value(interface, card, control_id, "")
         return ""
     
     def _get_hint(self, interface: str, card: str, control_id: str) -> str:
@@ -202,7 +201,7 @@ class InputBox:
         bg_card = theme_colors.get("bg_card", "#2D2D2D")
         border_color = theme_colors.get("border", "#3D3D3D")
         text_size = InputBox.get_text_size()
-        padding = InputBox._config_manager.get_ui_size("边距", "小") or 6
+        padding = InputBox._config_manager.get_ui_size("边距", "输入框内边距") or 6
         
         def handle_change(e):
             self._save_value(interface, card, control_id, e.control.value)

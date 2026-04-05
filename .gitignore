@@ -1,40 +1,42 @@
-# 虚拟环境
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 venv/
+venv_new/
+*.egg-info/
+dist/
+build/
+.eggs/
 
-# IDE配置
-.idea/
+# IDE
 .vscode/
+.idea/
 *.swp
 *.swo
-*~
 
-# 操作系统文件
-Thumbs.db
-.DS_Store
-
-# 配置文件
-前端/配置/用户配置/
-*.ini
-*.cfg
-*.conf
-
-# 日志文件
-logs/
-*.log
-
-# 编译产物
-__pycache__/
-*.pyc
-*.pyo
+# AI产物
+AI产物/
 
 # 临时文件
 *.tmp
 *.temp
+*.log
 
 # 测试文件
-.pytest_cache/
-.tox/
+test_*.py
 
-# 其他
-.env
-*.env
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 设备相关
+.device_seed
+.install_time
+.trial
+
+# 导出文件
+前端/导出/
+前端/output/

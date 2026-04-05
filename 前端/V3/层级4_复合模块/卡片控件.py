@@ -20,6 +20,7 @@ from typing import Callable, Dict, List
 from 前端.V3.层级0_数据管理.配置管理 import ConfigManager
 from 前端.V3.层级4_复合模块.标签下拉框 import LabeledDropdown
 from 前端.V3.层级5_基础模块.输入框 import InputBox
+from 前端.V3.层级5_基础模块.主题色块 import ThemeColorBlock
 
 
 class CardControls:
@@ -44,6 +45,7 @@ class CardControls:
         cls._config_manager = config_manager
         LabeledDropdown.set_config_manager(config_manager)
         InputBox.set_config_manager(config_manager)
+        ThemeColorBlock.set_config_manager(config_manager)
     
     @staticmethod
     def _check_config_manager():
@@ -58,7 +60,7 @@ class CardControls:
     def get_controls_per_row() -> int:
         """获取每行控件数（从用户偏好.yaml获取）"""
         CardControls._check_config_manager()
-        value = CardControls._config_manager.get_ui_config("控件布局", "每行控件数")
+        value = CardControls._config_manager.get_ui_config("控件", "每行控件数")
         if value is None:
             value = 6
         return value
@@ -67,7 +69,7 @@ class CardControls:
     def get_spacing() -> int:
         """获取控件间距（从用户偏好.yaml获取）"""
         CardControls._check_config_manager()
-        value = CardControls._config_manager.get_ui_config("控件布局", "控件间距")
+        value = CardControls._config_manager.get_ui_size("边距", "控件间距")
         if value is None:
             value = 6
         return value
@@ -76,15 +78,16 @@ class CardControls:
     def get_right_margin() -> int:
         """获取控件区右边距（从用户偏好.yaml获取）"""
         CardControls._check_config_manager()
-        value = CardControls._config_manager.get_ui_config("控件布局", "右边距")
+        value = CardControls._config_manager.get_ui_size("边距", "控件区内边距")
         if value is None:
-            value = 8
+            value = 6
         return value
     
     def __init__(self, page: ft.Page, config_manager: ConfigManager = None):
         self._page = page
         self._config_manager = config_manager or CardControls._config_manager
         self._input_box = InputBox(page, self._config_manager)
+        self._theme_block = ThemeColorBlock(page, self._config_manager)
         self._controls_cache: Dict[str, ft.Control] = {}
         self._controls_list: List[ft.Control] = []
         self._container: ft.Container = None
@@ -93,7 +96,7 @@ class CardControls:
     @property
     def dropdown(self):
         """提供下拉框实例访问（用于销毁）"""
-        return LabeledDropdown.get_dropdown()
+        return LabeledDropdown
     
     def create(
         self,
@@ -101,6 +104,7 @@ class CardControls:
         card: str,
         on_change: Callable[[str, str, str], None] = None,
         theme_colors: Dict[str, str] = None,
+        use_defaults: bool = False,
     ) -> ft.Control:
         """
         创建卡片控件区
@@ -110,6 +114,7 @@ class CardControls:
         - card: 卡片名称
         - on_change: 值变更回调
         - theme_colors: 主题颜色
+        - use_defaults: 是否使用默认值（True时忽略方案值）
         
         返回：
         - ft.Control: 控件区内容
@@ -128,13 +133,15 @@ class CardControls:
         )
         
         controls = self._create_controls(
-            interface, card, controls_config, enabled, on_change, theme_colors
+            interface, card, controls_config, enabled, on_change, theme_colors, use_defaults
         )
         
         self._layout_controls(interface, card, controls_column, controls)
         
         self._container = ft.Container(
             content=controls_column,
+            padding=self.get_spacing(),
+            clip_behavior=ft.ClipBehavior.NONE,
         )
         
         return self._container
@@ -159,6 +166,7 @@ class CardControls:
         enabled: bool,
         on_change: Callable,
         theme_colors: Dict,
+        use_defaults: bool = False,
     ) -> List[ft.Control]:
         """创建控件列表"""
         controls = []
@@ -187,6 +195,7 @@ class CardControls:
                     enabled=enabled,
                     on_change=make_callback(control_id),
                     dropdown_width=dropdown_width,
+                    use_defaults=use_defaults,
                 )
             
             elif control_type == "input":
@@ -206,7 +215,60 @@ class CardControls:
                     password_mode=password,
                     width=input_width,
                     on_change=make_callback(control_id),
+                    use_defaults=use_defaults,
                 )
+            
+            elif control_type == "color_block":
+                block_type = config.get("block_type", "theme")
+                
+                if block_type == "theme":
+                    color_list = self._config_manager.get_theme_list()
+                    current_key = self._config_manager.get_current_theme()
+                elif block_type == "accent":
+                    color_list = self._config_manager.get_accent_list()
+                    current_key = self._config_manager.get_current_accent()
+                else:
+                    color_list = []
+                    current_key = ""
+                
+                current_color = next(
+                    (item["value"] for item in color_list if item["key"] == current_key),
+                    "#808080"
+                )
+                
+                def make_color_callback(bt, iface, crd, cid):
+                    def handler(color_value: str):
+                        items = self._config_manager.get_theme_list() if bt == "theme" else self._config_manager.get_accent_list()
+                        for item in items:
+                            if item["value"] == color_value:
+                                if bt == "theme":
+                                    self._config_manager.set_current_theme(item["key"])
+                                else:
+                                    self._config_manager.set_current_accent(item["key"])
+                                if on_change:
+                                    on_change(iface, crd, cid, item["key"])
+                                break
+                    return handler
+                
+                control = self._theme_block.create_group(
+                    color_list=color_list,
+                    selected_color=current_color,
+                    on_select=make_color_callback(block_type, interface, card, control_id),
+                    theme_colors=theme_colors,
+                )
+            
+            elif control_type == "info":
+                value = config.get("value", "")
+                text_primary = theme_colors.get("text_primary", "#FFFFFF") if theme_colors else "#FFFFFF"
+                text_secondary = theme_colors.get("text_secondary", "#AAAAAA") if theme_colors else "#AAAAAA"
+                
+                if label:
+                    control = ft.Row([
+                        ft.Text(label, size=14, color=text_secondary, width=80),
+                        ft.Text(value, size=14, color=text_primary),
+                    ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER)
+                else:
+                    control = ft.Text(value, size=14, color=text_primary)
             
             else:
                 continue
@@ -239,7 +301,6 @@ class CardControls:
                 controls=row_controls,
                 spacing=spacing,
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                alignment=ft.MainAxisAlignment.END,
             )
             controls_column.controls.append(row)
     

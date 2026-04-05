@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 """
-模块名称：系统界面.py
-模块功能：系统设置界面
+模块名称：个性化界面.py
+模块功能：个性化设置界面
 
 职责：
-- 管理系统设置卡片
-- 响应配置变更
+- 管理主题模式和强调色卡片
+- 响应主题切换
 - 加载默认值
 
 不负责：
@@ -22,25 +22,24 @@ from 前端.V3.层级3_功能卡片.功能卡片 import FunctionCard
 from 前端.V3.层级3_功能卡片.界面容器 import InterfaceContainer
 
 
-class SystemInterface:
-    """系统界面 - V3版本"""
+class PersonalizationInterface:
+    """个性化界面 - V3版本"""
     
-    INTERFACE_NAME = "系统界面"
-    INTERFACE_TITLE = "系统设置"
-    INTERFACE_HINT = "点击卡片标题栏可启用/禁用功能"
+    INTERFACE_NAME = "个性化界面"
+    INTERFACE_TITLE = "个性化设置"
+    INTERFACE_HINT = "自定义主题和强调色"
     
-    def __init__(self, page: ft.Page, config_manager: ConfigManager, on_scheme_change: Callable[[str], None] = None):
+    def __init__(self, page: ft.Page, config_manager: ConfigManager, on_scheme_change: Callable[[str], None] = None, on_theme_change: Callable[[], None] = None):
         self._page = page
         self._config_manager = config_manager
         self._on_scheme_change = on_scheme_change
+        self._on_theme_change = on_theme_change
         self._function_card = FunctionCard(page, config_manager)
         self._interface_container = InterfaceContainer(page, config_manager)
         self._cards: Dict[str, ft.Container] = {}
         self._container: ft.Container = None
-        self._cards_column: ft.Column = None
     
     def build(self) -> ft.Container:
-        """构建系统界面"""
         theme_colors = self._config_manager.get_theme_colors()
         
         card_names = self._config_manager.get_card_names(self.INTERFACE_NAME)
@@ -69,7 +68,28 @@ class SystemInterface:
     
     def _on_change(self, interface: str, card: str, control_id: str, value: Any):
         """控件值变更回调"""
-        pass
+        if card in self._cards:
+            theme_colors = self._config_manager.get_theme_colors()
+            new_card = self._function_card.create(
+                interface=interface,
+                card=card,
+                on_change=self._on_change,
+                on_toggle=self._on_toggle,
+                theme_colors=theme_colors,
+            )
+            self._cards[card] = new_card
+            
+            if self._container:
+                main_column = self._container.content
+                cards_column = main_column.controls[1]
+                for i, c in enumerate(cards_column.controls):
+                    if hasattr(c, 'key') and c.key == f"{interface}.{card}":
+                        cards_column.controls[i] = new_card
+                        break
+                self._page.update()
+        
+        if self._on_theme_change:
+            self._on_theme_change()
     
     def _on_toggle(self, interface: str, card: str, enabled: bool):
         """开关状态变更回调"""
@@ -119,7 +139,7 @@ class SystemInterface:
             self._page.update()
     
     def destroy(self):
-        """销毁界面（只清理界面级缓存，下拉框销毁由层级1负责）"""
+        """销毁界面"""
         self._function_card.destroy()
         self._cards.clear()
         self._container = None

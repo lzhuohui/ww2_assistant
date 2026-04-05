@@ -2,10 +2,10 @@
 
 """
 模块名称：功能卡片.py
-模块功能：功能卡片组件，Stack布局（开关浮动+控件区右侧居中）
+模块功能：功能卡片组件，Stack布局（三层结构）
 
 职责：
-- Stack布局：卡片开关浮动在左侧，控件区在右侧居中
+- Stack布局：背景容器(下层) + 卡片开关(中层) + 卡片控件(上层)
 - 卡片高度精确控制
 - 开关状态联动容器透明度
 
@@ -27,7 +27,7 @@ class FunctionCard:
     功能卡片 - V3版本
     
     职责：
-    - Stack布局：卡片开关浮动在左侧，控件区在右侧居中
+    - Stack布局：背景容器(下层) + 卡片开关(中层) + 卡片控件(上层)
     - 卡片高度精确控制
     - 开关状态联动容器透明度
     
@@ -95,9 +95,10 @@ class FunctionCard:
         on_change: Callable[[str, str, str, Any], None] = None,
         on_toggle: Callable[[str, str, bool], None] = None,
         theme_colors: Dict[str, str] = None,
+        use_defaults: bool = False,
     ) -> ft.Stack:
         """
-        创建功能卡片（Stack布局）
+        创建功能卡片（Stack三层布局）
         
         参数：
         - interface: 界面名称
@@ -105,6 +106,7 @@ class FunctionCard:
         - on_change: 控件值变更回调
         - on_toggle: 开关状态变更回调
         - theme_colors: 主题颜色
+        - use_defaults: 是否使用默认值（True时忽略方案值）
         
         返回：
         - ft.Stack: 完整的功能卡片
@@ -116,7 +118,16 @@ class FunctionCard:
         key = f"{interface}.{card}"
         
         card_height = self._config_manager.get_card_height(interface, card)
-        enabled = self._config_manager.get_enabled(interface, card)
+        
+        no_switch = card_info.get("no_switch", False)
+        
+        if use_defaults:
+            enabled = self._config_manager.get_enabled_default(interface, card)
+        else:
+            enabled = self._config_manager.get_enabled(interface, card)
+        
+        if no_switch:
+            enabled = True
         
         card_switch = CardSwitch(self._page, self._config_manager)
         card_controls = CardControls(self._page, self._config_manager)
@@ -126,34 +137,43 @@ class FunctionCard:
             card=card,
             on_change=on_change,
             theme_colors=theme_colors,
+            use_defaults=use_defaults,
         )
-        
-        right_area = ft.Row([
-            ft.Container(expand=True),
-            controls_section,
-        ], spacing=0, vertical_alignment=ft.CrossAxisAlignment.CENTER, expand=True)
         
         bg_card = theme_colors.get("bg_card", "#2D2D2D")
         border_color = theme_colors.get("border", "#3D3D3D")
+        accent = theme_colors.get("accent", "#0078D4")
         
-        container = ft.Container(
-            content=right_area,
+        animation_config = self._config_manager.get_animation_config()
+        transition_duration = animation_config.get("transition_duration", 167)
+        
+        bg_container = ft.Container(
             bgcolor=bg_card,
             border=ft.Border.all(1, border_color),
             border_radius=self.get_border_radius(),
-            padding=self.get_padding(),
+            padding=0,
             height=card_height,
             opacity=1.0 if enabled else 0.5,
+            clip_behavior=ft.ClipBehavior.NONE,
+            animate=transition_duration,
         )
         
-        self._containers[key] = container
+        def on_card_hover(e):
+            if e.data == "true":
+                bg_container.border = ft.Border.all(1, accent)
+            else:
+                bg_container.border = ft.Border.all(1, border_color)
+            bg_container.update()
         
-        switch_height = card_height
-        top_offset = 0
+        bg_container.on_hover = on_card_hover
+        
+        self._containers[key] = bg_container
         
         def handle_toggle(interface: str, card: str, new_enabled: bool):
+            if no_switch:
+                return
             card_switch.set_enabled_state(new_enabled)
-            container.opacity = 1.0 if new_enabled else 0.5
+            bg_container.opacity = 1.0 if new_enabled else 0.5
             card_controls.set_enabled(new_enabled)
             self._config_manager.set_enabled(interface, card, new_enabled)
             if on_toggle:
@@ -169,19 +189,38 @@ class FunctionCard:
             card_info=card_info,
             on_toggle=handle_toggle,
             theme_colors=theme_colors,
+            enabled=enabled,
         )
+        
+        left_width = CardSwitch.get_left_width()
+        
+        subtitle_max_width = 400
+        switch_max_width = left_width + subtitle_max_width
         
         switch_container = ft.Container(
             content=switch_section,
             alignment=ft.alignment.Alignment(0, 0.5),
-            top=top_offset,
+            top=0,
             left=0,
+            width=switch_max_width,
+        )
+        
+        controls_container = ft.Container(
+            content=ft.Row([
+                ft.Container(expand=True),
+                controls_section,
+            ], spacing=0, vertical_alignment=ft.CrossAxisAlignment.CENTER, expand=True),
+            top=0,
+            left=left_width,
+            right=0,
+            height=card_height,
         )
         
         card_stack = ft.Stack([
-            container,
+            bg_container,
             switch_container,
-        ], clip_behavior=ft.ClipBehavior.NONE)
+            controls_container,
+        ], clip_behavior=ft.ClipBehavior.NONE, key=key)
         
         card_stack.height = card_height
         
@@ -204,3 +243,16 @@ class FunctionCard:
         if self._config_manager:
             return self._config_manager.get_card_info(interface, card)
         return {}
+    
+    def set_subtitle(self, interface: str, card: str, subtitle: str):
+        """更新卡片副标题"""
+        key = f"{interface}.{card}"
+        if key in self._card_switches:
+            self._card_switches[key].set_subtitle(subtitle)
+    
+    def destroy(self):
+        """销毁所有卡片资源"""
+        self._cards.clear()
+        self._card_switches.clear()
+        self._card_controls.clear()
+        self._containers.clear()
