@@ -38,5 +38,9 @@ Thumbs.db
 .trial
 
 # 导出文件
-前端/导出/
 前端/output/
+前端/导出/
+
+# 文档文件
+前端/*.md
+README.md
