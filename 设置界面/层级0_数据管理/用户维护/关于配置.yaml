@@ -31,7 +31,23 @@
     - id: 核心功能
       type: info
       label: "核心功能:"
-      value: 自动打野、建筑加速、资源采集
+      value: 自动打野、建筑升级、任务执行、资源管理
+    - id: 系统功能
+      type: info
+      label: "系统功能:"
+      value: 挂机模式、指令速度、尝试次数、清缓限量
+    - id: 账号管理
+      type: info
+      label: "账号管理:"
+      value: 支持15个账号配置、多账号切换执行
+    - id: 策略功能
+      type: info
+      label: "策略功能:"
+      value: 建筑速建、资源速产、策点保留
+    - id: 其他功能
+      type: info
+      label: "其他功能:"
+      value: 集资纳租、打扫城区、个性化主题
     - id: 使用说明
       type: info
       label: "使用说明:"
