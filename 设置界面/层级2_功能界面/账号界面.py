@@ -87,20 +87,32 @@ class AccountInterface:
         return self._container
     
     def _calculate_card_subtitle(self, card: str) -> str:
-        """计算卡片副标题"""
-        enabled = self._config_manager.get_enabled(self.INTERFACE_NAME, card)
+        """计算卡片副标题
         
-        if not enabled:
-            return self.SUBTITLE_DISABLED
+        场景逻辑：
+        - 场景1：信息不完整 + 开关打开 → "请完善账号信息"
+        - 场景2：信息不完整 + 开关关闭 → "禁止挂机（信息不完整）"
+        - 场景3：信息完整 + 开关打开 → "参与挂机状态"
+        - 场景4：信息完整 + 开关关闭 → "禁止挂机状态"
+        """
+        enabled = self._config_manager.get_enabled(self.INTERFACE_NAME, card)
         
         name = self._config_manager.get_raw_value(self.INTERFACE_NAME, card, "名称") or ""
         account = self._config_manager.get_raw_value(self.INTERFACE_NAME, card, "账号") or ""
         password = self._config_manager.get_raw_value(self.INTERFACE_NAME, card, "密码") or ""
         
-        if not name or not account or not password:
-            return self.SUBTITLE_INCOMPLETE
+        info_complete = bool(name and account and password)
         
-        return self.SUBTITLE_ACTIVE
+        if not info_complete:
+            if enabled:
+                return "请完善账号信息"
+            else:
+                return "禁止挂机（信息不完整）"
+        else:
+            if enabled:
+                return "参与挂机状态"
+            else:
+                return "禁止挂机状态"
     
     def _calculate_interface_hint(self) -> str:
         """计算界面副标题（显示参与挂机账号数量）"""

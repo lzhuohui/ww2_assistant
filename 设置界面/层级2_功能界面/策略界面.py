@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+﻿﻿# -*- coding: utf-8 -*-
 
 import flet as ft
 from typing import Callable, Dict, Any, List
