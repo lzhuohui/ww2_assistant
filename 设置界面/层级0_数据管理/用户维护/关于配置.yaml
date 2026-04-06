@@ -28,22 +28,34 @@
     title: 功能介绍
     icon: FEATURES
   控件列表:
-    - id: 核心功能
+    - id: 建筑升级
       type: info
-      label: "核心功能:"
-      value: 自动打野、建筑升级、任务执行、资源管理
-    - id: 系统功能
+      label: "建筑升级:"
+      value: 设置各类建筑的目标等级和建筑优先级
+    - id: 自动打野
       type: info
-      label: "系统功能:"
-      value: 挂机模式、指令速度、尝试次数、清缓限量
+      label: "自动打野:"
+      value: 设置自动打野的主城等级和野怪等级
+    - id: 任务执行
+      type: info
+      label: "任务执行:"
+      value: 设置主线和支线任务的触发等级
+    - id: 策略加速
+      type: info
+      label: "策略加速:"
+      value: 主城达等级后加速建筑建设和资源生产
+    - id: 资源管理
+      type: info
+      label: "资源管理:"
+      value: 设置资源速产的策略类型和策点保留
     - id: 账号管理
       type: info
       label: "账号管理:"
-      value: 支持15个账号配置、多账号切换执行
-    - id: 策略功能
+      value: 支持15个账号配置，多账号切换执行
+    - id: 系统设置
       type: info
-      label: "策略功能:"
-      value: 建筑速建、资源速产、策点保留
+      label: "系统设置:"
+      value: 挂机模式、指令速度、尝试次数、清缓限量
     - id: 其他功能
       type: info
       label: "其他功能:"
