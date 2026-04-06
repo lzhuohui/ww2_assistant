@@ -31,7 +31,7 @@ class RegisterInterface:
     """注册界面 - V3版本"""
     
     INTERFACE_NAME = "注册界面"
-    INTERFACE_TITLE = "注册"
+    INTERFACE_TITLE = "注册管理"
     INTERFACE_HINT = "注册信息、购买授权、联系方式"
     
     def __init__(self, page: ft.Page, config_manager: ConfigManager, on_scheme_change: Callable[[str], None] = None):
