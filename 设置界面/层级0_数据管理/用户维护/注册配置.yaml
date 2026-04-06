@@ -22,7 +22,7 @@
     - id: 扩展包说明
       type: info
       label: "扩展包:"
-      value: "多账号挂机(按次扣减)  价格: 15次25元 | 30次45元 | 60次80元 | 120次150元 | 240次280元"
+      value: "多账号挂机(按次扣减)  价格: 15次20元 | 30次36元 | 60次66元 | 120次120元 | 240次216元"
     - id: 计费说明
       type: info
       label: "计费方式:"
@@ -75,15 +75,15 @@
         - text: 无
           price: 0
         - text: 15次
-          price: 25
+          price: 20
         - text: 30次
-          price: 45
+          price: 36
         - text: 60次
-          price: 80
+          price: 66
         - text: 120次
-          price: 150
+          price: 120
         - text: 240次
-          price: 280
+          price: 216
     - id: 复制信息
       type: icon_button
       label: ""
