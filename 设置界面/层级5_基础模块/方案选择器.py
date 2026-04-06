@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """
 模块名称：方案选择器.py
@@ -40,12 +40,28 @@ class SchemeSelector:
     
     @classmethod
     def set_config_manager(cls, config_manager: ConfigManager):
+        """
+        设置配置管理实例（类级别）
+        
+        注意：此方法必须在创建任何SchemeSelector实例之前调用
+        通常在MainEntry的_init_modules方法中调用
+        
+        参数:
+            config_manager: 配置管理实例
+        """
         cls._config_manager = config_manager
     
     @staticmethod
     def _check_config_manager():
+        """检查配置管理是否已设置"""
         if SchemeSelector._config_manager is None:
-            raise RuntimeError("SchemeSelector模块未设置config_manager")
+            raise RuntimeError(
+                "SchemeSelector模块未设置config_manager。\n"
+                "解决方案：\n"
+                "1. 确保在创建SchemeSelector实例之前调用 SchemeSelector.set_config_manager(config_manager)\n"
+                "2. 通常在MainEntry的_init_modules方法中调用\n"
+                "3. 检查初始化顺序是否正确"
+            )
     
     @staticmethod
     def get_font_size() -> int:

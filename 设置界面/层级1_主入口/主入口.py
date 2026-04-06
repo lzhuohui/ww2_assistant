@@ -71,7 +71,23 @@ class MainEntry:
         self._build_ui()
     
     def _init_modules(self):
-        """初始化模块配置管理（级联设置底层模块）"""
+        """
+        初始化模块配置管理（级联设置底层模块）
+        
+        重要说明：
+        - 此方法在__init__中调用，必须在创建任何UI组件之前执行
+        - 使用类属性注入方式，将配置管理实例传递给底层模块
+        - 初始化顺序：UserInfoCard -> Label/Dropdown/SchemeSelector
+        
+        设计考虑：
+        - 使用类属性注入而非实例属性，简化模块间的依赖关系
+        - 所有底层模块都有_check_config_manager方法，确保初始化顺序正确
+        - 错误提示清晰，便于排查初始化顺序问题
+        
+        注意：
+        - 不要在初始化完成前创建任何UI组件
+        - 如果添加新的底层模块，需要在此方法中添加对应的set_config_manager调用
+        """
         UserInfoCard.set_config_manager(self._config_manager)
         UserInfoCard.set_on_click_callback(self._on_user_info_click)
         Label.set_config_manager(self._config_manager)
@@ -455,7 +471,13 @@ class MainEntry:
         nav_item._content_container.update()  # type: ignore
     
     def _on_scheme_change(self, scheme_name: str):
-        """方案切换回调（由界面容器调用）"""
+        """方案切换回调（由界面容器调用）
+        
+        方案切换时需要：
+        1. 清理所有下拉框实例
+        2. 清空界面缓存
+        3. 重新创建当前界面
+        """
         Dropdown.cleanup_page_overlay(self._page)
         Dropdown.destroy_all_instances()
         
@@ -467,42 +489,45 @@ class MainEntry:
             self._switch_interface(current)
     
     def _switch_interface(self, interface_name: str):
-        """切换界面（懒加载模式）
+        """切换界面（缓存模式）
         
-        懒加载逻辑：
-        1. 切换界面时，销毁上一界面的所有资源
-        2. 创建新界面实例
-        3. 不缓存界面实例，每次切换都重新创建
+        缓存逻辑：
+        1. 检查界面是否已缓存，如果已缓存则直接使用
+        2. 如果未缓存，创建新界面实例并缓存
+        3. 切换界面时，只销毁下拉框实例，不销毁界面实例
+        
+        性能优化：
+        - 避免重复创建界面实例
+        - 界面状态由ConfigManager管理，缓存安全
+        - 主题切换时清空缓存（通过_rebuild_ui）
+        - 方案切换时清空缓存（通过_on_scheme_change）
         """
         if interface_name == self._current_interface:
             return
         
-        if self._current_interface and self._current_interface in self._interfaces:
-            old_interface = self._interfaces[self._current_interface]
-            if hasattr(old_interface, 'destroy'):
-                old_interface.destroy()
-            del self._interfaces[self._current_interface]
-        
-        interface_map = {
-            "系统界面": SystemInterface,
-            "策略界面": StrategyInterface,
-            "任务界面": TaskInterface,
-            "建筑界面": BuildingInterface,
-            "集资界面": FundraiseInterface,
-            "账号界面": AccountInterface,
-            "打扫界面": CleanInterface,
-            "打野界面": HuntInterface,
-            "个性化界面": PersonalizationInterface,
-            "注册界面": RegisterInterface,
-            "关于界面": AboutInterface,
-        }
-        
-        interface_class = interface_map.get(interface_name)
-        if interface_class:
-            interface = interface_class(self._page, self._config_manager, self._on_scheme_change)
-            self._interfaces[interface_name] = interface
+        if interface_name in self._interfaces:
+            interface = self._interfaces[interface_name]
         else:
-            return
+            interface_map = {
+                "系统界面": SystemInterface,
+                "策略界面": StrategyInterface,
+                "任务界面": TaskInterface,
+                "建筑界面": BuildingInterface,
+                "集资界面": FundraiseInterface,
+                "账号界面": AccountInterface,
+                "打扫界面": CleanInterface,
+                "打野界面": HuntInterface,
+                "个性化界面": PersonalizationInterface,
+                "注册界面": RegisterInterface,
+                "关于界面": AboutInterface,
+            }
+            
+            interface_class = interface_map.get(interface_name)
+            if interface_class:
+                interface = interface_class(self._page, self._config_manager, self._on_scheme_change)
+                self._interfaces[interface_name] = interface
+            else:
+                return
         
         self._current_interface = interface_name
         

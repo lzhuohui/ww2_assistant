@@ -51,6 +51,18 @@ class DropdownOptimized:
     2. 搜索功能：选项超过阈值时启用
     3. 隐藏滚动条：Win11风格
     4. 聚焦功能：offset方式scroll_to
+    
+    全局状态管理：
+    - _config_manager: 配置管理实例（类级别）
+    - _current_open_key: 当前打开的下拉框key，确保同时只有一个下拉框打开
+    - _all_dropdowns: 所有下拉框实例字典，用于生命周期管理
+    - _interface_cache: 界面级选项缓存，提高性能
+    - _current_interface: 当前界面名称，用于缓存管理
+    
+    生命周期：
+    1. 创建：通过create()方法创建实例，自动注册到_all_dropdowns
+    2. 使用：用户交互，打开/关闭下拉框
+    3. 销毁：通过destroy_all_instances()或destroy_interface_instances()销毁
     """
     
     _config_manager: ConfigManager = None
@@ -62,12 +74,28 @@ class DropdownOptimized:
     
     @classmethod
     def set_config_manager(cls, config_manager: ConfigManager):
+        """
+        设置配置管理实例（类级别）
+        
+        注意：此方法必须在创建任何Dropdown实例之前调用
+        通常在MainEntry的_init_modules方法中调用
+        
+        参数:
+            config_manager: 配置管理实例
+        """
         cls._config_manager = config_manager
     
     @staticmethod
     def _check_config_manager():
+        """检查配置管理是否已设置"""
         if DropdownOptimized._config_manager is None:
-            raise RuntimeError("DropdownOptimized模块未设置config_manager")
+            raise RuntimeError(
+                "DropdownOptimized模块未设置config_manager。\n"
+                "解决方案：\n"
+                "1. 确保在创建Dropdown实例之前调用 Dropdown.set_config_manager(config_manager)\n"
+                "2. 通常在MainEntry的_init_modules方法中调用\n"
+                "3. 检查初始化顺序是否正确"
+            )
     
     @staticmethod
     def get_font_size() -> int:
@@ -111,18 +139,42 @@ class DropdownOptimized:
     
     @classmethod
     def set_current_interface(cls, interface: str):
+        """
+        设置当前界面（用于缓存管理）
+        
+        当切换界面时，会自动清理上一个界面的缓存
+        
+        参数:
+            interface: 界面名称
+        """
         if cls._current_interface and cls._current_interface != interface:
             cls._clear_interface_cache(cls._current_interface)
         cls._current_interface = interface
     
     @classmethod
     def _clear_interface_cache(cls, interface: str):
+        """
+        清理指定界面的缓存
+        
+        参数:
+            interface: 界面名称
+        """
         if interface in cls._interface_cache:
             cls._interface_cache[interface].clear()
             del cls._interface_cache[interface]
     
     @classmethod
     def get_cached_options(cls, interface: str, key: str) -> Optional[List[Dict]]:
+        """
+        获取缓存的选项列表
+        
+        参数:
+            interface: 界面名称
+            key: 下拉框key，格式为 "card.control_id"
+        
+        返回:
+            缓存的选项列表，如果不存在则返回None
+        """
         if not CACHE_ENABLED:
             return None
         if interface in cls._interface_cache:
@@ -131,6 +183,14 @@ class DropdownOptimized:
     
     @classmethod
     def cache_options(cls, interface: str, key: str, options: List[Dict]):
+        """
+        缓存选项列表
+        
+        参数:
+            interface: 界面名称
+            key: 下拉框key，格式为 "card.control_id"
+            options: 选项列表
+        """
         if not CACHE_ENABLED:
             return
         if interface not in cls._interface_cache:
@@ -152,6 +212,16 @@ class DropdownOptimized:
     
     @classmethod
     def destroy_all_instances(cls):
+        """
+        销毁所有下拉框实例
+        
+        使用场景：
+        - 主题切换时，需要重建所有UI
+        - 方案切换时，需要清空所有状态
+        - 应用退出时，清理资源
+        
+        注意：此方法会清空_all_dropdowns字典和所有缓存
+        """
         keys_to_process = list(cls._all_dropdowns.keys())
         for key in keys_to_process:
             if key in cls._all_dropdowns:
@@ -162,6 +232,16 @@ class DropdownOptimized:
     
     @classmethod
     def destroy_interface_instances(cls, interface: str):
+        """
+        销毁指定界面的所有下拉框实例
+        
+        使用场景：
+        - 切换界面时，销毁上一界面的下拉框
+        - 释放内存，避免资源泄漏
+        
+        参数:
+            interface: 界面名称
+        """
         keys_to_remove = [k for k in list(cls._all_dropdowns.keys()) if k.startswith(f"{interface}.")]
         for key in keys_to_remove:
             if key in cls._all_dropdowns:
@@ -172,6 +252,16 @@ class DropdownOptimized:
     
     @classmethod
     def cleanup_page_overlay(cls, page: ft.Page):
+        """
+        清理页面overlay中的下拉框面板和遮罩
+        
+        使用场景：
+        - 切换界面时，清理overlay中的残留元素
+        - 重建UI前，确保overlay干净
+        
+        参数:
+            page: Flet页面对象
+        """
         panels_to_remove = []
         masks_to_remove = []
         for key in list(cls._all_dropdowns.keys()):
@@ -520,6 +610,24 @@ class DropdownOptimized:
             return btn
         
         def build_options_list(opts: List[Dict], need_search: bool):
+            """
+            构建选项列表
+            
+            性能优化策略：
+            1. 选项数据已缓存（通过get_cached_options）
+            2. 选项按钮每次重新构建，原因：
+               - 需要更新选中状态
+               - 需要处理搜索过滤
+               - Flet控件不支持复用
+            3. 使用列表推导式优化性能
+            
+            参数:
+                opts: 选项列表
+                need_search: 是否需要搜索框
+            
+            返回:
+                选中项的索引，如果没有选中项则返回-1
+            """
             options_list = state.get("options_list")
             if not options_list:
                 return -1
