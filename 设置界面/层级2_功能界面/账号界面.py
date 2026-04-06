@@ -45,6 +45,7 @@ class AccountInterface:
         self._cards: Dict[str, ft.Container] = {}
         self._container: ft.Container = None
         self._subtitle_text: ft.Text = None
+        self._interface_container_ref: InterfaceContainer = None
     
     def build(self) -> ft.Container:
         """构建账号界面"""
@@ -64,14 +65,18 @@ class AccountInterface:
             cards.append(card)
             self._cards[card_name] = card
         
+        interface_hint = self._calculate_interface_hint()
+        
         self._container = self._interface_container.create(
             title=self.INTERFACE_TITLE,
-            hint=self.INTERFACE_HINT,
+            hint=interface_hint,
             cards=cards,
             on_scheme_change=self._on_scheme_change,
             on_load_defaults=self._on_load_defaults,
             on_start=self._on_start,
         )
+        
+        self._interface_container_ref = self._interface_container
         
         for card_name in card_names:
             subtitle = self._calculate_card_subtitle(card_name)
@@ -97,6 +102,22 @@ class AccountInterface:
         
         return self.SUBTITLE_ACTIVE
     
+    def _calculate_interface_hint(self) -> str:
+        """计算界面副标题（显示参与挂机账号数量）"""
+        card_names = self._config_manager.get_card_names(self.INTERFACE_NAME)
+        active_count = 0
+        
+        for card_name in card_names:
+            enabled = self._config_manager.get_enabled(self.INTERFACE_NAME, card_name)
+            if enabled:
+                name = self._config_manager.get_raw_value(self.INTERFACE_NAME, card_name, "名称") or ""
+                account = self._config_manager.get_raw_value(self.INTERFACE_NAME, card_name, "账号") or ""
+                password = self._config_manager.get_raw_value(self.INTERFACE_NAME, card_name, "密码") or ""
+                if name and account and password:
+                    active_count += 1
+        
+        return f"{active_count}个账号参与挂机"
+    
     def _update_card_subtitle(self, card: str, immediate: bool = False):
         """更新卡片副标题
         
@@ -107,14 +128,22 @@ class AccountInterface:
         subtitle = self._calculate_card_subtitle(card)
         self._function_card.set_subtitle(self.INTERFACE_NAME, card, subtitle)
     
+    def _update_interface_hint(self):
+        """更新界面副标题（显示参与挂机账号数量）"""
+        interface_hint = self._calculate_interface_hint()
+        if self._interface_container_ref:
+            self._interface_container_ref.set_hint(interface_hint)
+    
     def _on_change(self, interface: str, card: str, control_id: str, value: Any):
         """控件值变更回调"""
         if control_id in ["名称", "账号", "密码"]:
             self._update_card_subtitle(card)
+            self._update_interface_hint()
     
     def _on_toggle(self, interface: str, card: str, enabled: bool):
         """开关状态变更回调"""
         self._update_card_subtitle(card, immediate=True)
+        self._update_interface_hint()
     
     def _on_load_defaults(self):
         """加载默认值回调"""

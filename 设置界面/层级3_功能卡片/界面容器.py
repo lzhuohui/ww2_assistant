@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """
 模块名称：界面容器.py
@@ -42,6 +42,7 @@ class InterfaceContainer:
         self._on_scheme_change: Callable = None
         self._on_load_defaults: Callable = None
         self._on_start: Callable = None
+        self._hint_control: ft.Text = None
     
     def create(
         self,
@@ -113,14 +114,14 @@ class InterfaceContainer:
             color=text_primary,
         )
         
-        hint_control = ft.Text(
+        self._hint_control = ft.Text(
             value=hint,
             size=12,
             color=text_secondary,
         )
         
         left_section = ft.Row(
-            controls=[title_control, ft.VerticalDivider(width=1, color=text_secondary), hint_control],
+            controls=[title_control, ft.VerticalDivider(width=1, color=text_secondary), self._hint_control],
             vertical_alignment=ft.CrossAxisAlignment.END,
             spacing=12,
             expand=True,
@@ -196,6 +197,16 @@ class InterfaceContainer:
         """启动按钮点击回调"""
         if self._on_start:
             self._on_start()
+    
+    def set_hint(self, hint: str):
+        """更新界面副标题
+        
+        参数:
+            hint: 新的副标题文本
+        """
+        if self._hint_control:
+            self._hint_control.value = hint
+            self._hint_control.update()
     
     def _show_save_dialog(self, e):
         """显示保存方案对话框 - Win11风格"""
