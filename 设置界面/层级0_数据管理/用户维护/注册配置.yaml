@@ -26,7 +26,7 @@
     - id: 计费说明
       type: info
       label: "计费方式:"
-      value: 基础包+扩展包=总价，扩展包次数用完可续购
+      value: 总价 = 基础包 + 扩展包，到期或次数用完可续购
     - id: 注意事项
       type: info
       label: "注意事项:"
