@@ -135,11 +135,20 @@ class UserInfoCard:
         info_size = UserInfoCard._config_manager.get_ui_size("字体", "副标题字体")
         card_padding = UserInfoCard.get_card_padding()
         
+        def on_avatar_text_change(new_text: str):
+            """头像文字变更回调，保存到用户数据"""
+            prefs = UserInfoCard._config_manager._data.load_user_preference()
+            if "用户信息" not in prefs:
+                prefs["用户信息"] = {}
+            prefs["用户信息"]["avatar_text"] = new_text
+            UserInfoCard._config_manager._data.save_user_preference(prefs)
+        
         avatar = Avatar.create(
             text=avatar_text,
             text_color="#FFD700",
             size=50,
             theme_colors=theme_colors,
+            on_text_change=on_avatar_text_change,
         )
         
         text_primary = theme_colors.get("text_primary", "#FFFFFF")

@@ -53,6 +53,18 @@ class AccountInterface:
         
         card_names = self._config_manager.get_card_names(self.INTERFACE_NAME)
         
+        # 自动关闭信息不完整的账号开关
+        for card_name in card_names:
+            enabled = self._config_manager.get_enabled(self.INTERFACE_NAME, card_name)
+            if enabled:
+                name = self._config_manager.get_raw_value(self.INTERFACE_NAME, card_name, "名称") or ""
+                account = self._config_manager.get_raw_value(self.INTERFACE_NAME, card_name, "账号") or ""
+                password = self._config_manager.get_raw_value(self.INTERFACE_NAME, card_name, "密码") or ""
+                
+                if not (name and account and password):
+                    # 信息不完整，自动关闭开关
+                    self._config_manager.set_enabled(self.INTERFACE_NAME, card_name, False)
+        
         cards = []
         for card_name in card_names:
             card = self._function_card.create(
@@ -149,6 +161,38 @@ class AccountInterface:
     def _on_change(self, interface: str, card: str, control_id: str, value: Any):
         """控件值变更回调"""
         if control_id in ["名称", "账号", "密码"]:
+            # 检查信息是否完整
+            name = self._config_manager.get_raw_value(self.INTERFACE_NAME, card, "名称") or ""
+            account = self._config_manager.get_raw_value(self.INTERFACE_NAME, card, "账号") or ""
+            password = self._config_manager.get_raw_value(self.INTERFACE_NAME, card, "密码") or ""
+            
+            info_complete = bool(name and account and password)
+            
+            # 如果信息不完整，自动关闭开关
+            if not info_complete:
+                enabled = self._config_manager.get_enabled(self.INTERFACE_NAME, card)
+                if enabled:
+                    self._config_manager.set_enabled(self.INTERFACE_NAME, card, False)
+                    # 需要重新创建卡片以更新开关状态
+                    theme_colors = self._config_manager.get_theme_colors()
+                    new_card = self._function_card.create(
+                        interface=self.INTERFACE_NAME,
+                        card=card,
+                        on_change=self._on_change,
+                        on_toggle=self._on_toggle,
+                        theme_colors=theme_colors,
+                    )
+                    self._cards[card] = new_card
+                    
+                    # 更新界面中的卡片
+                    if self._container:
+                        main_column = self._container.content
+                        cards_column = main_column.controls[1]
+                        for i, c in enumerate(cards_column.controls):
+                            if hasattr(c, 'key') and c.key == f"{self.INTERFACE_NAME}.{card}":
+                                cards_column.controls[i] = new_card
+                                break
+            
             self._update_card_subtitle(card)
             self._update_interface_hint()
     
