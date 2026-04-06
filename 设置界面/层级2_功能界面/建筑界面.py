@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import flet as ft
 from typing import Callable, Dict, Any, List
@@ -13,7 +13,7 @@ class BuildingInterface:
     
     INTERFACE_NAME = "建筑界面"
     INTERFACE_TITLE = "建筑设置"
-    INTERFACE_HINT = "点击卡片标题栏可启用/禁用功能"
+    INTERFACE_HINT = "设置各类建筑的目标等级和优先级"
     
     def __init__(self, page: ft.Page, config_manager: ConfigManager, on_scheme_change: Callable[[str], None] = None):
         self._page = page

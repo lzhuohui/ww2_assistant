@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import flet as ft
 from typing import Callable, Dict, Any, List
@@ -13,7 +13,7 @@ class HuntInterface:
     
     INTERFACE_NAME = "打野界面"
     INTERFACE_TITLE = "打野设置"
-    INTERFACE_HINT = "点击卡片标题栏可启用/禁用功能"
+    INTERFACE_HINT = "配置自动打野的主城和野怪等级"
     
     def __init__(self, page: ft.Page, config_manager: ConfigManager, on_scheme_change: Callable[[str], None] = None):
         self._page = page

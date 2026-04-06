@@ -14,7 +14,7 @@ class FundraiseInterface:
     
     INTERFACE_NAME = "集资界面"
     INTERFACE_TITLE = "集资设置"
-    INTERFACE_HINT = "点击卡片标题栏可启用/禁用功能"
+    INTERFACE_HINT = "配置小号上贡和分城纳租参数"
     
     def __init__(self, page: ft.Page, config_manager: ConfigManager, on_scheme_change: Callable[[str], None] = None):
         self._page = page

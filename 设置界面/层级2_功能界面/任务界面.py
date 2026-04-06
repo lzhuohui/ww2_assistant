@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import flet as ft
 from typing import Callable, Dict, Any, List
@@ -13,7 +13,7 @@ class TaskInterface:
     
     INTERFACE_NAME = "任务界面"
     INTERFACE_TITLE = "任务设置"
-    INTERFACE_HINT = "点击卡片标题栏可启用/禁用功能"
+    INTERFACE_HINT = "设置主线和支线任务的触发等级"
     
     def __init__(self, page: ft.Page, config_manager: ConfigManager, on_scheme_change: Callable[[str], None] = None):
         self._page = page

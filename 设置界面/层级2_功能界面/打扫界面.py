@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import flet as ft
 from typing import Callable, Dict, Any, List
@@ -13,7 +13,7 @@ class CleanInterface:
     
     INTERFACE_NAME = "打扫界面"
     INTERFACE_TITLE = "打扫设置"
-    INTERFACE_HINT = "点击卡片标题栏可启用/禁用功能"
+    INTERFACE_HINT = "设置打扫城区和政区的参数"
     
     def __init__(self, page: ft.Page, config_manager: ConfigManager, on_scheme_change: Callable[[str], None] = None):
         self._page = page

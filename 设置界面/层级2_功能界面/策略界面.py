@@ -13,7 +13,7 @@ class StrategyInterface:
     
     INTERFACE_NAME = "策略界面"
     INTERFACE_TITLE = "策略设置"
-    INTERFACE_HINT = "点击卡片标题栏可启用/禁用功能"
+    INTERFACE_HINT = "配置建筑速建、资源速产和策点保留"
     
     def __init__(self, page: ft.Page, config_manager: ConfigManager, on_scheme_change: Callable[[str], None] = None):
         self._page = page
