@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "二战风云"
+name = "ww2_assistant"
 version = "0.1.0"
 description = "二战风云游戏辅助工具"
 authors = ["Your Name <you@example.com>"]
@@ -8,7 +8,7 @@ authors = ["Your Name <you@example.com>"]
 python = "^3.11"
 flet = "^0.82.0"
 pytest = "^9.0.2"
-pytest-cov = "^7.0.0"
+pytest-cov = "^7.13.4"
 pytest-html = "^4.2.0"
 coverage = "^7.13.4"
 allure-pytest = "^2.15.3"
@@ -20,3 +20,6 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest.ini_options]
 testpaths = ["测试"]
 addopts = ["-v", "--tb=short"]
+
+[tool.flet]
+product = "二战风云"
