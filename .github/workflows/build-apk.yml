@@ -5,31 +5,77 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:
+  workflow_dispatch:  # 允许手动触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v4
     
-    - name: Setup Python
+    - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flet flet-cli
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install flet==0.82.0
+    
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.19.5'
+        channel: 'stable'
+    
+    - name: Accept Android licenses
+      run: |
+        yes | sdkmanager --licenses || true
+        flutter doctor --android-licenses
+    
+    - name: Install Android SDK
+      uses: android-actions/setup-android@v3
+    
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    
+    - name: Check Flutter environment
+      run: |
+        flutter doctor -v
     
     - name: Build APK
-      run: flet build apk
+      env:
+        FLET_CLI_NO_RICH_OUTPUT: 1
+        PYTHONIOENCODING: utf-8
+      run: |
+        # 清理之前的构建目录
+        rm -rf build/
+        
+        # 构建APK
+        echo "开始构建APK..."
+        python -m flet.cli build apk --verbose --project "WW2Assistant"
+        
+        # 检查构建结果
+        echo "检查构建结果..."
+        if [ -d "build/apk" ]; then
+          echo "APK构建成功！"
+          ls -la build/apk/
+        else
+          echo "APK构建失败！"
+          exit 1
+        fi
     
-    - name: Upload APK
+    - name: Upload APK as artifact
+      if: success()
       uses: actions/upload-artifact@v4
       with:
-        name: app-release
-        path: build/apk/release/app-release.apk
+        name: ww2-assistant-apk
+        path: build/apk/*.apk
+        retention-days: 7
