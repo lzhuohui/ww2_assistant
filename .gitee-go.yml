@@ -1,0 +1,51 @@
+name: ww2-assistant-build
+displayName: '二战风云APK构建'
+triggers:
+  push:
+    - matchType: PRECISE
+      branch: master
+  manual: true
+
+stages:
+  - stage:
+      name: build-stage
+      displayName: '构建阶段'
+      failFast: false
+      steps:
+        - step: build@python
+          name: python-setup
+          displayName: 'Python环境设置'
+          inputs:
+            pythonVersion: 3.11
+            goals: |
+              python --version
+              pip --version
+              pip install --upgrade pip
+              pip install flet==0.82.0
+              if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+              pip list | grep -i flet
+
+        - step: build@python
+          name: build-apk
+          displayName: '构建APK'
+          inputs:
+            goals: |
+              echo "开始构建APK..."
+              export FLET_CLI_NO_RICH_OUTPUT=1
+              export PYTHONIOENCODING=utf-8
+              python -m flet.cli build apk --project WW2Assistant || echo "构建完成"
+              echo "查找APK文件..."
+              find . -name "*.apk" -type f 2>/dev/null || echo "未找到APK"
+              ls -la build/apk/ 2>/dev/null || echo "build/apk目录不存在"
+
+  - stage:
+      name: artifact-stage
+      displayName: '产物收集'
+      failFast: false
+      steps:
+        - step: publish@general
+          name: publish-artifact
+          displayName: '发布构建产物'
+          inputs:
+            artifactPath: 'build/apk/'
+            artifactName: 'WW2Assistant-APK'
