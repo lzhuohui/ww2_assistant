@@ -4,43 +4,56 @@ __pycache__/
 *$py.class
 *.so
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
 venv/
 venv_new/
-*.egg-info/
-dist/
-build/
-.eggs/
+ENV/
+env/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
-# AI产物
-AI产物/
+# Flet
+.flet/
 
-# 临时文件
-*.tmp
-*.temp
+# Build
+build/
+*.apk
+*.aab
+
+# Logs
 *.log
 
-# 测试文件
-test_*.py
-
-# 系统文件
+# OS
 .DS_Store
 Thumbs.db
 
-# 设备相关
-.device_seed
-.install_time
-.trial
+# Test
+.pytest_cache/
+.coverage
+htmlcov/
 
-# 导出文件
-前端/output/
-前端/导出/
-
-# 文档文件
-前端/*.md
-README.md
+# Temporary
+*.tmp
+*.temp
+.cache/

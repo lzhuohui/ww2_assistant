@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Flet APK构建环境下载链接</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        h1 { color: #333; }
+        h2 { color: #555; margin-top: 30px; }
+        .section { 
+            background: #f5f5f5; 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 5px; 
+            border-left: 4px solid #4CAF50;
+        }
+        .download-link { 
+            display: inline-block; 
+            background: #4CAF50; 
+            color: white; 
+            padding: 10px 15px; 
+            margin: 10px 5px; 
+            text-decoration: none; 
+            border-radius: 3px;
+        }
+        .download-link:hover { background: #45a049; }
+        .step { margin: 10px 0; padding-left: 20px; }
+        .warning { background: #fff3cd; border-left: 4px solid #ffc107; }
+        .important { background: #d1ecf1; border-left: 4px solid #0dcaf0; }
+    </style>
+</head>
+<body>
+    <h1>📱 Flet APK构建环境下载链接</h1>
+    
+    <div class="section">
+        <h2>1. Flutter SDK（必须）</h2>
+        <div class="step">
+            <strong>国内镜像（推荐，速度快）：</strong><br>
+            <a class="download-link" href="https://flutter.cn/community/china" target="_blank">Flutter中文网</a><br>
+            <a class="download-link" href="https://storage.flutter-io.cn/flutter_infra_release/releases/stable/windows/flutter_windows_3.16.0-stable.zip" target="_blank">直接下载地址</a>
+        </div>
+        <div class="step">
+            <strong>官方地址（可能需要VPN）：</strong><br>
+            <a class="download-link" href="https://flutter.dev/docs/get-started/install" target="_blank">Flutter官方下载</a>
+        </div>
+        <div class="step">
+            <strong>安装步骤：</strong>
+            <ol>
+                <li>下载 flutter_windows_3.16.0-stable.zip</li>
+                <li>解压到 C:\flutter</li>
+                <li>将 C:\flutter\bin 添加到系统Path环境变量</li>
+                <li>设置国内镜像环境变量（推荐）</li>
+            </ol>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>2. Java JDK（必须）</h2>
+        <div class="step">
+            <strong>Oracle JDK（官方）：</strong><br>
+            <a class="download-link" href="https://www.oracle.com/java/technologies/downloads/" target="_blank">Oracle JDK下载</a>
+        </div>
+        <div class="step">
+            <strong>OpenJDK（免费开源）：</strong><br>
+            <a class="download-link" href="https://adoptium.net/temurin/releases/" target="_blank">Eclipse Temurin OpenJDK</a><br>
+            <a class="download-link" href="https://www.azul.com/downloads/?package=jdk" target="_blank">Zulu OpenJDK</a>
+        </div>
+        <div class="step">
+            <strong>安装步骤：</strong>
+            <ol>
+                <li>下载JDK 11或更高版本</li>
+                <li>运行安装程序</li>
+                <li>设置JAVA_HOME环境变量指向JDK安装目录</li>
+                <li>将 %JAVA_HOME%\bin 添加到系统Path环境变量</li>
+            </ol>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>3. Android Studio（必须）</h2>
+        <div class="step">
+            <strong>官方下载：</strong><br>
+            <a class="download-link" href="https://developer.android.com/studio" target="_blank">Android Studio下载</a>
+        </div>
+        <div class="step">
+            <strong>安装步骤：</strong>
+            <ol>
+                <li>下载Android Studio安装程序</li>
+                <li>运行安装程序，选择以下组件：
+                    <ul>
+                        <li>Android SDK</li>
+                        <li>Android SDK Platform</li>
+                        <li>Android Virtual Device（可选）</li>
+                    </ul>
+                </li>
+                <li>安装完成后，打开Android Studio</li>
+                <li>点击 Configure -> SDK Manager</li>
+                <li>安装 Android SDK Platform 33 或更高版本</li>
+                <li>安装 Android SDK Build-Tools 33.0.0 或更高版本</li>
+                <li>设置环境变量 ANDROID_HOME = C:\Users\[用户名]\AppData\Local\Android\Sdk</li>
+            </ol>
+        </div>
+    </div>
+    
+    <div class="section important">
+        <h2>🔥 一键安装脚本</h2>
+        <div class="step">
+            在项目目录中运行以下批处理文件：
+            <ul>
+                <li><strong>环境安装指南.bat</strong> - 完整的安装指南</li>
+                <li><strong>setup_flutter_env.bat</strong> - 设置Flutter国内镜像</li>
+                <li><strong>setup_android_env.bat</strong> - 设置Android SDK环境变量</li>
+                <li><strong>verify_environment.bat</strong> - 验证环境安装</li>
+                <li><strong>accept_licenses.bat</strong> - 接受Android许可</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="section warning">
+        <h2>⚠️ 注意事项</h2>
+        <div class="step">
+            <ul>
+                <li>安装过程中可能需要重启计算机</li>
+                <li>环境变量设置后需要重启命令行窗口才能生效</li>
+                <li>Android Studio第一次启动可能需要下载组件，请保持网络连接</li>
+                <li>Flutter SDK约1.5GB，Android Studio约1GB，请确保有足够磁盘空间</li>
+                <li>建议使用国内镜像加速下载</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>🔧 验证安装</h2>
+        <div class="step">
+            安装完成后，运行以下命令验证：
+            <pre><code>java -version
+flutter --version
+adb --version
+flutter doctor</code></pre>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>🚀 开始构建</h2>
+        <div class="step">
+            环境安装完成后，运行：
+            <pre><code>python build_apk_simple.py</code></pre>
+            或
+            <pre><code>python build_apk_full.py</code></pre>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+name: Simple APK Build
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install Flet
+      run: |
+        python -m pip install --upgrade pip
+        pip install flet==0.82.0
+    
+    - name: Build APK
+      run: |
+        echo "开始构建APK..."
+        python -m flet.cli build apk --project "WW2Assistant" --verbose
+        echo "构建完成！"
+        
+        # 查找APK文件
+        find . -name "*.apk" -type f -exec ls -lh {} \;
+    
+    - name: Upload APK
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: WW2Assistant-Simple-APK
+        path: |
+          build/apk/*.apk
+          *.apk
+        retention-days: 5

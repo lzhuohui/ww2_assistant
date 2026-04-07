@@ -40,8 +40,8 @@
   控件列表:
     - id: 注册名称
       type: input
-      label: "注册名称:"
-      value: ""
+      label: "注册名:"
+      value: "注册名:"
       placeholder: 请输入注册名称（注册后不可更改）
     - id: 设备码
       type: info

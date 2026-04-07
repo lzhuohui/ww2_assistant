@@ -1,0 +1,88 @@
+🚀 Flet APK构建环境快速安装指南
+
+根据环境检查结果，需要安装以下组件：
+
+❌ 缺失的组件：
+1. Java JDK
+2. Flutter SDK
+3. Android SDK
+
+📥 下载链接（已保存到 download_links.html）：
+- Java JDK: https://www.oracle.com/java/technologies/downloads/
+- Flutter SDK: https://flutter.cn/community/china
+- Android Studio: https://developer.android.com/studio
+
+🔧 安装顺序：
+1. 先安装Java JDK
+2. 再安装Flutter SDK
+3. 最后安装Android Studio
+
+📋 详细步骤：
+
+=== 步骤1：安装Java JDK ===
+1. 下载JDK 11+（推荐JDK 17）
+2. 运行安装程序
+3. 设置环境变量：
+   - JAVA_HOME = C:\Program Files\Java\jdk-17
+   - Path添加：%JAVA_HOME%\bin
+
+=== 步骤2：安装Flutter SDK ===
+1. 从国内镜像下载：https://storage.flutter-io.cn/flutter_infra_release/releases/stable/windows/flutter_windows_3.16.0-stable.zip
+2. 解压到 C:\flutter
+3. 设置环境变量：
+   - Path添加：C:\flutter\bin
+   - 新建变量：
+     FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn
+     PUB_HOSTED_URL=https://pub.flutter-io.cn
+
+=== 步骤3：安装Android Studio ===
+1. 下载Android Studio安装程序
+2. 运行安装程序，选择：
+   - Android SDK
+   - Android SDK Platform
+   - Android Virtual Device（可选）
+3. 安装完成后，打开Android Studio
+4. 点击 Configure -> SDK Manager
+5. 安装：
+   - Android SDK Platform 33+
+   - Android SDK Build-Tools 33.0.0+
+6. 设置环境变量：
+   - ANDROID_HOME = C:\Users\[用户名]\AppData\Local\Android\Sdk
+
+=== 步骤4：验证安装 ===
+1. 重启命令行窗口
+2. 运行验证命令：
+   ```
+   java -version
+   flutter --version
+   adb --version
+   flutter doctor
+   ```
+3. 接受Android许可：
+   ```
+   flutter doctor --android-licenses
+   ```
+   对所有问题输入 y
+
+=== 步骤5：构建APK ===
+安装完成后，运行：
+```
+python build_apk_simple.py
+```
+或
+```
+python build_apk_full.py
+```
+
+⚠️ 注意事项：
+- 安装过程可能需要重启计算机
+- 环境变量设置后需要重启命令行窗口
+- Android Studio第一次启动需要下载组件，请保持网络连接
+- 总安装大小约3-4GB，请确保有足够磁盘空间
+
+🆘 如果遇到问题：
+1. 查看 download_links.html 中的详细说明
+2. 运行 环境安装指南.bat
+3. 运行 verify_environment.bat 检查环境
+
+📞 安装完成后，请运行 check_env.py 再次验证环境

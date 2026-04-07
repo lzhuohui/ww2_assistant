@@ -1,0 +1,176 @@
+# Gitee Go 流水线配置文件
+# 在Gitee流水线页面的"代码视图"中粘贴此配置
+
+version: '1.0'
+name: WW2Assistant-APK-Build
+displayName: 二战风云辅助APK构建流水线
+
+# 触发器配置
+triggers:
+  trigger: auto
+  push:
+    branches:
+      prefix:
+        - master
+        - main
+  schedule:
+    - cron: '0 2 * * *'  # 每天凌晨2点自动构建
+  manual: true  # 允许手动触发
+
+# 阶段配置
+stages:
+  - stage:
+      name: checkout
+      displayName: 代码检出
+      steps:
+        - step: checkout@general
+          name: checkout_code
+          displayName: 检出代码
+          inputs:
+            depth: 1
+    
+  - stage:
+      name: setup
+      displayName: 环境设置
+      steps:
+        - step: build@nodejs
+          name: setup_python
+          displayName: 设置Python环境
+          inputs:
+            nodeVersion: '16'  # Node.js环境
+            commands:
+              - echo "设置Python环境..."
+              - apt-get update
+              - apt-get install -y python3 python3-pip python3-venv
+              - python3 --version
+              - pip3 --version
+    
+  - stage:
+      name: install_deps
+      displayName: 安装依赖
+      steps:
+        - step: build@nodejs
+          name: install_python_deps
+          displayName: 安装Python依赖
+          inputs:
+            commands:
+              - echo "安装Python依赖..."
+              - pip3 install --upgrade pip
+              - if [ -f requirements.txt ]; then pip3 install -r requirements.txt; fi
+              - pip3 install flet==0.82.0
+              - pip3 list | grep flet
+    
+  - stage:
+      name: setup_flutter
+      displayName: 设置Flutter环境
+      steps:
+        - step: build@nodejs
+          name: install_flutter
+          displayName: 安装Flutter
+          inputs:
+            commands:
+              - echo "设置Flutter环境..."
+              - apt-get install -y curl unzip
+              - curl -O https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.19.5-stable.tar.xz
+              - tar xf flutter_linux_3.19.5-stable.tar.xz -C /usr/local
+              - export PATH="$PATH:/usr/local/flutter/bin"
+              - flutter --version
+              - flutter doctor
+    
+  - stage:
+      name: setup_android
+      displayName: 设置Android环境
+      steps:
+        - step: build@nodejs
+          name: setup_android_sdk
+          displayName: 安装Android SDK
+          inputs:
+            commands:
+              - echo "设置Android SDK..."
+              - apt-get install -y wget
+              - wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+              - mkdir -p /usr/local/android-sdk
+              - unzip commandlinetools-linux-9477386_latest.zip -d /usr/local/android-sdk
+              - yes | /usr/local/android-sdk/cmdline-tools/bin/sdkmanager --licenses
+              - flutter doctor --android-licenses
+    
+  - stage:
+      name: build_apk
+      displayName: 构建APK
+      steps:
+        - step: build@nodejs
+          name: build_with_flet
+          displayName: 使用Flet构建APK
+          inputs:
+            commands:
+              - echo "开始构建APK..."
+              - export PATH="$PATH:/usr/local/flutter/bin"
+              - export FLET_CLI_NO_RICH_OUTPUT=1
+              - export PYTHONIOENCODING=utf-8
+              - python3 -m flet.cli build apk --verbose --project "WW2Assistant"
+              - echo "APK构建完成"
+              - find . -name "*.apk" -type f | xargs ls -lh
+    
+  - stage:
+      name: collect_artifacts
+      displayName: 收集构建产物
+      steps:
+        - step: build@nodejs
+          name: package_apk
+          displayName: 打包APK文件
+          inputs:
+            commands:
+              - echo "收集APK文件..."
+              - mkdir -p apk-output
+              - find . -name "*.apk" -type f -exec cp {} apk-output/ \;
+              - echo "找到的APK文件："
+              - ls -la apk-output/
+              - if [ -z "$(ls -A apk-output/)" ]; then
+                  echo "未找到APK文件，构建可能失败"
+                  exit 1
+                fi
+              - cd apk-output && zip -r ../ww2-assistant-apk.zip ./*
+              - echo "APK打包完成"
+    
+  - stage:
+      name: upload
+      displayName: 上传产物
+      steps:
+        - step: upload@general
+          name: upload_apk
+          displayName: 上传APK文件
+          inputs:
+            uploadType: ARTIFACT
+            artifactName: WW2Assistant-APK
+            artifactPath: ww2-assistant-apk.zip
+            artifactType: GENERIC
+
+# 变量配置
+variables:
+  - name: PYTHON_VERSION
+    value: '3.11'
+    description: 'Python版本'
+  - name: FLUTTER_VERSION
+    value: '3.19.5'
+    description: 'Flutter版本'
+  - name: BUILD_TYPE
+    value: 'release'
+    description: '构建类型'
+
+# 缓存配置
+caches:
+  - key: '${CI_COMMIT_REF_SLUG}-pip'
+    paths:
+      - ~/.cache/pip
+  - key: '${CI_COMMIT_REF_SLUG}-flutter'
+    paths:
+      - /usr/local/flutter
+
+# 通知配置（可选）
+notifications:
+  email:
+    recipients:
+      - your-email@example.com
+    on_success: change
+    on_failure: always
+    on_pending: never

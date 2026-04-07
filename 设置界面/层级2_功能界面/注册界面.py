@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """
 模块名称：注册界面.py
@@ -148,13 +148,13 @@ class RegisterInterface:
             focused_border_color=accent,
             content_padding=ft.Padding.symmetric(horizontal=8, vertical=4),
             height=30,
-            width=120,
+            width=200,
             on_change=self._on_username_change,
             disabled=(status != "试用期"),
         )
         
-        self._device_code_text = ft.Text(self._device_code, size=info_size, color=text_primary)
-        self._status_text = ft.Text(status, size=info_size, color=accent if status == "试用期" else text_primary)
+        self._device_code_text = ft.Text(self._device_code, size=info_size, color=text_primary, width=200, no_wrap=True)
+        self._status_text = ft.Text(status, size=info_size, color=accent if status == "试用期" else text_primary, width=60)
         
         basic_options = []
         extension_options = []
@@ -198,7 +198,7 @@ class RegisterInterface:
             options=basic_options,
             current_value=self._basic_value,
             on_change=on_basic_change,
-            width=80,
+            width=200,
             height=30,
         )
         
@@ -206,7 +206,7 @@ class RegisterInterface:
             options=extension_options,
             current_value=self._extension_value,
             on_change=on_extension_change,
-            width=80,
+            width=200,
             height=30,
         )
         
@@ -236,22 +236,56 @@ class RegisterInterface:
             style=ft.ButtonStyle(padding=4),
         )
         
+        col1_width = 280
+        col2_width = 265
+        col3_width = 110
+        
         row1 = ft.Row([
-            ft.Text("注册名称", size=info_size, color=text_secondary, width=70),
-            self._username_input,
-            ft.Text("设备码", size=info_size, color=text_secondary, width=55),
-            self._device_code_text,
-            ft.Text("状态", size=info_size, color=text_secondary, width=40),
-            self._status_text,
+            ft.Container(
+                content=ft.Row([
+                    ft.Text("注册名:", size=info_size, color=text_secondary, width=70),
+                    self._username_input,
+                ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                width=col1_width,
+            ),
+            ft.Container(
+                content=ft.Row([
+                    ft.Text("设备码:", size=info_size, color=text_secondary, width=55),
+                    self._device_code_text,
+                ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                width=col2_width,
+            ),
+            ft.Container(
+                content=ft.Row([
+                    ft.Text("状态:", size=info_size, color=text_secondary, width=40),
+                    self._status_text,
+                ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                width=col3_width,
+            ),
         ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER)
         
         row2 = ft.Row([
-            ft.Text("基础包", size=info_size, color=text_secondary, width=70),
-            basic_container,
-            ft.Text("扩展包", size=info_size, color=text_secondary, width=55),
-            extension_container,
-            ft.Text("价格", size=info_size, color=text_secondary, width=40),
-            self._price_text,
+            ft.Container(
+                content=ft.Row([
+                    ft.Text("基础包:", size=info_size, color=text_secondary, width=70),
+                    basic_container,
+                ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                width=col1_width,
+            ),
+            ft.Container(
+                content=ft.Row([
+                    ft.Text("扩展包:", size=info_size, color=text_secondary, width=55),
+                    extension_container,
+                ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                width=col2_width,
+            ),
+            ft.Container(
+                content=ft.Row([
+                    ft.Text("总价:", size=info_size, color=text_secondary, width=40),
+                    self._price_text,
+                ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                width=col3_width,
+            ),
         ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER)
         
         row3 = ft.Row([
@@ -336,8 +370,8 @@ class RegisterInterface:
             focused_border_color=accent,
             content_padding=ft.Padding.symmetric(horizontal=8, vertical=4),
             height=30,
+            width=200,
             hint_text="XXXX-XXXX-XXXX-XXXX",
-            expand=True,
         )
         
         activate_btn = ft.IconButton(
@@ -357,12 +391,12 @@ class RegisterInterface:
         
         info_rows = [
             ft.Row([
-                ft.Text("授权码", size=info_size, color=text_secondary, width=80),
+                ft.Text("授权码:", size=info_size, color=text_secondary, width=70),
                 self._license_input,
                 activate_btn,
             ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER),
             ft.Row([
-                ft.Container(width=80),
+                ft.Container(width=70),
                 hint_text,
             ], spacing=0),
         ]

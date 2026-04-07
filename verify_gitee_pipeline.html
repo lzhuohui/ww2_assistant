@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gitee流水线功能检查指南</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #d81e06;
+            text-align: center;
+            border-bottom: 2px solid #d81e06;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #333;
+            margin-top: 30px;
+            padding-left: 10px;
+            border-left: 4px solid #d81e06;
+        }
+        h3 {
+            color: #555;
+            margin-top: 20px;
+        }
+        .step {
+            background-color: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .step.error {
+            border-left-color: #f44336;
+            background-color: #ffebee;
+        }
+        .step.warning {
+            border-left-color: #ff9800;
+            background-color: #fff3e0;
+        }
+        .step.success {
+            border-left-color: #4CAF50;
+            background-color: #e8f5e9;
+        }
+        .link-box {
+            background-color: #e3f2fd;
+            border: 1px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            word-break: break-all;
+        }
+        .link-box a {
+            color: #1976d2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .link-box a:hover {
+            text-decoration: underline;
+        }
+        .checklist {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .checklist li {
+            margin: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        .checklist li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .screenshot {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            border-radius: 5px;
+        }
+        .code {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+        .button {
+            display: inline-block;
+            background-color: #d81e06;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #c62828;
+        }
+        .button.secondary {
+            background-color: #2196F3;
+        }
+        .button.secondary:hover {
+            background-color: #1976d2;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status.error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .status.warning {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+        .tip {
+            background-color: #fffde7;
+            border-left: 4px solid #ffd600;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Gitee流水线功能开启检查指南</h1>
+        
+        <div class="step success">
+            <h3>📋 检查前准备</h3>
+            <p>请确保：</p>
+            <ul class="checklist">
+                <li>已登录Gitee账号</li>
+                <li>有仓库的管理权限</li>
+                <li>使用Chrome/Firefox/Edge浏览器</li>
+                <li>网络连接正常</li>
+            </ul>
+        </div>
+
+        <h2>1️⃣ 第一步：访问仓库设置</h2>
+        
+        <div class="link-box">
+            <strong>点击以下链接直接访问：</strong><br>
+            🔗 <a href="https://gitee.com/lzhuohui/ww2_assistant/settings" target="_blank">https://gitee.com/lzhuohui/ww2_assistant/settings</a>
+        </div>
+        
+        <div class="step">
+            <h3>操作步骤：</h3>
+            <ol>
+                <li>点击上面的链接，打开仓库设置页面</li>
+                <li>确保已登录（右上角显示你的用户名）</li>
+                <li>在左侧菜单中找到 <strong>"功能设置"</strong></li>
+                <li>点击进入功能设置</li>
+            </ol>
+        </div>
+
+        <h2>2️⃣ 第二步：开启流水线功能</h2>
+        
+        <div class="step">
+            <h3>在功能设置页面中：</h3>
+            <div class="screenshot">
+                <p>📸 应该看到类似这样的界面：</p>
+                <pre>
+功能设置
+├── ☑ 代码质量
+├── ☐ 代码扫描
+├── ☐ 知识库
+├── ☐ Wiki
+├── ☐ 议题
+├── ☐ 合并请求
+├── ☐ 项目
+├── ☐ Releases
+├── ☐ 包管理
+└── ☐ <strong>流水线</strong> ← 重点检查这里！
+                </pre>
+            </div>
+            
+            <p><strong>需要做：</strong></p>
+            <ul class="checklist">
+                <li>找到"流水线"选项</li>
+                <li>勾选复选框：□ → ☑</li>
+                <li>点击页面底部的"保存"按钮</li>
+                <li>等待保存成功提示</li>
+            </ul>
+        </div>
+
+        <h2>3️⃣ 第三步：验证流水线功能</h2>
+        
+        <div class="link-box">
+            <strong>验证链接：</strong><br>
+            🔗 <a href="https://gitee.com/lzhuohui/ww2_assistant/actions" target="_blank">https://gitee.com/lzhuohui/ww2_assistant/actions</a>
+        </div>
+        
+        <div class="step">
+            <h3>检查点：</h3>
+            
+            <div class="status success">✅ 成功标志：</div>
+            <ul class="checklist">
+                <li>顶部菜单栏显示"流水线"标签</li>
+                <li>能看到"Build APK for Gitee"工作流</li>
+                <li>能看到构建历史列表</li>
+                <li>能看到"运行流水线"按钮</li>
+            </ul>
+            
+            <div class="status error">❌ 失败标志：</div>
+            <ul>
+                <li>显示404页面</li>
+                <li>提示"功能未开启"</li>
+                <li>看不到"流水线"菜单</li>
+                <li>页面空白或加载失败</li>
+            </ul>
+        </div>
+
+        <h2>4️⃣ 第四步：常见问题解决</h2>
+        
+        <div class="step error">
+            <h3>问题A：完全看不到"流水线"选项</h3>
+            <p><strong>可能原因：</strong></p>
+            <ul>
+                <li>仓库类型不支持（必须是公开仓库）</li>
+                <li>账号权限不足</li>
+                <li>Gitee平台限制</li>
+            </ul>
+            <p><strong>解决方案：</strong></p>
+            <ol>
+                <li>确认仓库是公开的（不是私有）</li>
+                <li>联系仓库所有者获取管理员权限</li>
+                <li>联系Gitee客服：service@gitee.com</li>
+                <li>改用GitHub Actions</li>
+            </ol>
+        </div>
+        
+        <div class="step warning">
+            <h3>问题B：点击"流水线"显示404</h3>
+            <p><strong>可能原因：</strong></p>
+            <ul>
+                <li>功能未正确开启</li>
+                <li>浏览器缓存问题</li>
+                <li>平台延迟</li>
+            </ul>
+            <p><strong>解决方案：</strong></p>
+            <ol>
+                <li>强制刷新页面：Ctrl+F5</li>
+                <li>清除浏览器缓存</li>
+                <li>换个浏览器尝试</li>
+                <li>等待5分钟后重试</li>
+            </ol>
+        </div>
+        
+        <div class="step">
+            <h3>问题C：已开启但仍失败</h3>
+            <p><strong>操作步骤：</strong></p>
+            <ol>
+                <li>查看构建 #7 的详细错误日志</li>
+                <li>点击"运行流水线"测试简单构建</li>
+                <li>提供错误截图给我分析</li>
+            </ol>
+        </div>
+
+        <h2>5️⃣ 第五步：备用方案</h2>
+        
+        <div class="tip">
+            <p>💡 <strong>如果Gitee流水线确实无法使用，可以：</strong></p>
+        </div>
+        
+        <div class="step">
+            <h3>方案1：使用GitHub Actions</h3>
+            <p>执行以下命令切换回GitHub：</p>
+            <div class="code">
+git remote set-url origin https://github.com/lzhuohui/ww2_assistant.git<br>
+git push origin master
+            </div>
+        </div>
+        
+        <div class="step">
+            <h3>方案2：本地构建APK</h3>
+            <p>运行本地构建脚本：</p>
+            <div class="code">
+python local_build_alternative.py
+            </div>
+        </div>
+        
+        <div class="step">
+            <h3>方案3：手动下载工作流文件</h3>
+            <p>从GitHub直接下载APK：</p>
+            <div class="link-box">
+                🔗 <a href="https://github.com/lzhuohui/ww2_assistant/actions" target="_blank">GitHub Actions页面</a>
+            </div>
+        </div>
+
+        <h2>6️⃣ 第六步：反馈信息</h2>
+        
+        <div class="step success">
+            <h3>请告诉我以下信息：</h3>
+            
+            <div class="status">📋 需要提供的信息：</div>
+            <ol>
+                <li>是否能看到"流水线"菜单？ ✅/❌</li>
+                <li>是否已开启流水线功能？ ✅/❌</li>
+                <li>页面截图（如果有问题）</li>
+                <li>错误信息（如果有）</li>
+                <li>构建 #7 的详细日志</li>
+            </ol>
+            
+            <div class="status warning">📸 如何截图：</div>
+            <ol>
+                <li>按 <kbd>PrtSc</kbd> 键截全屏</li>
+                <li>或按 <kbd>Alt</kbd>+<kbd>PrtSc</kbd> 截当前窗口</li>
+                <li>粘贴到微信或保存为图片</li>
+                <li>发送给我分析</li>
+            </ol>
+            
+            <div class="status">📋 如何复制错误信息：</div>
+            <ol>
+                <li>在错误页面按 <kbd>F12</kbd> 打开开发者工具</li>
+                <li>点击"Console"（控制台）标签</li>
+                <li>复制红色错误信息</li>
+                <li>粘贴发送给我</li>
+            </ol>
+        </div>
+
+        <h2>📞 联系支持</h2>
+        
+        <div class="step">
+            <p>如果问题仍未解决：</p>
+            <ul>
+                <li><strong>Gitee官方帮助：</strong> <a href="https://gitee.com/help" target="_blank">https://gitee.com/help</a></li>
+                <li><strong>Gitee客服邮箱：</strong> service@gitee.com</li>
+                <li><strong>GitHub替代方案：</strong> 随时可以切换回GitHub</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p><strong>现在请立即访问：</strong></p>
+            <a href="https://gitee.com/lzhuohui/ww2_assistant/settings" class="button" target="_blank">🚀 打开Gitee设置页面</a>
+            <a href="https://gitee.com/lzhuohui/ww2_assistant/actions" class="button secondary" target="_blank">📊 打开流水线页面</a>
+            
+            <p style="margin-top: 20px; color: #666;">
+                检查完成后，请告诉我结果！我会帮你解决后续问题。
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 简单的时间戳显示
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const timeStr = now.toLocaleString('zh-CN');
+            const timeElement = document.createElement('div');
+            timeElement.style.textAlign = 'center';
+            timeElement.style.color = '#999';
+            timeElement.style.marginTop = '20px';
+            timeElement.style.fontSize = '12px';
+            timeElement.textContent = `页面生成时间：${timeStr}`;
+            document.body.appendChild(timeElement);
+            
+            // 添加点击提示
+            const links = document.querySelectorAll('.link-box a');
+            links.forEach(link => {
+                link.addEventListener('click', function() {
+                    console.log(`正在打开：${this.href}`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

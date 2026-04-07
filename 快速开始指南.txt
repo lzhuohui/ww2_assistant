@@ -1,0 +1,79 @@
+# 🚀 Flet APK构建快速开始
+
+## 📋 环境检查
+运行以下命令检查环境：
+```
+python simple_build_test.py
+```
+
+## 🔧 环境安装（如果缺失）
+
+### 1. 安装Flutter SDK
+1. 下载Flutter SDK：https://flutter.cn/community/china
+2. 解压到 C:\flutter
+3. 设置环境变量：
+   - 系统变量 Path 添加：C:\flutter\bin
+   - 新建系统变量：
+     - FLUTTER_STORAGE_BASE_URL = https://storage.flutter-io.cn
+     - PUB_HOSTED_URL = https://pub.flutter-io.cn
+
+### 2. 安装Android Studio
+1. 下载：https://developer.android.com/studio
+2. 安装时选择Android SDK
+3. 设置环境变量：
+   - ANDROID_HOME = C:\Users\你的用户名\AppData\Local\Android\Sdk
+
+### 3. 安装Java JDK
+1. 下载：https://www.oracle.com/java/technologies/downloads/
+2. 或使用OpenJDK：https://adoptium.net/
+
+### 4. 接受许可
+```
+flutter doctor --android-licenses
+# 全部输入 y
+```
+
+## 🏗️ 构建APK
+```
+python build_apk_full.py
+```
+
+## 🆘 故障排除
+
+### 常见问题1：Flutter命令找不到
+```
+解决方案：
+1. 确保Flutter SDK已解压到 C:\flutter
+2. 将 C:\flutter\bin 添加到系统Path环境变量
+3. 重启命令行窗口
+```
+
+### 常见问题2：Android SDK问题
+```
+解决方案：
+1. 打开Android Studio
+2. 点击 Configure -> SDK Manager
+3. 安装 Android SDK Platform
+4. 安装 Android SDK Build-Tools
+```
+
+### 常见问题3：许可问题
+```
+解决方案：
+1. 运行：flutter doctor --android-licenses
+2. 对所有问题输入 y
+```
+
+### 常见问题4：网络问题
+```
+解决方案：
+1. 设置国内镜像环境变量
+2. 运行 flutter_env.bat
+3. 重新运行构建
+```
+
+## 📞 帮助
+如果遇到问题，请提供：
+- `flutter doctor` 输出
+- 错误信息截图
+- 操作系统版本

@@ -1,0 +1,92 @@
+🎯 环境变量设置指南（截图步骤）
+
+已下载：C:\Users\chmm1\Downloads\flutter_windows_3.16.0-stable.zip
+
+========== 第1步：解压Flutter SDK ==========
+1. 右键点击下载的ZIP文件
+2. 选择"解压到 flutter\"
+3. 把解压出的"flutter"文件夹移动到 C:\
+4. 最终路径应该是：C:\flutter\bin\flutter.bat
+
+========== 第2步：设置环境变量 ==========
+
+🔥 截图1：打开环境变量设置
+1. 右键点击"此电脑"或"我的电脑"
+2. 选择"属性"
+3. 点击"高级系统设置"
+4. 点击"环境变量"
+
+🔥 截图2：新建系统变量1
+1. 在"系统变量"部分点击"新建"
+2. 变量名：FLUTTER_STORAGE_BASE_URL
+3. 变量值：https://storage.flutter-io.cn
+4. 点击"确定"
+
+🔥 截图3：新建系统变量2
+1. 再次点击"新建"
+2. 变量名：PUB_HOSTED_URL
+3. 变量值：https://pub.flutter-io.cn
+4. 点击"确定"
+
+🔥 截图4：编辑Path变量
+1. 在"系统变量"中找到"Path"
+2. 选中"Path"，点击"编辑"
+3. 点击"新建"
+4. 输入：C:\flutter\bin
+5. 点击"确定"
+6. 点击"确定"关闭所有窗口
+
+========== 第3步：验证安装 ==========
+1. 按 Win + R，输入 cmd，回车
+2. 在新的命令行窗口输入：
+   flutter --version
+
+✅ 应该显示类似：
+Flutter 3.16.0 • channel stable • https://github.com/flutter/flutter.git
+Framework • revision ...
+Engine • revision ...
+Tools • Dart ...
+
+========== 第4步：接受许可 ==========
+在同一个命令行窗口输入：
+flutter doctor --android-licenses
+
+❓ 会询问多个问题，全部输入 y
+
+========== 第5步：检查环境 ==========
+输入：
+flutter doctor
+
+✅ 应该显示：
+[✓] Flutter (Channel stable, 3.16.0, ...)
+[✓] Android toolchain - develop for Android devices
+[!] Android Studio (version ...)
+[✓] Connected device
+[✓] Network resources
+
+========== 第6步：构建APK ==========
+1. 打开新的命令行窗口
+2. 输入：
+   cd "C:\Users\chmm1\Documents\二战风云"
+3. 输入：
+   python build_apk_simple.py
+
+========== 🆘 如果遇到问题 ==========
+
+问题1：'flutter' 不是内部或外部命令
+👉 解决：环境变量Path设置错误，检查 C:\flutter\bin 是否正确添加
+
+问题2：Android licenses not accepted
+👉 解决：运行 flutter doctor --android-licenses 并全部输入 y
+
+问题3：Java not found
+👉 解决：Android Studio自带Java，运行Android Studio一次，或设置JAVA_HOME
+
+问题4：其他错误
+👉 截图错误信息发给我
+
+========== 📞 需要帮助？ ==========
+把以下信息发给我：
+1. flutter --version 的输出
+2. flutter doctor 的输出
+3. 任何错误信息的截图

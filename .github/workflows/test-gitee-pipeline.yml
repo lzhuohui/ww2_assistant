@@ -1,0 +1,31 @@
+name: Test Gitee Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  test-pipeline:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check if pipeline works
+      run: |
+        echo "🎉 Gitee Pipeline is working!"
+        echo "当前时间: $(date)"
+        echo "工作目录: $(pwd)"
+        echo "Git版本: $(git --version)"
+        echo "✅ 如果看到此信息，说明流水线功能已开启"
+        
+    - name: Create test file
+      run: |
+        echo "Test file created at $(date)" > test-success.txt
+        echo "Gitee Pipeline is working correctly!" >> test-success.txt
+        
+    - name: Upload test result
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-output
+        path: test-success.txt
+        retention-days: 1

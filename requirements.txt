@@ -1,0 +1,32 @@
+# APK打包依赖文件
+# 由项目需求自动生成
+
+# Flet核心依赖
+flet==0.82.0
+
+# 加密相关依赖（用于授权管理）
+cryptography>=42.0.0
+
+# YAML配置文件支持
+PyYAML>=6.0
+
+# 拼音搜索支持
+pypinyin>=0.51.0
+
+# 类型注解支持
+typing-extensions>=4.0.0
+
+# Python标准库（无需额外安装）
+# import json
+# import os
+# import hashlib
+# import base64
+# import time
+# import asyncio
+
+# 测试依赖（仅开发使用，可选）
+# pytest>=9.0.2
+# pytest-cov>=7.0.0
+# pytest-html>=4.2.0
+# coverage>=7.13.4
+# allure-pytest>=2.15.3
