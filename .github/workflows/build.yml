@@ -26,6 +26,22 @@ jobs:
         pip install flet
         pip install -r requirements.txt
 
+    - name: Set up Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.41.4'
+        channel: 'stable'
+
+    - name: Accept Android licenses
+      run: |
+        yes | flutter doctor --android-licenses || true
+
     - name: Build APK
       run: |
         python -m flet.cli build apk --project WW2Assistant
@@ -36,3 +52,11 @@ jobs:
         name: WW2Assistant-APK
         path: build/apk/
         retention-days: 30
+
+    - name: Upload build directory (for debugging)
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs
+        path: build/
+        retention-days: 7
