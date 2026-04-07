@@ -48,18 +48,40 @@ jobs:
         FLET_CLI_NO_RICH_OUTPUT: 1
         PYTHONIOENCODING: utf-8
       run: |
+        set -e  # 出错时退出
         echo "开始构建APK..."
         
         # 清理旧的构建
         rm -rf build/ || true
         
+        # 显示环境信息
+        echo "Python版本:"
+        python --version
+        echo "Flet版本:"
+        python -m flet.cli --version
+        echo "当前目录:"
+        pwd
+        echo "项目文件:"
+        ls -la
+        
         # 构建APK
-        python -m flet.cli build apk --verbose --project "WW2Assistant"
+        echo "运行Flet构建命令..."
+        python -m flet.cli build apk --verbose --project "WW2Assistant" || {
+          echo "Flet构建失败，尝试诊断..."
+          # 检查Flet版本
+          python -m flet.cli --version
+          # 检查项目结构
+          echo "项目结构:"
+          ls -la
+          echo "main.py内容:"
+          head -20 main.py || echo "main.py不存在"
+          exit 1
+        }
         
         echo "构建完成，搜索APK文件..."
         
         # 查找所有APK文件
-        find . -name "*.apk" -type f | while read apk; do
+        find . -name "*.apk" -type f 2>/dev/null | while read apk; do
           echo "找到APK: $apk"
           ls -lh "$apk"
         done
@@ -68,15 +90,22 @@ jobs:
         mkdir -p apk-output
         
         # 复制所有APK文件到输出目录
-        find . -name "*.apk" -type f -exec cp {} apk-output/ \;
+        find . -name "*.apk" -type f -exec cp {} apk-output/ \; 2>/dev/null || true
         
         echo "APK文件已收集到 apk-output/ 目录:"
-        ls -la apk-output/
+        ls -la apk-output/ || echo "apk-output目录为空"
         
-        # 如果没有找到APK，创建错误标记
-        if [ ! -f "apk-output/*.apk" ]; then
-          echo "错误: 未找到APK文件"
-          echo "构建日志:" > apk-output/build-error.log
+        # 检查是否有APK文件
+        if ls apk-output/*.apk 1>/dev/null 2>&1; then
+          echo "✅ 找到APK文件"
+          APK_COUNT=$(find apk-output -name "*.apk" -type f | wc -l)
+          echo "APK文件数量: $APK_COUNT"
+        else
+          echo "❌ 未找到APK文件"
+          echo "构建可能失败，检查日志..."
+          # 保存构建日志
+          find build -type f -name "*.log" -exec cat {} \; > apk-output/build-error.log 2>/dev/null || true
+          echo "详细错误信息已保存到 apk-output/build-error.log"
           exit 1
         fi
     
