@@ -62,20 +62,72 @@ jobs:
         echo "开始构建APK..."
         python -m flet.cli build apk --verbose --project "WW2Assistant"
         
-        # 检查构建结果
+        # 检查构建结果并查找APK文件
         echo "检查构建结果..."
+        echo "搜索APK文件..."
+        
+        # 查找所有APK文件
+        find . -name "*.apk" -type f 2>/dev/null | while read apk_file; do
+          echo "找到APK文件: $apk_file"
+          echo "文件大小: $(ls -lh "$apk_file" | awk '{print $5}')"
+          echo "文件路径: $(dirname "$apk_file")"
+        done
+        
+        # 检查常见输出目录
+        echo ""
+        echo "检查常见构建目录:"
+        if [ -d "build" ]; then
+          echo "build目录内容:"
+          find build -type f -name "*.apk" 2>/dev/null | head -10
+          echo ""
+          find build -type d 2>/dev/null | head -20
+        fi
+        
         if [ -d "build/apk" ]; then
-          echo "APK构建成功！"
+          echo "build/apk目录内容:"
           ls -la build/apk/
-        else
-          echo "APK构建失败！"
+        fi
+        
+        # 检查是否至少有一个APK文件
+        apk_count=$(find . -name "*.apk" -type f 2>/dev/null | wc -l)
+        if [ $apk_count -eq 0 ]; then
+          echo "错误: 未找到任何APK文件！"
+          echo "可能的构建失败。"
           exit 1
+        else
+          echo "✅ 找到 $apk_count 个APK文件"
         fi
     
-    - name: Upload APK as artifact
+    - name: Find and collect APK files
+      if: success()
+      run: |
+        echo "收集所有APK文件..."
+        mkdir -p artifacts
+        
+        # 查找并复制所有APK文件到artifacts目录
+        find . -name "*.apk" -type f -exec cp {} artifacts/ \;
+        
+        echo "收集到的APK文件:"
+        ls -la artifacts/
+        
+        # 如果没有找到文件，创建占位符
+        if [ ! -f "artifacts/*.apk" ]; then
+          echo "警告: 未找到APK文件，创建测试文件"
+          echo "构建失败或输出路径未知" > artifacts/build-status.txt
+        fi
+    
+    - name: Upload APK artifacts
       if: success()
       uses: actions/upload-artifact@v4
       with:
         name: ww2-assistant-apk
-        path: build/apk/*.apk
+        path: artifacts/
+        retention-days: 7
+    
+    - name: Upload build directory (for debugging)
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-debug-info
+        path: build/
         retention-days: 7
