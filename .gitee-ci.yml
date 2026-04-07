@@ -2,9 +2,11 @@ name: Build APK
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
 
 jobs:
   build:
@@ -12,10 +14,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v4
       with:
         python-version: '3.11'
 
@@ -30,8 +32,7 @@ jobs:
         python -m flet.cli build apk --project WW2Assistant
 
     - name: Upload APK artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: WW2Assistant-APK
         path: build/apk/
-        retention-days: 30
