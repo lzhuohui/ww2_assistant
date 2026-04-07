@@ -1,0 +1,124 @@
+name: Build APK for Gitee
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install flet==0.82.0
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.19.5'
+        channel: 'stable'
+    
+    - name: Accept Android licenses
+      run: |
+        yes | sdkmanager --licenses || true
+        flutter doctor --android-licenses
+    
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    
+    - name: Build APK with Flet
+      env:
+        FLET_CLI_NO_RICH_OUTPUT: 1
+        PYTHONIOENCODING: utf-8
+      run: |
+        echo "开始构建APK..."
+        
+        # 清理旧的构建
+        rm -rf build/ || true
+        
+        # 构建APK
+        python -m flet.cli build apk --verbose --project "WW2Assistant"
+        
+        echo "构建完成，搜索APK文件..."
+        
+        # 查找所有APK文件
+        find . -name "*.apk" -type f | while read apk; do
+          echo "找到APK: $apk"
+          ls -lh "$apk"
+        done
+        
+        # 创建明确的输出目录
+        mkdir -p apk-output
+        
+        # 复制所有APK文件到输出目录
+        find . -name "*.apk" -type f -exec cp {} apk-output/ \;
+        
+        echo "APK文件已收集到 apk-output/ 目录:"
+        ls -la apk-output/
+        
+        # 如果没有找到APK，创建错误标记
+        if [ ! -f "apk-output/*.apk" ]; then
+          echo "错误: 未找到APK文件"
+          echo "构建日志:" > apk-output/build-error.log
+          exit 1
+        fi
+    
+    - name: Create APK archive
+      if: success()
+      run: |
+        echo "创建APK压缩包..."
+        
+        # 进入输出目录
+        cd apk-output
+        
+        # 创建ZIP文件
+        zip -r ../ww2-assistant-apk.zip ./*
+        
+        echo "ZIP文件创建完成:"
+        ls -lh ../ww2-assistant-apk.zip
+        
+        # 返回到项目根目录
+        cd ..
+    
+    - name: Upload APK archive
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: WW2Assistant-APK
+        path: ww2-assistant-apk.zip
+        retention-days: 30
+    
+    - name: Upload individual APK files
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: APK-Files
+        path: apk-output/*.apk
+        retention-days: 30
+    
+    - name: Upload build logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Build-Logs
+        path: |
+          build/
+          **/*.log
+        retention-days: 7
