@@ -1,0 +1,65 @@
+name: Simple APK Build
+
+on:
+  workflow_dispatch:  # 仅手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Debug - Show environment
+      run: |
+        echo "=== 环境信息 ==="
+        uname -a
+        python --version
+        pip --version
+        echo "当前目录:"
+        pwd
+        ls -la
+        echo "main.py前20行:"
+        head -20 main.py || echo "main.py不存在"
+        echo "requirements.txt内容:"
+        cat requirements.txt || echo "requirements.txt不存在"
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flet==0.82.0
+    
+    - name: Try Flet build
+      run: |
+        echo "=== 尝试Flet构建 ==="
+        python -m flet.cli --version
+        echo "尝试构建..."
+        python -m flet.cli build apk --project "WW2Assistant" --verbose || {
+          echo "构建失败，显示错误"
+          exit 1
+        }
+        echo "构建成功！"
+    
+    - name: Find APK files
+      if: success()
+      run: |
+        echo "=== 查找APK文件 ==="
+        find . -name "*.apk" -type f 2>/dev/null || echo "未找到APK文件"
+        echo "build目录内容:"
+        find build -type f 2>/dev/null || echo "build目录不存在"
+    
+    - name: Upload debug info
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Debug-Info
+        path: |
+          **/*.log
+          **/build/
+        retention-days: 7
